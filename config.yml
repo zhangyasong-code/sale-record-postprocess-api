@@ -1,0 +1,8 @@
+database:
+  saleRecord:
+    driver: sqlite3
+    connection: sale_record.db
+  order:
+    driver: sqlite3
+    connection: order.db
+serviceName: sale-record-postprocess-api
