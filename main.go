@@ -10,8 +10,8 @@ import (
 	"nhub/sale-record-postprocess-api/adapters"
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/factory"
+	"nomni/utils/auth"
 	"nomni/utils/eventconsume"
-	"omni/utils/auth"
 
 	"github.com/go-xorm/xorm"
 	"github.com/labstack/echo"
