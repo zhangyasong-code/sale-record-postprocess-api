@@ -7,4 +7,10 @@ database:
     connection: root:root@tcp(localhost:3307)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
 services:
   membershipApi: https://staging.p2shop.com.cn/pangpang-brand/membership-api
+saleRecordEvent:
+  kafka:
+    brokers:
+      - localhost:9092
+    topic: pangpang-brand-sale-record
+appenv: dev
 serviceName: sale-record-postprocess-api

@@ -8,7 +8,7 @@ import (
 type PostSaleRecordFee struct {
 	Id                     int64   `json:"id" query:"id"`
 	TransactionId          string  `json:"transactionId" query:"transactionId" xorm:"index VARCHAR(30) notnull" validate:"required"`
-	SaleRecordDtlId        string  `json:"saleRecordDtlId" query:"saleRecordDtlId" xorm:"index VARCHAR(30) notnull" validate:"required"`
+	SaleRecordDtlId        int64   `json:"saleRecordDtlId" query:"saleRecordDtlId" xorm:"index VARCHAR(30) notnull" validate:"required"`
 	SaleRecordOfferId      int64   `json:"saleRecordOfferId" query:"saleRecordOfferId" xorm:"index notnull" validate:"gte=0"`
 	OrderId                int64   `json:"orderId" query:"orderId" xorm:"index notnull" validate:"gte=0"`
 	OrderItemId            int64   `json:"orderItemId" query:"orderItemId" xorm:"index notnull" validate:"gte=0"`
