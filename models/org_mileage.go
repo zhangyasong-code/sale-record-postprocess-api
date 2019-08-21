@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	membership "membership-api/models"
 	"nhub/sale-record-postprocess-api/factory"
 	"time"
 )
@@ -42,7 +41,7 @@ type OrgMileageDtl struct {
 	UpdateAt     *time.Time  `json:"updateAt" xorm:"updated"`
 }
 
-func (OrgMileage) MakeOrgMileage(mileage *membership.Mileage, record SaleRecordEvent) *OrgMileage {
+func (OrgMileage) MakeOrgMileage(mileage *Mileage, record SaleRecordEvent) *OrgMileage {
 	var mileageType MileageType
 	point := record.Mileage
 	pointAmount := record.MileagePrice

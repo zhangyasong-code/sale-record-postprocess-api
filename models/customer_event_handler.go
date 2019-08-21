@@ -28,7 +28,7 @@ func setAccumulateMileage(ctx context.Context, a SaleRecordEvent) error {
 		tradeNo = a.RefundId
 	}
 
-	accumulateMileages, err := GetMembershipMileages(ctx, tradeNo, "E")
+	accumulateMileages, err := Mileage{}.GetMembershipMileages(ctx, tradeNo, "E")
 	if err != nil {
 		return err
 	}
