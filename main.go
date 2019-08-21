@@ -27,6 +27,12 @@ func main() {
 	fmt.Println(config)
 	saleRecordDB := initDB(config.Database.SaleRecord.Driver, config.Database.SaleRecord.Connection)
 	orderDB := initDB(config.Database.Order.Driver, config.Database.Order.Connection)
+	if err := models.InitSaleRecordDb(saleRecordDB); err != nil {
+		panic(err)
+	}
+	if err := models.InitOrderDb(orderDB); err != nil {
+		panic(err)
+	}
 
 	if config.SaleRecordEvent.Kafka.Brokers != nil {
 		if err := adapters.NewSaleRecordEventConsumer(config.ServiceName, config.SaleRecordEvent.Kafka,
@@ -68,10 +74,6 @@ func initDB(driver, connection string) *xorm.Engine {
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(time.Minute * 10)
-
-	if err := models.InitDb(db); err != nil {
-		log.Fatal(err)
-	}
 
 	return db
 }
