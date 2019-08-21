@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"nhub/sale-record-postprocess-api/factory"
+	"nhub/sale-record-postprocess-api/models"
 	"os"
 	"time"
 
 	"nhub/sale-record-postprocess-api/adapters"
 	"nhub/sale-record-postprocess-api/config"
-	"nhub/sale-record-postprocess-api/factory"
 	"nomni/utils/auth"
 	"nomni/utils/eventconsume"
 
@@ -65,5 +66,8 @@ func initDB(driver, connection string) *xorm.Engine {
 	db.SetConnMaxLifetime(time.Minute * 10)
 	db.ShowSQL()
 
+	if err := models.InitDb(db); err != nil {
+		log.Fatal(err)
+	}
 	return db
 }
