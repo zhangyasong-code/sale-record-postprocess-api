@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"nhub/sale-record-postprocess-api/factory"
-	"nhub/sale-record-postprocess-api/models"
 	"os"
 	"time"
 
 	"nhub/sale-record-postprocess-api/adapters"
 	"nhub/sale-record-postprocess-api/config"
+	"nhub/sale-record-postprocess-api/factory"
+	"nhub/sale-record-postprocess-api/models"
 	"nomni/utils/auth"
 	"nomni/utils/eventconsume"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -61,13 +62,16 @@ func initDB(driver, connection string) *xorm.Engine {
 	if err != nil {
 		panic(err)
 	}
+	if os.Getenv("APP_ENV") != "production" {
+		db.ShowSQL(true)
+	}
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(time.Minute * 10)
-	db.ShowSQL()
 
 	if err := models.InitDb(db); err != nil {
 		log.Fatal(err)
 	}
+
 	return db
 }

@@ -57,10 +57,8 @@ type C struct {
 	SaleRecordEvent struct {
 		Kafka echomiddleware.KafkaConfig
 	}
-	StockSourceTypes []string
-	Services         struct {
-		MembershipApi,
-		ProductApi string
+	Services struct {
+		MembershipApi string
 	}
 	AppEnv, JwtSecret string
 	ServiceName       string
