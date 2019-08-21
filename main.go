@@ -10,6 +10,7 @@ import (
 	"nhub/sale-record-postprocess-api/adapters"
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/controllers"
+	"nhub/sale-record-postprocess-api/promotion"
 
 	"nhub/sale-record-postprocess-api/factory"
 	"nhub/sale-record-postprocess-api/models"
@@ -33,15 +34,13 @@ func main() {
 	defer saleRecordDB.Close()
 	defer orderDB.Close()
 
-	if config.SaleRecordEvent.Kafka.Consumer.Brokers != nil {
-		if err := adapters.NewSaleRecordEventConsumer(config.ServiceName, config.SaleRecordEvent.Kafka.Consumer,
-			eventconsume.Recover(),
-			eventconsume.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka),
-			eventconsume.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, config.Database.Logger.Kafka),
-			eventconsume.ContextDBWithName(config.ServiceName, factory.OrderDBContextName, orderDB, config.Database.Logger.Kafka),
-		); err != nil {
-			log.Fatal(err)
-		}
+	if err := adapters.NewConsumers(config.ServiceName, config.Kafka,
+		eventconsume.Recover(),
+		eventconsume.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka),
+		eventconsume.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, config.Database.Logger.Kafka),
+		eventconsume.ContextDBWithName(config.ServiceName, factory.OrderDBContextName, orderDB, config.Database.Logger.Kafka),
+	); err != nil {
+		log.Fatal(err)
 	}
 
 	e := echo.New()
@@ -67,7 +66,7 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Use(echomiddleware.ContextLogger())
-	e.Use(echomiddleware.ContextDB(config.ServiceName, saleRecordDB, echomiddleware.KafkaConfig(config.Database.Logger.Kafka)))
+	e.Use(echomiddleware.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, echomiddleware.KafkaConfig(config.Database.Logger.Kafka)))
 	e.Use(echomiddleware.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka))
 	e.Use(auth.UserClaimMiddleware("/ping", "/docs"))
 
@@ -91,6 +90,8 @@ func initDB(driver, connection string) *xorm.Engine {
 	if err := models.InitDb(db); err != nil {
 		log.Fatal(err)
 	}
-
+	if err := promotion.InitDB(db); err != nil {
+		log.Fatal(err)
+	}
 	return db
 }

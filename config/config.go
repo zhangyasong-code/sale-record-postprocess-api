@@ -37,6 +37,11 @@ func Config() C {
 	return config
 }
 
+type EventKafka struct {
+	SaleRecordEvent echomiddleware.KafkaConfig
+	PromotionEvent  echomiddleware.KafkaConfig
+}
+
 type C struct {
 	Database struct {
 		SaleRecord struct {
@@ -54,12 +59,8 @@ type C struct {
 	BehaviorLog struct {
 		Kafka echomiddleware.KafkaConfig
 	}
-	SaleRecordEvent struct {
-		Kafka struct {
-			Consumer  echomiddleware.KafkaConfig
-			Publisher echomiddleware.KafkaConfig
-		}
-	}
+	Kafka EventKafka
+
 	StockSourceTypes []string
 	Services         struct {
 		MembershipApi,

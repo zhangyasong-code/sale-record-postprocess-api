@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"net/http"
-	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/promotion"
 	"strconv"
 	"strings"
 
@@ -30,7 +30,7 @@ func (PromotionEventController) GetOne(c echo.Context) error {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
 	}
 
-	v, err := models.GetById(c.Request().Context(), campaignId, ruleId)
+	v, err := promotion.GetById(c.Request().Context(), campaignId, ruleId)
 	if err != nil {
 		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
 	}

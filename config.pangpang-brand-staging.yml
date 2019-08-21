@@ -20,16 +20,15 @@ behaviorLog:
     brokers:
       - 10.173.208.142:9092
     topic: behaviorlog
-saleRecordEvent:
-  kafka:
-    publisher:
-      brokers:
-        - 10.173.208.142:9092
-      topic: pangpang-brand-sale-record
-    consumer:
-      brokers:
-        - 10.173.208.142:9092
-      topic: pangpang-brand-offer
+kafka:
+  saleRecordEvent:
+    brokers:
+      - 10.173.208.142:9092
+    topic: pangpang-brand-sale-record
+  promotionEvent:
+    brokers:
+      - 10.173.208.142:9092
+    topic: pangpang-brand-offer
 appenv: pangpang-brand-staging
 services:
   offerApi: http://offer-api.pangpang-brand-staging:8080
