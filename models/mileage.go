@@ -6,20 +6,41 @@ import (
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
 	"nomni/utils/auth"
-
-	membership "membership-api/models"
+	"time"
 
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
 	"github.com/sirupsen/logrus"
 )
 
-func GetMembershipMileages(ctx context.Context, tradeNo int64, mileageType string) ([]membership.Mileage, error) {
+type Mileage struct {
+	Id         int64      `json:"id,omitempty"`         /*ID 主键*/
+	TenantCode string     `json:"tenantCode,omitempty"` /*租户代码*/
+	MallId     string     `json:"mallId,omitempty"`     /*购物中心代码*/
+	StoreId    string     `json:"storeId,omitempty"`    /*店铺代码*/
+	MemberId   int64      `json:"memberId"`             /*会员id*/
+	Type       string     `json:"type,omitempty"`       /*类型*/
+	ChannelId  int64      `json:"channelId"`            /*渠道*/
+	TradeDate  time.Time  `json:"tradeDate,omitempty"`  /*交易日期*/
+	TradeNo    string     `json:"tradeNo,omitempty"`    /*交易单号*/
+	PreTradeNo string     `json:"preTradeNo,omitempty"` /*原交易单号*/
+	SaleAmount float64    `json:"saleAmount"`           /*整单金额*/
+	PayAmount  float64    `json:"payAmount"`            /*实付金额*/
+	Point      float64    `json:"point"`                /*积分数量*/
+	Remark     string     `json:"remark,omitempty"`     /*备注*/
+	IsSend     string     `json:"isSend,omitempty"`     /*变动是否推送给顾客*/
+	CreatedBy  string     `json:"createdBy,omitempty"`
+	UpdatedBy  string     `json:"updatedBy,omitempty"`
+	CreatedAt  *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
+}
+
+func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64, mileageType string) ([]Mileage, error) {
 	userClaim := auth.UserClaim{}.FromCtx(ctx)
 	var resp struct {
 		Result struct {
-			Items      []membership.Mileage `json:"items"`
-			TotalCount int64                `json:"totalCount"`
+			Items      []Mileage `json:"items"`
+			TotalCount int64     `json:"totalCount"`
 		} `json:"result"`
 		Success bool `json:"success"`
 		Error   struct {
