@@ -22,8 +22,18 @@ behaviorLog:
     topic: behaviorlog
 saleRecordEvent:
   kafka:
-    brokers:
-      - 10.173.208.142:9092
-    topic: pangpang-brand-sale-record
+    publisher:
+      brokers:
+        - 10.173.208.142:9092
+      topic: pangpang-brand-sale-record
+    consumer:
+      brokers:
+        - 10.173.208.142:9092
+      topic: pangpang-brand-offer
 appenv: pangpang-brand-staging
+services:
+  offerApi: http://offer-api.pangpang-brand-staging:8080
+  promotionApi: http://promotion-api.mslv2-staging:5000
+  productApi: http://product-api.pangpang-brand-staging:8080
+  storeApi: http://place-management-api.pangpang-brand-staging:8080
 serviceName: sale-record-postprocess-api

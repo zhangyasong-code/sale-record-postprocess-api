@@ -7,20 +7,41 @@ import (
 	"github.com/pangpanglabs/goutils/kafka"
 )
 
+const (
+	EventCatalogCampaignApproved = "CatalogCampaignApproved"
+	EventCartCampaignApproved    = "CartCampaignApproved"
+)
+
 func NewSaleRecordEventConsumer(serviceName string, kafkaConfig kafka.Config, filters ...eventconsume.Filter) error {
 	return eventconsume.NewEventConsumer(serviceName, kafkaConfig.Brokers, kafkaConfig.Topic, filters).Handle(handleEvent)
 }
 
 func handleEvent(c eventconsume.ConsumeContext) error {
-	var event models.SaleRecordEvent
-	if err := c.Bind(&event); err != nil {
-		return err
-	}
-
 	ctx := c.Context()
 
-	if err := (models.CustomerEventHandler{}).Handle(ctx, event); err != nil {
-		return err
+	if c.Status() == EventCartCampaignApproved {
+		var event models.CartCampaign
+
+		if err := c.Bind(&event); err != nil {
+			return err
+		}
+
+		if err := (models.CampaignEventHandler{}).HandleCartCampaign(ctx, event); err != nil {
+			return err
+		}
 	}
+
+	if c.Status() == EventCatalogCampaignApproved {
+		var event models.CatalogCampaign
+
+		if err := c.Bind(&event); err != nil {
+			return err
+		}
+
+		if err := (models.CampaignEventHandler{}).HandleCatalogCampaign(ctx, event); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

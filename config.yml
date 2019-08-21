@@ -12,8 +12,18 @@ behaviorLog:
     topic: behaviorlog
 saleRecordEvent:
   kafka:
-    brokers:
-      - localhost:9092
-    topic: pangpang-brand-sale-record
+    publisher:
+      brokers:
+        - 127.0.0.1:9092
+      topic: pangpang-brand-sale-record
+    consumer:
+      brokers:
+        - 127.0.0.1:9092
+      topic: offer
 appenv: dev
+services:
+  offerApi: https://staging.p2shop.com.cn/pangpang-brand/offer-api
+  promotionApi: https://dmz-staging.p2shop.com.cn/mslv2/promotion-api
+  productApi: https://staging.p2shop.com.cn/pangpang-brand/product-api
+  storeApi: https://staging.p2shop.com.cn/pangpang-brand/place-management-api
 serviceName: sale-record-postprocess-api

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-xorm/xorm"
+	"github.com/pangpanglabs/goutils/echomiddleware"
 )
 
 var (
@@ -12,7 +13,7 @@ var (
 )
 
 func SaleRecordDB(ctx context.Context) xorm.Interface {
-	v := ctx.Value(SaleRecordDBContextName)
+	v := ctx.Value(echomiddleware.ContextDBName)
 	if v == nil {
 		panic("DB is not exist")
 	}
