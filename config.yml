@@ -5,4 +5,15 @@ database:
   order:
     driver: mysql
     connection: root:root@tcp(localhost:3307)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
+behaviorLog:
+  kafka:
+    brokers:
+      - localhost
+    topic: behaviorlog
+saleRecordEvent:
+  kafka:
+    brokers:
+      - localhost:9092
+    topic: pangpang-brand-sale-record
+appenv: dev
 serviceName: sale-record-postprocess-api
