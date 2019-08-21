@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"nhub/sale-record-postprocess-api/factory"
-	"nhub/sale-record-postprocess-api/models"
 	"os"
 	"time"
 
@@ -13,6 +11,8 @@ import (
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/controllers"
 
+	"nhub/sale-record-postprocess-api/factory"
+	"nhub/sale-record-postprocess-api/models"
 	"nomni/utils/auth"
 	"nomni/utils/eventconsume"
 
@@ -40,7 +40,6 @@ func main() {
 			eventconsume.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, config.Database.Logger.Kafka),
 			eventconsume.ContextDBWithName(config.ServiceName, factory.OrderDBContextName, orderDB, config.Database.Logger.Kafka),
 		); err != nil {
-			fmt.Println("***********8")
 			log.Fatal(err)
 		}
 	}
@@ -82,13 +81,16 @@ func initDB(driver, connection string) *xorm.Engine {
 	if err != nil {
 		panic(err)
 	}
+	if os.Getenv("APP_ENV") != "production" {
+		db.ShowSQL(true)
+	}
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(time.Minute * 10)
-	db.ShowSQL()
 
 	if err := models.InitDb(db); err != nil {
 		log.Fatal(err)
 	}
+
 	return db
 }

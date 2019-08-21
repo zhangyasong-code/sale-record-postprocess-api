@@ -8,10 +8,6 @@ import (
 )
 
 type SaleRecordEvent struct {
-	AuthToken string    `json:"authToken"`
-	Payload   EventBody `json:"payload"`
-}
-type EventBody struct {
 	TransactionId          string                  `json:"transactionId"`
 	AssortedSaleRecordDtls []AssortedSaleRecordDtl `json:"assortedSaleRecordDtls"`
 	TenantCode             string                  `json:"tenantCode"`

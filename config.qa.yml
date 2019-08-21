@@ -1,0 +1,21 @@
+database:
+  saleRecord:
+    driver: mysql
+    connection: pangpang_app:Eland^123@tcp(10.30.8.55:3306)/pangpang_brand_nhub?charset=utf8
+logger:
+  kafka:
+        brokers:
+          - 10.30.8.55:9092
+        topic: sqllog
+behaviorLog:
+    kafka:
+      brokers:
+        - 10.30.8.55:9092
+      topic: behaviorlog
+eventMessageBroker:
+  kafka:
+    brokers:
+      - 10.30.8.55:9092
+    topic: nhub-sale-record-postprocess-api
+services:
+  membershipApi: http://membership-api.pangpang-brand-qa:8080
