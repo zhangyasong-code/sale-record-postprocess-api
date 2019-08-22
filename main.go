@@ -44,7 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := adapters.NewConsumers(config.ServiceName, config.Kafka,
+	if err := adapters.NewConsumers(config.ServiceName, config.EventKafka,
 		eventconsume.Recover(),
 		eventconsume.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka),
 		eventconsume.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, config.Database.Logger.Kafka),
