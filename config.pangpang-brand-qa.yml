@@ -30,4 +30,5 @@ services:
   promotionApi: http://promotion-api.mslv2-qa:5000
   productApi: http://product-api.pangpang-brand-qa:8080
   storeApi: http://place-management-api.pangpang-brand-qa:8080
+  placeManagementApi: http://place-management-api.pangpang-brand-qa:8080
 serviceName: sale-record-postprocess-api

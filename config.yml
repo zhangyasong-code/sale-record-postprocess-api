@@ -25,5 +25,6 @@ services:
   productApi: https://staging.p2shop.com.cn/pangpang-brand/product-api
   storeApi: https://staging.p2shop.com.cn/pangpang-brand/place-management-api
   membershipApi: https://staging.p2shop.com.cn/pangpang-brand/membership-api
+  placeManagementApi: https://staging.p2shop.com.cn/pangpang-brand/place-management-api
 appenv: dev
 serviceName: sale-record-postprocess-api

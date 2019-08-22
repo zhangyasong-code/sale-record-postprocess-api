@@ -37,9 +37,9 @@ func main() {
 	if err := models.InitSaleRecordDb(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
-	if err := models.InitOrderDb(orderDB); err != nil {
-		log.Fatal(err)
-	}
+	// if err := models.InitOrderDb(orderDB); err != nil {
+	// 	log.Fatal(err)
+	// }
 	if err := promotion.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
