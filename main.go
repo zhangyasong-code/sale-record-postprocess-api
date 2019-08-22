@@ -40,7 +40,7 @@ func main() {
 	if err := models.InitOrderDb(orderDB); err != nil {
 		log.Fatal(err)
 	}
-	if err := promotion.InitDB(db); err != nil {
+	if err := promotion.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
 
@@ -76,7 +76,7 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Use(echomiddleware.ContextLogger())
-	e.Use(echomiddleware.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, echomiddleware.KafkaConfig(config.Database.Logger.Kafka)))
+	e.Use(echomiddleware.ContextDBWithName(config.ServiceName, echomiddleware.ContextDBType(factory.SaleRecordDBContextName), saleRecordDB, echomiddleware.KafkaConfig(config.Database.Logger.Kafka)))
 	e.Use(echomiddleware.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka))
 	e.Use(auth.UserClaimMiddleware("/ping", "/docs"))
 
