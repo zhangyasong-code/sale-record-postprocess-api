@@ -2,19 +2,14 @@ database:
   saleRecord:
     driver: mysql
     connection: pangpang_app:Eland^123@tcp(10.173.208.142:3307)/pangpang_brand_nhub?charset=utf8&parseTime=True&loc=UTC
-    logger:
-      kafka:
-        brokers:
-          - 10.173.208.142:9092
-        topic: sqllog
   order:
     driver: mysql
     connection: pangpang_app:Eland^123@tcp(10.173.208.142:3307)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
-    logger:
-      kafka:
-        brokers:
-          - 10.173.208.142:9092
-        topic: sqllog
+  logger:
+    kafka:
+      brokers:
+        - 10.173.208.142:9092
+      topic: sqllog
 behaviorLog:
   kafka:
     brokers:

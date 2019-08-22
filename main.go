@@ -34,6 +34,16 @@ func main() {
 	defer saleRecordDB.Close()
 	defer orderDB.Close()
 
+	if err := models.InitSaleRecordDb(saleRecordDB); err != nil {
+		log.Fatal(err)
+	}
+	if err := models.InitOrderDb(orderDB); err != nil {
+		log.Fatal(err)
+	}
+	if err := promotion.InitDB(db); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := adapters.NewConsumers(config.ServiceName, config.Kafka,
 		eventconsume.Recover(),
 		eventconsume.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka),
@@ -87,11 +97,5 @@ func initDB(driver, connection string) *xorm.Engine {
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(time.Minute * 10)
 
-	if err := models.InitDb(db); err != nil {
-		log.Fatal(err)
-	}
-	if err := promotion.InitDB(db); err != nil {
-		log.Fatal(err)
-	}
 	return db
 }
