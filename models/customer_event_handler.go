@@ -18,6 +18,9 @@ func (h CustomerEventHandler) Handle(ctx context.Context, a SaleRecordEvent) err
 			return err
 		}
 	}
+	if err := setPostSaleRecordFee(ctx, a); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -69,6 +72,19 @@ func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
 	}
 	if err := (OrgMileageDtl{}).CreateBatch(ctx, orgMileageDtls); err != nil {
 		return err
+	}
+	return nil
+}
+
+func setPostSaleRecordFee(ctx context.Context, a SaleRecordEvent) error {
+	postSaleRecordFees, err := PostSaleRecordFee{}.MakePostSaleRecordFeesEntiiy(ctx, a)
+	if err != nil {
+		return err
+	}
+	for _, postSaleRecordFee := range postSaleRecordFees {
+		if err := postSaleRecordFee.Save(ctx); err != nil {
+			return err
+		}
 	}
 	return nil
 }
