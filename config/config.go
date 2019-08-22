@@ -59,7 +59,7 @@ type C struct {
 	BehaviorLog struct {
 		Kafka echomiddleware.KafkaConfig
 	}
-	Kafka EventKafka
+	EventKafka EventKafka
 
 	StockSourceTypes []string
 	Services         struct {

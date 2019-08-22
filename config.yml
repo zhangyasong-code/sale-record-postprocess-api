@@ -10,7 +10,7 @@ behaviorLog:
     brokers:
       - localhost
     topic: behaviorlog
-kafka:
+eventKafka:
   saleRecordEvent:
     brokers:
       - 127.0.0.1:9092

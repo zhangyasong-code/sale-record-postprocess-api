@@ -15,7 +15,7 @@ behaviorLog:
     brokers:
       - 10.173.208.142:9092
     topic: behaviorlog
-kafka:
+eventKafka:
   saleRecordEvent:
     brokers:
       - 10.173.208.142:9092
