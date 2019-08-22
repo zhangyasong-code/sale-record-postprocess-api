@@ -5,12 +5,25 @@ database:
   order:
     driver: mysql
     connection: root:root@tcp(localhost:3307)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
-services:
-  membershipApi: https://staging.p2shop.com.cn/pangpang-brand/membership-api
-saleRecordEvent:
+behaviorLog:
   kafka:
     brokers:
-      - localhost:9092
+      - localhost
+    topic: behaviorlog
+kafka:
+  saleRecordEvent:
+    brokers:
+      - 127.0.0.1:9092
     topic: pangpang-brand-sale-record
+  promotionEvent:
+    brokers:
+      - 127.0.0.1:9092
+    topic: offer
+services:
+  offerApi: https://staging.p2shop.com.cn/pangpang-brand/offer-api
+  promotionApi: https://dmz-staging.p2shop.com.cn/mslv2/promotion-api
+  productApi: https://staging.p2shop.com.cn/pangpang-brand/product-api
+  storeApi: https://staging.p2shop.com.cn/pangpang-brand/place-management-api
+  membershipApi: https://staging.p2shop.com.cn/pangpang-brand/membership-api
 appenv: dev
 serviceName: sale-record-postprocess-api

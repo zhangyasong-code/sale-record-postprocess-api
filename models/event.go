@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type SaleRecordEvent struct {
 	TransactionId          string                  `json:"transactionId"`
@@ -86,3 +88,5 @@ type TotalPrice struct {
 	DiscountPrice    float64 `json:"discountPrice"`
 	TransactionPrice float64 `json:"transactionPrice"`
 }
+
+type AssortedSaleRecordOffer struct{}
