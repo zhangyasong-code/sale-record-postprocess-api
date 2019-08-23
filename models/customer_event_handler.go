@@ -37,8 +37,8 @@ func setAccumulateMileage(ctx context.Context, a SaleRecordEvent) error {
 	}
 	for _, accumulateMileage := range accumulateMileages {
 		if accumulateMileage.Point != 0 {
-			orgMileage := OrgMileage{}.MakeOrgMileage(&accumulateMileage, a)
-			if err := orgMileage.Create(ctx); err != nil {
+			postMileage := PostMileage{}.MakePostMileage(&accumulateMileage, a)
+			if err := postMileage.Create(ctx); err != nil {
 				return err
 			}
 		}
@@ -48,11 +48,11 @@ func setAccumulateMileage(ctx context.Context, a SaleRecordEvent) error {
 }
 
 func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
-	orgMileage := OrgMileage{}.MakeOrgMileage(nil, a)
-	if err := orgMileage.Create(ctx); err != nil {
+	postMileage := PostMileage{}.MakePostMileage(nil, a)
+	if err := postMileage.Create(ctx); err != nil {
 		return err
 	}
-	orgMileageDtls := make([]OrgMileageDtl, 0)
+	postMileageDtls := make([]PostMileageDtl, 0)
 	var lastPoint, lastPointAmount float64
 	for i, recordDtl := range a.AssortedSaleRecordDtls {
 		var currentPoint, currentPointAmount float64
@@ -66,11 +66,11 @@ func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
 			lastPoint = a.Mileage - currentPoint
 			lastPointAmount = a.MileagePrice - currentPointAmount
 		}
-		orgMileageDtl := OrgMileageDtl{}.MakeOrgMileageDtl(orgMileage.Id,
-			orgMileage.MileageType, currentPoint, currentPointAmount, recordDtl)
-		orgMileageDtls = append(orgMileageDtls, *orgMileageDtl)
+		postMileageDtl := PostMileageDtl{}.MakePostMileageDtl(postMileage.Id,
+			postMileage.MileageType, currentPoint, currentPointAmount, recordDtl)
+		postMileageDtls = append(postMileageDtls, *postMileageDtl)
 	}
-	if err := (OrgMileageDtl{}).CreateBatch(ctx, orgMileageDtls); err != nil {
+	if err := (PostMileageDtl{}).CreateBatch(ctx, postMileageDtls); err != nil {
 		return err
 	}
 	return nil
