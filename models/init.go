@@ -10,6 +10,6 @@ func InitSaleRecordDb(db *xorm.Engine) error {
 	return db.Sync(
 		new(PostSaleRecordFee),
 		new(PostFailCreateSaleFee),
-		new(OrgMileage),
-		new(OrgMileageDtl))
+		new(PostMileage),
+		new(PostMileageDtl))
 }
