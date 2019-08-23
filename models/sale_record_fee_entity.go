@@ -38,6 +38,12 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 			appliedFeeRate = contractFeeRate
 		} else if appliedFeeRate == 0 && contractFeeRate == 0 {
 			// Add one Case when eventFeeRate and contractFeeRate is 0
+			logrus.WithField("TransactionId", a.TransactionId).Info("Add FailCreateSaleFee data")
+			postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
+			if err := postFailCreateSaleFee.Save(ctx); err != nil {
+				return nil, err
+			}
+			return nil, nil
 		}
 
 		// Use the OrderItemId to query Mileage and MileagePrice
