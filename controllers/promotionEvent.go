@@ -38,5 +38,4 @@ func (PromotionEventController) GetOne(c echo.Context) error {
 		return ReturnApiFail(c, http.StatusNotFound, ApiErrorNotFound, nil)
 	}
 	return ReturnApiSucc(c, http.StatusOK, v)
-	return nil
 }

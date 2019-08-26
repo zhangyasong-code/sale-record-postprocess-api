@@ -9,7 +9,7 @@ import (
 
 type PromotionEvent struct {
 	CampaignId                int64     `json:"campaignId" xorm:"index"`
-	RuleId                    int64     `json:""ruleId xorm:"index"`
+	RuleId                    int64     `json:"ruleId" xorm:"index"`
 	BrandCode                 string    `json:"brandCode"`
 	ShopCode                  string    `json:"shopCode"` //是否需要（SaleEvent）
 	EventTypeCode             string    `json:"eventTypeCode"`
