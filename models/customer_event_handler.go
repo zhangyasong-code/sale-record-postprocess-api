@@ -67,7 +67,7 @@ func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
 			lastPointAmount = a.MileagePrice - currentPointAmount
 		}
 		postMileageDtl := PostMileageDtl{}.MakePostMileageDtl(postMileage.Id,
-			postMileage.MileageType, currentPoint, currentPointAmount, recordDtl)
+			postMileage.UseType, currentPoint, currentPointAmount, recordDtl)
 		postMileageDtls = append(postMileageDtls, *postMileageDtl)
 	}
 	if err := (PostMileageDtl{}).CreateBatch(ctx, postMileageDtls); err != nil {
