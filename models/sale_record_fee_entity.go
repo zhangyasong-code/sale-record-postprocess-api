@@ -47,7 +47,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 		}
 
 		// Use the OrderItemId to query Mileage and MileagePrice
-		mileagePrice, err := PostSaleRecordFee{}.GetOrgMileageDtl(ctx, assortedSaleRecordDtl.OrderItemId, assortedSaleRecordDtl.RefundItemId)
+		mileagePrice, err := PostSaleRecordFee{}.GetPostMileageDtl(ctx, assortedSaleRecordDtl.OrderItemId, assortedSaleRecordDtl.RefundItemId)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{"OrderItemId": assortedSaleRecordDtl.OrderItemId, "RefundItemId": assortedSaleRecordDtl.RefundItemId, "Error": err}).Error("GetOrgMileageDtl failed!")
 			return nil, err

@@ -133,8 +133,8 @@ func (PostSaleRecordFee) GetPromotionEvent(ctx context.Context, offerNo string) 
 	return promotionEvent, nil
 }
 
-func (PostSaleRecordFee) GetOrgMileageDtl(ctx context.Context, orderItemId, refundItemId int64) (*OrgMileageDtl, error) {
-	var o OrgMileageDtl
+func (PostSaleRecordFee) GetPostMileageDtl(ctx context.Context, orderItemId, refundItemId int64) (*PostMileageDtl, error) {
+	var o PostMileageDtl
 	exist, err := factory.SaleRecordDB(ctx).Where("order_item_id = ?", orderItemId).And("refund_item_id = ?", refundItemId).Get(&o)
 	if err != nil {
 		return nil, err
