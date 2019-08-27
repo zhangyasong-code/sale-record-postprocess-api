@@ -53,8 +53,8 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 			return nil, err
 		}
 
-		// ((totalSalePrice - mileagePrice) * appliedFeeRate) / 100
-		feeAmount = number.ToFixed(((assortedSaleRecordDtl.TotalSalePrice-mileagePrice.PointAmount)*appliedFeeRate)/100, nil)
+		// ((TotalDistributedPaymentPrice - mileagePrice) * appliedFeeRate) / 100
+		feeAmount = number.ToFixed(((assortedSaleRecordDtl.TotalDistributedPaymentPrice-mileagePrice.PointAmount)*appliedFeeRate)/100, nil)
 		postSaleRecordFees = append(
 			postSaleRecordFees,
 			PostSaleRecordFee{
