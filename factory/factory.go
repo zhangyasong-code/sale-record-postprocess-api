@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/go-xorm/xorm"
+	"github.com/pangpanglabs/goutils/echomiddleware"
 )
 
 var (
-	SaleRecordDBContextName = "saleRecordDB"
-	OrderDBContextName      = "orderDB"
+	SaleRecordDBContextName echomiddleware.ContextDBType = "saleRecordDB"
+	OrderDBContextName      echomiddleware.ContextDBType = "orderDB"
 )
 
 func SaleRecordDB(ctx context.Context) xorm.Interface {
