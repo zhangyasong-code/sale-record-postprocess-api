@@ -15,16 +15,17 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 		var eventType string
 
 		// Use the offerNo to query promotionEvent
-		if assortedSaleRecordDtl.Offer.OfferId != 0 {
-			promotionEvent, err := PostSaleRecordFee{}.GetPromotionEvent(ctx, assortedSaleRecordDtl.Offer.OfferNo)
-			if err != nil {
-				logrus.WithField("Error", err).Info("GetPromotionEvent error")
-				return nil, err
+		if len(assortedSaleRecordDtl.ItemOffers) != 0 {
+			for _, ItemOffer := range assortedSaleRecordDtl.ItemOffers {
+				promotionEvent, err := PostSaleRecordFee{}.GetPromotionEvent(ctx, ItemOffer.OfferNo)
+				if err != nil {
+					logrus.WithField("Error", err).Info("GetPromotionEvent error")
+					return nil, err
+				}
+				eventFeeRate += promotionEvent.FeeRate
 			}
-			eventFeeRate = promotionEvent.FeeRate
-			eventType = promotionEvent.EventTypeCode
 			if eventType != "" && eventFeeRate > 0 {
-				appliedFeeRate = promotionEvent.FeeRate
+				appliedFeeRate = eventFeeRate
 			}
 		}
 
@@ -54,22 +55,20 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 		}
 
 		// ((TotalDistributedPaymentPrice - mileagePrice) * appliedFeeRate) / 100
-		feeAmount = number.ToFixed(((assortedSaleRecordDtl.TotalDistributedPaymentPrice-mileagePrice.PointAmount)*appliedFeeRate)/100, nil)
+		feeAmount = number.ToFixed(((assortedSaleRecordDtl.DistributedPrice.TotalDistributedPaymentPrice-mileagePrice.PointAmount)*appliedFeeRate)/100, nil)
 		postSaleRecordFees = append(
 			postSaleRecordFees,
 			PostSaleRecordFee{
 				TransactionId:          a.TransactionId,
 				SaleRecordDtlId:        assortedSaleRecordDtl.Id,
-				SaleRecordOfferId:      assortedSaleRecordDtl.Offer.OfferId,
 				OrderId:                a.OrderId,
 				OrderItemId:            assortedSaleRecordDtl.OrderItemId,
 				RefundId:               a.RefundId,
 				RefundItemId:           assortedSaleRecordDtl.RefundItemId,
 				CustomerId:             a.CustomerId,
 				StoreId:                a.StoreId,
-				EventType:              eventType,
-				TotalSalePrice:         assortedSaleRecordDtl.TotalSalePrice,
-				TotalPaymentPrice:      assortedSaleRecordDtl.TotalDistributedPaymentPrice,
+				TotalSalePrice:         assortedSaleRecordDtl.TotalPrice.SalePrice,
+				TotalPaymentPrice:      assortedSaleRecordDtl.DistributedPrice.TotalDistributedPaymentPrice,
 				Mileage:                mileagePrice.Point,
 				MileagePrice:           mileagePrice.PointAmount,
 				ContractFeeRate:        contractFeeRate,

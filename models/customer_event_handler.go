@@ -77,7 +77,7 @@ func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
 	var lastPoint, lastPointAmount float64
 	for i, recordDtl := range a.AssortedSaleRecordDtls {
 		var currentPoint, currentPointAmount float64
-		ratio := recordDtl.TotalSalePrice / a.TotalPrice.SalePrice
+		ratio := recordDtl.TotalPrice.SalePrice / a.TotalPrice.SalePrice
 		if i == len(a.AssortedSaleRecordDtls) {
 			currentPoint = lastPoint
 			currentPointAmount = lastPointAmount

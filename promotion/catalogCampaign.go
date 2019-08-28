@@ -26,7 +26,7 @@ type CatalogCampaign struct {
 	StartAt   time.Time          `json:"startAt"`
 	EndAt     time.Time          `json:"endAt"`
 	FinalAt   time.Time          `json:"finalAt"` // 延期后的最终结束时间(== CSL：SaleEventEndDate + ExtendSalePermitDateCount)
-	RulesetId int64              `json:"rulesetId""`
+	RulesetId int64              `json:"rulesetId"`
 	Enable    bool               `json:"enable"`
 	CreatedAt time.Time          `json:"createdAt"`
 	UpdatedAt time.Time          `json:"updatedAt"`
