@@ -83,6 +83,16 @@ func (o *PostMileage) Create(ctx context.Context) error {
 	return nil
 }
 
+func (PostMileage) CheckOrderRefundExist(ctx context.Context, saleRecordMstId string) (bool, error) {
+	postMileage := PostMileage{}
+	has, err := factory.SaleRecordDB(ctx).Table("post_mileage").
+		Where("sale_record_mst_id=?", saleRecordMstId).Get(&postMileage)
+	if err != nil {
+		return true, err
+	}
+	return has, nil
+}
+
 func (PostMileageDtl) MakePostMileageDtl(postMileageId int64, useType UseType, point, pointAmount float64, recordDtl AssortedSaleRecordDtl) *PostMileageDtl {
 	postMileageDtl := &PostMileageDtl{
 		PostMileageId:   postMileageId,

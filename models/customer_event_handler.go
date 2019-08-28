@@ -4,24 +4,45 @@ import (
 	"context"
 
 	"github.com/pangpanglabs/goutils/number"
+	"github.com/sirupsen/logrus"
 )
 
 type CustomerEventHandler struct {
 }
 
 func (h CustomerEventHandler) Handle(ctx context.Context, a SaleRecordEvent) error {
-	if err := setAccumulateMileage(ctx, a); err != nil {
+	//mileage
+	if err := setPostMileage(ctx, a); err != nil {
 		return err
 	}
-	if a.Mileage != 0 {
-		if err := setUsedMileage(ctx, a); err != nil {
-			return err
-		}
-	}
+
 	if err := setPostSaleRecordFee(ctx, a); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func setPostMileage(ctx context.Context, a SaleRecordEvent) error {
+	has, err := PostMileage{}.CheckOrderRefundExist(ctx, a.TransactionId)
+	if err != nil {
+		logrus.WithField("err", err).Info("CheckOrderRefundExist")
+		return err
+	}
+	if has {
+		return nil
+	}
+
+	if err := setAccumulateMileage(ctx, a); err != nil {
+		logrus.WithField("err", err).Info("setAccumulateMileage")
+		return err
+	}
+	if a.Mileage != 0 {
+		if err := setUsedMileage(ctx, a); err != nil {
+			logrus.WithField("err", err).Info("setUsedMileage")
+			return err
+		}
+	}
 	return nil
 }
 
