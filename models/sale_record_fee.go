@@ -39,8 +39,7 @@ type PostSaleRecordFee struct {
 }
 
 type PostFailCreateSaleFee struct {
-	Id            int64     `json:"id" query:"id"`
-	TransactionId string    `json:"transactionId" query:"transactionId" xorm:"index VARCHAR(30) notnull" validate:"required"`
+	TransactionId string    `json:"transactionId" query:"transactionId" xorm:"index VARCHAR(30) notnull pk" validate:"required"`
 	IsProcessed   bool      `json:"isProcessed" query:"isProcessed" xorm:"index notnull default false" validate:"required"`
 	CreatedAt     time.Time `json:"createdAt" xorm:"created"`
 	UpdatedAt     time.Time `json:"updatedAt" xorm:"updated"`
