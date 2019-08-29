@@ -30,5 +30,6 @@ services:
   promotionApi: http://promotion-api.mslv2-staging:5000
   productApi: http://product-api.pangpang-brand-staging:8080
   storeApi: http://place-management-api.pangpang-brand-staging:8080
+  membershipApi: http://membership-api.pangpang-brand-staging:8080
   placeManagementApi: http://place-management-api.pangpang-brand-staging:8080
 serviceName: sale-record-postprocess-api
