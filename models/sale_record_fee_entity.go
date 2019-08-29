@@ -10,7 +10,7 @@ import (
 
 func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
-	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtls {
+	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
 		var eventFeeRate, appliedFeeRate, feeAmount float64
 		var eventType string
 

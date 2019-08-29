@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"nhub/sale-record-postprocess-api/models"
 	"nomni/utils/eventconsume"
 
@@ -20,7 +21,8 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	}
 
 	ctx := c.Context()
-	logrus.WithField("Body", event).Info("Event Body>>>>>>")
+	str, _ := json.Marshal(event)
+	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
 	if err := (models.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		return err
 	}
