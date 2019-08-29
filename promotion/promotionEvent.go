@@ -18,6 +18,7 @@ type PromotionEvent struct {
 	StartDate                 time.Time `json:"startDate"`
 	EndDate                   time.Time `json:"endDate"`
 	ExtendSalePermitDateCount int       `json:"extendSalePermitDateCount"` //扩展天数
+	NormalSaleRecognitionChk  bool      `json:"normalSaleRecognitionChk"`  //活动销售额是否正常
 	FeeRate                   float64   `json:"feeRate"`
 	ApprovalChk               int       `json:"approvalChk"`
 	InUserID                  string    `json:"inUserId"`
