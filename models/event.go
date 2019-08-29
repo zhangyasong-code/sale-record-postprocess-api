@@ -5,28 +5,28 @@ import (
 )
 
 type SaleRecordEvent struct {
-	TransactionId          string                  `json:"transactionId"`
-	AssortedSaleRecordDtls []AssortedSaleRecordDtl `json:"assortedSaleRecordDtls"`
-	TenantCode             string                  `json:"tenantCode"`
-	StoreId                int64                   `json:"storeId"`
-	OrderId                int64                   `json:"orderId"`
-	OuterOrderNo           string                  `json:"outerOrderNo"`
-	RefundId               int64                   `json:"refundId"`
-	TransactionType        string                  `json:"transactionType"`
-	TransactionChannelType string                  `json:"transactionChannelType"`
-	TransactionStatus      string                  `json:"transactionStatus"`
-	TransactionCreateDate  time.Time               `json:"transactionCreateDate"`
-	TransactionUpdateDate  time.Time               `json:"transactionUpdateDate"`
-	CustomerId             int64                   `json:"customerId"`
-	SalesmanId             int64                   `json:"salesmanId"`
-	TotalPrice             TotalPrice              `json:"totalPrice"`
-	FreightPrice           float64                 `json:"freightPrice"`
-	Mileage                float64                 `json:"mileage"`
-	MileagePrice           float64                 `json:"mileagePrice"`
-	CashPrice              float64                 `json:"cashPrice"`
-	IsOutPaid              bool                    `json:"isOutPaid"`
-	CartOffers             []CartOffer             `json:"cartOffers"`
-	Committed              Committed               `json:"committed"`
+	TransactionId             string                  `json:"transactionId"`
+	AssortedSaleRecordDtlList []AssortedSaleRecordDtl `json:"assortedSaleRecordDtlList"`
+	TenantCode                string                  `json:"tenantCode"`
+	StoreId                   int64                   `json:"storeId"`
+	OrderId                   int64                   `json:"orderId"`
+	OuterOrderNo              string                  `json:"outerOrderNo"`
+	RefundId                  int64                   `json:"refundId"`
+	TransactionType           string                  `json:"transactionType"`
+	TransactionChannelType    string                  `json:"transactionChannelType"`
+	TransactionStatus         string                  `json:"transactionStatus"`
+	TransactionCreateDate     time.Time               `json:"transactionCreateDate"`
+	TransactionUpdateDate     time.Time               `json:"transactionUpdateDate"`
+	CustomerId                int64                   `json:"customerId"`
+	SalesmanId                int64                   `json:"salesmanId"`
+	TotalPrice                TotalPrice              `json:"totalPrice"`
+	FreightPrice              float64                 `json:"freightPrice"`
+	Mileage                   float64                 `json:"mileage"`
+	MileagePrice              float64                 `json:"mileagePrice"`
+	CashPrice                 float64                 `json:"cashPrice"`
+	IsOutPaid                 bool                    `json:"isOutPaid"`
+	CartOffers                []CartOffer             `json:"cartOffers"`
+	Committed                 Committed               `json:"committed"`
 }
 
 type AssortedSaleRecordDtl struct {
