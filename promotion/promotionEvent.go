@@ -8,13 +8,12 @@ import (
 )
 
 type PromotionEvent struct {
-	CampaignId                int64     `json:"campaignId" xorm:"index"`
-	RuleId                    int64     `json:"ruleId" xorm:"index"`
+	OfferNo                   string    `json:"offerNo" xorm:"pk"`
 	BrandCode                 string    `json:"brandCode"`
 	ShopCode                  string    `json:"shopCode"` //是否需要（SaleEvent）
 	EventTypeCode             string    `json:"eventTypeCode"`
 	EventName                 string    `json:"eventName"`
-	EventNo                   string    `json:"eventNo" xorm:"pk"`
+	EventNo                   string    `json:"eventNo"`
 	EventDescription          string    `json:"eventDescription"`
 	StartDate                 time.Time `json:"startDate"`
 	EndDate                   time.Time `json:"endDate"`
@@ -33,9 +32,9 @@ func (p *PromotionEvent) create(ctx context.Context) error {
 	return err
 }
 
-func GetById(ctx context.Context, campaignId, ruleId int64) (*PromotionEvent, error) {
+func GetById(ctx context.Context, no string) (*PromotionEvent, error) {
 	var p PromotionEvent
-	exist, err := factory.SaleRecordDB(ctx).Where("campaign_id = ?", campaignId).And("rule_id = ?", ruleId).Get(&p)
+	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", no).Get(&p)
 	if err != nil {
 		return nil, err
 	} else if !exist {
