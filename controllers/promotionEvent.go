@@ -25,7 +25,7 @@ func (PromotionEventController) GetOne(c echo.Context) error {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, errors.New("no can not be null"))
 	}
 
-	v, err := promotion.GetById(c.Request().Context(), no)
+	v, err := promotion.GetByNo(c.Request().Context(), no)
 	if err != nil {
 		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
 	}

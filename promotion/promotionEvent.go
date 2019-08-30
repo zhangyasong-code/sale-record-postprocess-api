@@ -20,7 +20,6 @@ type PromotionEvent struct {
 	ExtendSalePermitDateCount int       `json:"extendSalePermitDateCount"` //扩展天数
 	NormalSaleRecognitionChk  bool      `json:"normalSaleRecognitionChk"`  //活动销售额是否正常
 	FeeRate                   float64   `json:"feeRate"`
-	ApprovalChk               int       `json:"approvalChk"`
 	InUserID                  string    `json:"inUserId"`
 	SaleBaseAmt               float64   `json:"saleBaseAmt"`
 	DiscountBaseAmt           float64   `json:"discountBaseAmt"`
@@ -33,7 +32,7 @@ func (p *PromotionEvent) create(ctx context.Context) error {
 	return err
 }
 
-func GetById(ctx context.Context, no string) (*PromotionEvent, error) {
+func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
 	var p PromotionEvent
 	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", no).Get(&p)
 	if err != nil {

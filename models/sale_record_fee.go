@@ -113,7 +113,7 @@ func (PostSaleRecordFee) GetContractFeeRate(ctx context.Context, storeId, brandI
 }
 
 func (PostSaleRecordFee) GetPromotionEvent(ctx context.Context, offerNo string) (*promotion.PromotionEvent, error) {
-	promotionEvent, err := promotion.GetById(ctx, offerNo)
+	promotionEvent, err := promotion.GetByNo(ctx, offerNo)
 	if err != nil {
 		return nil, err
 	}

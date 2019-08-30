@@ -108,7 +108,6 @@ func CatalogToCSLEvent(ctx context.Context, c CatalogCampaign, ruleSet *CatalogR
 		ExtendSalePermitDateCount: 0,
 		NormalSaleRecognitionChk:  promotion.NormalSaleRecognitionChk,
 		FeeRate:                   c.FeeRate,
-		ApprovalChk:               1,
 		InUserID:                  "mslv2.0",
 		SaleBaseAmt:               promotion.SaleBaseAmt,
 		DiscountBaseAmt:           promotion.DiscountBaseAmt,
