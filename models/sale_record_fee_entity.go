@@ -10,10 +10,13 @@ import (
 
 func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
+	var eventFeeRate, appliedFeeRate, feeAmount float64
+	var eventTypeCode string
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
-		var eventFeeRate, appliedFeeRate, feeAmount float64
-		var eventType string
-
+		eventFeeRate = 0
+		appliedFeeRate = 0
+		feeAmount = 0
+		eventTypeCode = ""
 		// Use the offerNo to query promotionEvent
 		if len(assortedSaleRecordDtl.ItemOffers) != 0 {
 			for _, ItemOffer := range assortedSaleRecordDtl.ItemOffers {
@@ -22,11 +25,18 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 					logrus.WithField("Error", err).Info("GetPromotionEvent error")
 					return nil, err
 				}
-				eventFeeRate += promotionEvent.FeeRate
+				eventTypeCode = promotionEvent.EventTypeCode
+				if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
+					eventFeeRate += promotionEvent.FeeRate
+					if eventFeeRate <= 0 {
+						postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
+						if err := postFailCreateSaleFee.Save(ctx); err != nil {
+							return nil, err
+						}
+					}
+				}
 			}
-			if eventType != "" && eventFeeRate > 0 {
-				appliedFeeRate = eventFeeRate
-			}
+			appliedFeeRate = eventFeeRate
 		}
 
 		// Use the brandId and TransactionCreateDate to get FeeRate in contracts
