@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	offer "nomni/offer-api/models"
-	"strconv"
 	"time"
 )
 
@@ -167,9 +166,9 @@ func CartToCSLEvent(ctx context.Context, c CartCampaign, ruleGroup *CartRulesetG
 	if len(ruleGroup.Actions) > 0 {
 		promotion.ToCSLDisCount(ruleGroup.Actions[0].StandardValue, ruleGroup.Actions[0].DiscountValue)
 	}
-	offerNo := strconv.Itoa(int(offer.CampaignTypeCart)) + "-" + strconv.FormatInt(c.Id, 10) + "-" + strconv.FormatInt(ruleGroup.Id, 10)
+	offerNo := offer.NewOfferNo(offer.CampaignTypeCart, c.Id, ruleGroup.Id)
 	return &PromotionEvent{
-		OfferNo:                   offerNo,
+		OfferNo:                   string(offerNo),
 		BrandCode:                 brandCode,
 		ShopCode:                  storeCode,
 		EventTypeCode:             eventType,
