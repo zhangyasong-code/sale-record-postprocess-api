@@ -8,19 +8,18 @@ import (
 )
 
 type PromotionEvent struct {
-	CampaignId                int64     `json:"campaignId" xorm:"index"`
-	RuleId                    int64     `json:"ruleId" xorm:"index"`
+	OfferNo                   string    `json:"offerNo" xorm:"pk"`
 	BrandCode                 string    `json:"brandCode"`
 	ShopCode                  string    `json:"shopCode"` //是否需要（SaleEvent）
 	EventTypeCode             string    `json:"eventTypeCode"`
 	EventName                 string    `json:"eventName"`
-	EventNo                   string    `json:"eventNo" xorm:"pk"`
+	EventNo                   string    `json:"eventNo"`
 	EventDescription          string    `json:"eventDescription"`
 	StartDate                 time.Time `json:"startDate"`
 	EndDate                   time.Time `json:"endDate"`
 	ExtendSalePermitDateCount int       `json:"extendSalePermitDateCount"` //扩展天数
+	NormalSaleRecognitionChk  bool      `json:"normalSaleRecognitionChk"`  //活动销售额是否正常
 	FeeRate                   float64   `json:"feeRate"`
-	ApprovalChk               int       `json:"approvalChk"`
 	InUserID                  string    `json:"inUserId"`
 	SaleBaseAmt               float64   `json:"saleBaseAmt"`
 	DiscountBaseAmt           float64   `json:"discountBaseAmt"`
@@ -33,9 +32,9 @@ func (p *PromotionEvent) create(ctx context.Context) error {
 	return err
 }
 
-func GetById(ctx context.Context, campaignId, ruleId int64) (*PromotionEvent, error) {
+func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
 	var p PromotionEvent
-	exist, err := factory.SaleRecordDB(ctx).Where("campaign_id = ?", campaignId).And("rule_id = ?", ruleId).Get(&p)
+	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", no).Get(&p)
 	if err != nil {
 		return nil, err
 	} else if !exist {

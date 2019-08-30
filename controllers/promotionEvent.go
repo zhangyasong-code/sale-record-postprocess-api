@@ -1,10 +1,9 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"nhub/sale-record-postprocess-api/promotion"
-	"strconv"
-	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/pangpanglabs/echoswagger"
@@ -15,22 +14,18 @@ type PromotionEventController struct{}
 func (c PromotionEventController) Init(g echoswagger.ApiGroup) {
 	g.SetSecurity("Authorization")
 
-	g.GET("/:id", c.GetOne).
-		AddParamPath("", "id", "Id of Offer")
+	g.GET("/:no", c.GetOne).
+		AddParamPath("", "no", "no of Offer")
 }
 
 func (PromotionEventController) GetOne(c echo.Context) error {
-	arr := strings.Split(c.Param("id"), "-")
-	campaignId, err := strconv.ParseInt(arr[0], 10, 64)
-	if err != nil {
-		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
-	}
-	ruleId, err := strconv.ParseInt(arr[1], 10, 64)
-	if err != nil {
-		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
+	no := c.Param("no")
+
+	if no == "" {
+		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, errors.New("no can not be null"))
 	}
 
-	v, err := promotion.GetById(c.Request().Context(), campaignId, ruleId)
+	v, err := promotion.GetByNo(c.Request().Context(), no)
 	if err != nil {
 		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
 	}

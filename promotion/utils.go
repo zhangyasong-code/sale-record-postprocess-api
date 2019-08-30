@@ -19,11 +19,11 @@ type Store struct {
 }
 
 type Promotion struct {
-	EventNo         string  `json:"eventNo"`
-	EventType       string  `json:"eventType"`
-	SaleBaseAmt     float64 `json:"saleBaseAmt"`
-	DiscountBaseAmt float64 `json:"discountBaseAmt"`
-	DiscountRate    float64 `json:"discountRate"`
+	EventType                string  `json:"eventType"`
+	SaleBaseAmt              float64 `json:"saleBaseAmt"`
+	DiscountBaseAmt          float64 `json:"discountBaseAmt"`
+	DiscountRate             float64 `json:"discountRate"`
+	NormalSaleRecognitionChk bool    `json:"normalSaleRecognitionChk"`
 }
 
 func getBrandAndStore(ctx context.Context, channels []ChannelCondition) (*Brand, *Store, error) {
@@ -107,16 +107,16 @@ func (p *Promotion) ToCSLDisCount(StandardValue, DiscountValue float64) {
 	case "01":
 		p.SaleBaseAmt = StandardValue
 		p.DiscountBaseAmt = DiscountValue
-		p.EventNo = "12345"
+		p.NormalSaleRecognitionChk = true
 		break
 	case "02":
 		p.SaleBaseAmt = StandardValue
 		p.DiscountBaseAmt = DiscountValue
-		p.EventNo = "12345"
+		p.NormalSaleRecognitionChk = false
 		break
 	case "03":
 		p.DiscountRate = 100 - DiscountValue
-		p.EventNo = "12345"
+		p.NormalSaleRecognitionChk = false
 		break
 	case "B":
 		p.SaleBaseAmt = StandardValue

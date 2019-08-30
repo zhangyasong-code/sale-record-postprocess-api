@@ -8,7 +8,6 @@ import (
 	"nhub/sale-record-postprocess-api/factory"
 	"nhub/sale-record-postprocess-api/promotion"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/pangpanglabs/goutils/behaviorlog"
@@ -113,16 +112,7 @@ func (PostSaleRecordFee) GetContractFeeRate(ctx context.Context, storeId, brandI
 }
 
 func (PostSaleRecordFee) GetPromotionEvent(ctx context.Context, offerNo string) (*promotion.PromotionEvent, error) {
-	arr := strings.Split(offerNo, "-")
-	campaignId, err := strconv.ParseInt(arr[0], 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	ruleId, err := strconv.ParseInt(arr[1], 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	promotionEvent, err := promotion.GetById(ctx, campaignId, ruleId)
+	promotionEvent, err := promotion.GetByNo(ctx, offerNo)
 	if err != nil {
 		return nil, err
 	}
