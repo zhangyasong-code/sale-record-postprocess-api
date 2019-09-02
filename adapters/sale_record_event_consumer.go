@@ -27,5 +27,8 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		return err
 	}
 
+	if err := (models.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
+		return err
+	}
 	return nil
 }
