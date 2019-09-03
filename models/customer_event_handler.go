@@ -98,7 +98,7 @@ func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
 }
 
 func setPostSaleRecordFee(ctx context.Context, a SaleRecordEvent) error {
-	postSaleRecordFees, err := PostSaleRecordFee{}.MakePostSaleRecordFeesEntiiy(ctx, a)
+	postSaleRecordFees, err := PostSaleRecordFee{}.MakePostSaleRecordFeesEntity(ctx, a)
 	if err != nil {
 		return err
 	}

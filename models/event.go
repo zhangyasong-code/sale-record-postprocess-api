@@ -5,7 +5,7 @@ import (
 )
 
 type SaleRecordEvent struct {
-	TransactionId             string                  `json:"transactionId"`
+	TransactionId             int64                   `json:"transactionId"`
 	AssortedSaleRecordDtlList []AssortedSaleRecordDtl `json:"assortedSaleRecordDtlList"`
 	TenantCode                string                  `json:"tenantCode"`
 	StoreId                   int64                   `json:"storeId"`
