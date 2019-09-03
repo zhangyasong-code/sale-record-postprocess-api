@@ -8,7 +8,7 @@ import (
 	"github.com/pangpanglabs/goutils/number"
 )
 
-func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a SaleRecordEvent) ([]PostSaleRecordFee, error) {
+func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
 	var eventFeeRate, appliedFeeRate, feeAmount float64
 	var eventTypeCode string
@@ -70,7 +70,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntiiy(ctx context.Context, a Sal
 			postSaleRecordFees,
 			PostSaleRecordFee{
 				TransactionId:          a.TransactionId,
-				SaleRecordDtlId:        assortedSaleRecordDtl.Id,
+				TransactionDtlId:       assortedSaleRecordDtl.Id,
 				OrderId:                a.OrderId,
 				OrderItemId:            assortedSaleRecordDtl.OrderItemId,
 				RefundId:               a.RefundId,

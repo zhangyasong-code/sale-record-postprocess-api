@@ -20,7 +20,7 @@ type PostMileage struct {
 	TenantCode      string    `json:"tenantCode" xorm:"index VARCHAR(50) notnull" validate:"required"`
 	StoreId         int64     `json:"storeId" xorm:"index notnull" validate:"gte=0"`
 	CustomerId      int64     `json:"customerId" xorm:"index notnull" validate:"gte=0"`
-	SaleRecordMstId string    `json:"saleRecordMstId" xorm:"index default 0" validate:"required"`
+	SaleRecordMstId int64     `json:"saleRecordMstId" xorm:"index default 0" validate:"required"`
 	OrderId         int64     `json:"orderId" xorm:"index default 0" validate:"required"`
 	RefundId        int64     `json:"refundId" xorm:"index default 0"`
 	UseType         UseType   `json:"useType" xorm:"VARCHAR(25)"`
