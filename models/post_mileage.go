@@ -111,3 +111,12 @@ func (PostMileageDtl) CreateBatch(ctx context.Context, v []PostMileageDtl) error
 	}
 	return nil
 }
+func (PostMileageDtl) GetByKey(ctx context.Context, saleRecordDtlId, orderItemId, refundItemId int64) (has bool, res *PostMileageDtl, err error) {
+	res = &PostMileageDtl{}
+	has, err = factory.SaleRecordDB(ctx).
+		Where("sale_record_dtl_id=?", saleRecordDtlId).
+		And("order_item_id=?", orderItemId).
+		And("refund_item_id=?", refundItemId).
+		Get(res)
+	return
+}

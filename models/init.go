@@ -11,5 +11,7 @@ func InitSaleRecordDb(db *xorm.Engine) error {
 		new(PostSaleRecordFee),
 		new(PostFailCreateSaleFee),
 		new(PostMileage),
-		new(PostMileageDtl))
+		new(PostMileageDtl),
+		new(SaleRecordDtlSalesmanAmount),
+		new(SaleRecordDtlOffer))
 }
