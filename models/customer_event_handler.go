@@ -41,10 +41,10 @@ func setPostMileage(ctx context.Context, a SaleRecordEvent) error {
 	return nil
 }
 
-func setAccumulateMileage(ctx context.Context, a SaleRecordEvent) error {
-	tradeNo := a.OrderId
-	if a.RefundId != 0 {
-		tradeNo = a.RefundId
+func setAccumulateMileage(ctx context.Context, saleRecordEvent SaleRecordEvent) error {
+	tradeNo := saleRecordEvent.OrderId
+	if saleRecordEvent.RefundId != 0 {
+		tradeNo = saleRecordEvent.RefundId
 	}
 
 	accumulateMileages, err := Mileage{}.GetMembershipMileages(ctx, tradeNo, "E")
@@ -53,7 +53,11 @@ func setAccumulateMileage(ctx context.Context, a SaleRecordEvent) error {
 	}
 	for _, accumulateMileage := range accumulateMileages {
 		if accumulateMileage.Point != 0 {
-			postMileage := PostMileage{}.MakePostMileage(&accumulateMileage, a)
+			mileageMall, err := MileageMall{}.GetMembershipGrade(ctx, accumulateMileage.MallId, accumulateMileage.MemberId, accumulateMileage.TenantCode)
+			if err != nil {
+				return err
+			}
+			postMileage := PostMileage{}.MakePostMileage(&accumulateMileage, mileageMall, saleRecordEvent)
 			if err := postMileage.Create(ctx); err != nil {
 				return err
 			}
@@ -63,24 +67,24 @@ func setAccumulateMileage(ctx context.Context, a SaleRecordEvent) error {
 	return nil
 }
 
-func setUsedMileage(ctx context.Context, a SaleRecordEvent) error {
-	postMileage := PostMileage{}.MakePostMileage(nil, a)
+func setUsedMileage(ctx context.Context, saleRecordEvent SaleRecordEvent) error {
+	postMileage := PostMileage{}.MakePostMileage(nil, nil, saleRecordEvent)
 	if err := postMileage.Create(ctx); err != nil {
 		return err
 	}
 	postMileageDtls := make([]PostMileageDtl, 0)
 	var lastPoint, lastPointAmount float64
-	for i, recordDtl := range a.AssortedSaleRecordDtlList {
+	for i, recordDtl := range saleRecordEvent.AssortedSaleRecordDtlList {
 		var currentPoint, currentPointAmount float64
-		ratio := recordDtl.TotalPrice.SalePrice / a.TotalPrice.SalePrice
-		if i == len(a.AssortedSaleRecordDtlList) {
+		ratio := recordDtl.TotalPrice.SalePrice / saleRecordEvent.TotalPrice.SalePrice
+		if i == len(saleRecordEvent.AssortedSaleRecordDtlList) {
 			currentPoint = lastPoint
 			currentPointAmount = lastPointAmount
 		} else {
-			currentPoint = number.ToFixed(a.Mileage*ratio, nil)
-			currentPointAmount = number.ToFixed(a.MileagePrice*ratio, nil)
-			lastPoint = a.Mileage - currentPoint
-			lastPointAmount = a.MileagePrice - currentPointAmount
+			currentPoint = number.ToFixed(saleRecordEvent.Mileage*ratio, nil)
+			currentPointAmount = number.ToFixed(saleRecordEvent.MileagePrice*ratio, nil)
+			lastPoint = saleRecordEvent.Mileage - currentPoint
+			lastPointAmount = saleRecordEvent.MileagePrice - currentPointAmount
 		}
 		postMileageDtl := PostMileageDtl{}.MakePostMileageDtl(postMileage.Id,
 			postMileage.UseType, currentPoint, currentPointAmount, recordDtl)

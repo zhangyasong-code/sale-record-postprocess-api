@@ -16,34 +16,36 @@ const (
 )
 
 type PostMileage struct {
-	Id              int64     `json:"id"`
-	TenantCode      string    `json:"tenantCode" xorm:"index VARCHAR(50) notnull" validate:"required"`
-	StoreId         int64     `json:"storeId" xorm:"index notnull" validate:"gte=0"`
-	CustomerId      int64     `json:"customerId" xorm:"index notnull" validate:"gte=0"`
-	SaleRecordMstId int64     `json:"saleRecordMstId" xorm:"index default 0" validate:"required"`
-	OrderId         int64     `json:"orderId" xorm:"index default 0" validate:"required"`
-	RefundId        int64     `json:"refundId" xorm:"index default 0"`
-	UseType         UseType   `json:"useType" xorm:"VARCHAR(25)"`
-	Point           float64   `json:"point" xorm:"decimal(19,2)"`
-	PointAmount     float64   `json:"pointAmount" xorm:"decimal(19,2)"`
-	CreateAt        time.Time `json:"createAt" xorm:"created"`
-	UpdateAt        time.Time `json:"updateAt" xorm:"updated"`
+	Id            int64     `json:"id"`
+	TenantCode    string    `json:"tenantCode" xorm:"index VARCHAR(50) notnull" validate:"required"`
+	StoreId       int64     `json:"storeId" xorm:"index notnull" validate:"gte=0"`
+	CustomerId    int64     `json:"customerId" xorm:"index notnull" validate:"gte=0"`
+	BrandId       int64     `json:"brandId" xorm:"notnull"`
+	GradeId       int64     `json:"gradeId"`
+	TransactionId int64     `json:"transactionId" xorm:"index default 0" validate:"required"`
+	OrderId       int64     `json:"orderId" xorm:"index default 0" validate:"required"`
+	RefundId      int64     `json:"refundId" xorm:"index default 0"`
+	UseType       UseType   `json:"useType" xorm:"VARCHAR(25)"`
+	Point         float64   `json:"point" xorm:"decimal(19,2)"`
+	PointAmount   float64   `json:"pointAmount" xorm:"decimal(19,2)"`
+	CreateAt      time.Time `json:"createAt" xorm:"created"`
+	UpdateAt      time.Time `json:"updateAt" xorm:"updated"`
 }
 
 type PostMileageDtl struct {
-	Id              int64      `json:"id"`
-	PostMileageId   int64      `json:"postMileageId"`
-	SaleRecordDtlId int64      `json:"saleRecordDtlId" xorm:"index default 0"`
-	OrderItemId     int64      `json:"orderItemId" xorm:"index default 0"`
-	RefundItemId    int64      `json:"refundItemId" xorm:"index default 0"`
-	UseType         UseType    `json:"useType" xorm:"VARCHAR(25)"`
-	Point           float64    `json:"point" xorm:"decimal(19,2)"`
-	PointAmount     float64    `json:"pointAmount" xorm:"decimal(19,2)"`
-	CreateAt        *time.Time `json:"createAt" xorm:"created"`
-	UpdateAt        *time.Time `json:"updateAt" xorm:"updated"`
+	Id               int64      `json:"id"`
+	PostMileageId    int64      `json:"postMileageId"`
+	TransactionDtlId int64      `json:"transactionDtlId" xorm:"index default 0"`
+	OrderItemId      int64      `json:"orderItemId" xorm:"index default 0"`
+	RefundItemId     int64      `json:"refundItemId" xorm:"index default 0"`
+	UseType          UseType    `json:"useType" xorm:"VARCHAR(25)"`
+	Point            float64    `json:"point" xorm:"decimal(19,2)"`
+	PointAmount      float64    `json:"pointAmount" xorm:"decimal(19,2)"`
+	CreateAt         *time.Time `json:"createAt" xorm:"created"`
+	UpdateAt         *time.Time `json:"updateAt" xorm:"updated"`
 }
 
-func (PostMileage) MakePostMileage(mileage *Mileage, record SaleRecordEvent) *PostMileage {
+func (PostMileage) MakePostMileage(mileage *Mileage, mileageMall *MileageMall, record SaleRecordEvent) *PostMileage {
 	var useType UseType
 	point := record.Mileage
 	pointAmount := record.MileagePrice
@@ -63,15 +65,17 @@ func (PostMileage) MakePostMileage(mileage *Mileage, record SaleRecordEvent) *Po
 		}
 	}
 	postMileage := &PostMileage{
-		TenantCode:      record.TenantCode,
-		StoreId:         record.StoreId,
-		CustomerId:      record.CustomerId,
-		SaleRecordMstId: record.TransactionId,
-		OrderId:         record.OrderId,
-		RefundId:        record.RefundId,
-		UseType:         useType,
-		Point:           point,
-		PointAmount:     pointAmount,
+		TenantCode:    record.TenantCode,
+		StoreId:       record.StoreId,
+		CustomerId:    record.CustomerId,
+		BrandId:       mileageMall.MallId,
+		GradeId:       mileageMall.GradeId,
+		TransactionId: record.TransactionId,
+		OrderId:       record.OrderId,
+		RefundId:      record.RefundId,
+		UseType:       useType,
+		Point:         point,
+		PointAmount:   pointAmount,
 	}
 	return postMileage
 }
@@ -83,10 +87,10 @@ func (o *PostMileage) Create(ctx context.Context) error {
 	return nil
 }
 
-func (PostMileage) CheckOrderRefundExist(ctx context.Context, saleRecordMstId string) (bool, error) {
+func (PostMileage) CheckOrderRefundExist(ctx context.Context, transactionId int64) (bool, error) {
 	postMileage := PostMileage{}
 	has, err := factory.SaleRecordDB(ctx).Table("post_mileage").
-		Where("sale_record_mst_id=?", saleRecordMstId).Get(&postMileage)
+		Where("transaction_id=?", transactionId).Get(&postMileage)
 	if err != nil {
 		return true, err
 	}
@@ -95,13 +99,13 @@ func (PostMileage) CheckOrderRefundExist(ctx context.Context, saleRecordMstId st
 
 func (PostMileageDtl) MakePostMileageDtl(postMileageId int64, useType UseType, point, pointAmount float64, recordDtl AssortedSaleRecordDtl) *PostMileageDtl {
 	postMileageDtl := &PostMileageDtl{
-		PostMileageId:   postMileageId,
-		SaleRecordDtlId: recordDtl.Id,
-		OrderItemId:     recordDtl.OrderItemId,
-		RefundItemId:    recordDtl.RefundItemId,
-		UseType:         useType,
-		Point:           point,
-		PointAmount:     pointAmount,
+		PostMileageId:    postMileageId,
+		TransactionDtlId: recordDtl.Id,
+		OrderItemId:      recordDtl.OrderItemId,
+		RefundItemId:     recordDtl.RefundItemId,
+		UseType:          useType,
+		Point:            point,
+		PointAmount:      pointAmount,
 	}
 	return postMileageDtl
 }
@@ -111,10 +115,10 @@ func (PostMileageDtl) CreateBatch(ctx context.Context, v []PostMileageDtl) error
 	}
 	return nil
 }
-func (PostMileageDtl) GetByKey(ctx context.Context, saleRecordDtlId, orderItemId, refundItemId int64) (has bool, res *PostMileageDtl, err error) {
+func (PostMileageDtl) GetByKey(ctx context.Context, transactionDtlId, orderItemId, refundItemId int64) (has bool, res *PostMileageDtl, err error) {
 	res = &PostMileageDtl{}
 	has, err = factory.SaleRecordDB(ctx).
-		Where("sale_record_dtl_id=?", saleRecordDtlId).
+		Where("transaction_dtl_id=?", transactionDtlId).
 		And("order_item_id=?", orderItemId).
 		And("refund_item_id=?", refundItemId).
 		Get(res)
