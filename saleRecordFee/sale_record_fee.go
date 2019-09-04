@@ -17,8 +17,8 @@ import (
 )
 
 type PostSaleRecordFee struct {
-	TransactionDtlId       int64     `json:"transactionDtlId" query:"transactionDtlId" xorm:"index VARCHAR(30) notnull pk" validate:"required"`
-	TransactionId          int64     `json:"transactionId" query:"transactionId" xorm:"index VARCHAR(30) notnull" validate:"required"`
+	TransactionDtlId       int64     `json:"transactionDtlId" query:"transactionDtlId" xorm:"index notnull pk" validate:"required"`
+	TransactionId          int64     `json:"transactionId" query:"transactionId" xorm:"index notnull" validate:"required"`
 	OrderId                int64     `json:"orderId" query:"orderId" xorm:"index notnull" validate:"gte=0"`
 	OrderItemId            int64     `json:"orderItemId" query:"orderItemId" xorm:"index notnull" validate:"gte=0"`
 	RefundId               int64     `json:"refundId" query:"refundId" xorm:"index notnull" validate:"gte=0"`
@@ -39,7 +39,7 @@ type PostSaleRecordFee struct {
 }
 
 type PostFailCreateSaleFee struct {
-	TransactionId int64     `json:"transactionId" query:"transactionId" xorm:"index VARCHAR(30) notnull pk" validate:"required"`
+	TransactionId int64     `json:"transactionId" query:"transactionId" xorm:"index notnull pk" validate:"required"`
 	IsProcessed   bool      `json:"isProcessed" query:"isProcessed" xorm:"index notnull default false" validate:"required"`
 	CreatedAt     time.Time `json:"createdAt" xorm:"created"`
 	UpdatedAt     time.Time `json:"updatedAt" xorm:"updated"`
