@@ -7,7 +7,7 @@ import (
 
 type SaleRecordDtlSalesmanAmount struct {
 	Id                          int64   `json:"id"`
-	TransactionId               string  `json:"transactionId"`
+	TransactionId               int64   `json:"transactionId"`
 	SaleRecordDtlId             int64   `json:"saleRecordDtlId"`
 	OrderId                     int64   `json:"orderId"`  //销售单号：退货时销售单号为原销售单号
 	RefundId                    int64   `json:"refundId"` //退货单号：销售时退货单号为0
