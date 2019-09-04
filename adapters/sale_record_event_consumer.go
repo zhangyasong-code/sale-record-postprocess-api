@@ -3,6 +3,7 @@ package adapters
 import (
 	"encoding/json"
 	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/saleRecordFee"
 	"nomni/utils/eventconsume"
 
 	"github.com/pangpanglabs/goutils/kafka"
@@ -30,5 +31,10 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	if err := (models.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
 		return err
 	}
+
+	if err := (saleRecordFee.SaleRecordFeeEventHandler{}).Handle(ctx, event); err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -1,4 +1,4 @@
-package models
+package saleRecordFee
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/factory"
+	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
 	"strconv"
 	"time"
@@ -119,8 +120,8 @@ func (PostSaleRecordFee) GetPromotionEvent(ctx context.Context, offerNo string) 
 	return promotionEvent, nil
 }
 
-func (PostSaleRecordFee) GetPostMileageDtl(ctx context.Context, orderItemId, refundItemId int64) (*PostMileageDtl, error) {
-	var o PostMileageDtl
+func (PostSaleRecordFee) GetPostMileageDtl(ctx context.Context, orderItemId, refundItemId int64) (*models.PostMileageDtl, error) {
+	var o models.PostMileageDtl
 	exist, err := factory.SaleRecordDB(ctx).Where("order_item_id = ?", orderItemId).And("refund_item_id = ?", refundItemId).Get(&o)
 	if err != nil {
 		return nil, err
