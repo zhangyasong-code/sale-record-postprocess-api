@@ -11,6 +11,7 @@ import (
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/controllers"
 	"nhub/sale-record-postprocess-api/promotion"
+	"nhub/sale-record-postprocess-api/saleRecordFee"
 
 	"nhub/sale-record-postprocess-api/factory"
 	"nhub/sale-record-postprocess-api/models"
@@ -41,6 +42,10 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 	if err := promotion.InitDB(saleRecordDB); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := saleRecordFee.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
 

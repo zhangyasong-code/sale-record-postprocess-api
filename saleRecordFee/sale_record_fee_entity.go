@@ -1,14 +1,15 @@
-package models
+package saleRecordFee
 
 import (
 	"context"
+	"nhub/sale-record-postprocess-api/models"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/pangpanglabs/goutils/number"
 )
 
-func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a SaleRecordEvent) ([]PostSaleRecordFee, error) {
+func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a models.SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
 	var eventFeeRate, appliedFeeRate, feeAmount float64
 	var eventTypeCode string
