@@ -98,10 +98,10 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s SaleRecordEvent) 
 					secondaryEventTypeCode = offers[d].EventType
 				}
 			}
-			if isNormalAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode) {
+			if isNormalAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode, saleAmountDtl.SalesmanSaleAmount, saleAmountDtl.TotalListPrice) {
 				saleAmountDtl.SalesmanNormalSaleAmount = saleAmountDtl.SalesmanSaleAmount
 				saleAmountDtl.SalesmanDiscountSaleAmount = 0
-			} else if isDiscountAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode) {
+			} else if isDiscountAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode, saleAmountDtl.SalesmanSaleAmount, saleAmountDtl.TotalListPrice) {
 				saleAmountDtl.SalesmanNormalSaleAmount = 0
 				saleAmountDtl.SalesmanDiscountSaleAmount = saleAmountDtl.SalesmanSaleAmount
 			}
@@ -119,12 +119,12 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s SaleRecordEvent) 
 	return nil
 }
 
-func isNormalAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode string) bool {
+func isNormalAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode string, salesmanSaleAmount, totalListPrice float64) bool {
 	return (primaryEventTypeCode == CustEventBrandDiscount || primaryEventTypeCode == CustEventCoupon || primaryEventTypeCode == CustEventCustmoer) ||
-		((saleEventTypeCode == SaleEventDiscount || primaryEventTypeCode == CustEventVip) && (saleAmountDtl.SalesmanSaleAmount/saleAmountDtl.TotalListPrice) > DiscountRate) ||
+		((saleEventTypeCode == SaleEventDiscount || primaryEventTypeCode == CustEventVip) && (salesmanSaleAmount/totalListPrice) > DiscountRate) ||
 		(saleEventTypeCode == "" && primaryEventTypeCode == "" && (secondaryEventTypeCode == CustEventMileage || secondaryEventTypeCode == ""))
 }
-func isDiscountAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode string) bool {
+func isDiscountAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode string, salesmanSaleAmount, totalListPrice float64) bool {
 	return ((saleEventTypeCode == SaleEventGive || saleEventTypeCode == SaleEventReduce) || (secondaryEventTypeCode == CustEventGift || secondaryEventTypeCode == CustEventAmountGift)) ||
-		((saleEventTypeCode == SaleEventDiscount || primaryEventTypeCode == CustEventVip) && (saleAmountDtl.SalesmanSaleAmount/saleAmountDtl.TotalListPrice) <= DiscountRate)
+		((saleEventTypeCode == SaleEventDiscount || primaryEventTypeCode == CustEventVip) && (salesmanSaleAmount/totalListPrice) <= DiscountRate)
 }
