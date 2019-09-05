@@ -41,6 +41,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s SaleRecordEvent) 
 			TransactionChannelType:      s.TransactionChannelType,
 			SalesmanSaleDiscountRate:    0,
 			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice,
+			TransactionCreateDate:       s.TransactionCreateDate,
 		}
 		//查询使用积分
 		has, e, err := PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId)
