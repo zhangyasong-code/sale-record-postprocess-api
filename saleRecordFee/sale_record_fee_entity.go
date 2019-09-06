@@ -39,17 +39,12 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			}
 			appliedFeeRate = eventFeeRate
 		}
-
-		// Use the brandId and TransactionCreateDate to get FeeRate in contracts
-		contractFeeRate, err := PostSaleRecordFee{}.GetContractFeeRate(ctx, a.StoreId, assortedSaleRecordDtl.BrandId, a.TransactionCreateDate)
-		if err != nil {
-			return nil, err
-		}
-		// eventFeeRate 优先级大于 contractFeeRate
-		if appliedFeeRate == 0 && contractFeeRate > 0 {
-			appliedFeeRate = contractFeeRate
-		} else if appliedFeeRate == 0 && contractFeeRate == 0 {
-			// Add one Case when eventFeeRate and contractFeeRate is 0
+		itemFeeRate := 0 //Tode assortedSaleRecordDtl.ItemFeeRate
+		// eventFeeRate 优先级大于 itemFeeRate
+		if appliedFeeRate == 0 && itemFeeRate > 0 {
+			appliedFeeRate = itemFeeRate
+		} else if appliedFeeRate == 0 && itemFeeRate == 0 {
+			// Add one Case when eventFeeRate and itemFeeRate is 0
 			logrus.WithField("TransactionId", a.TransactionId).Info("Add FailCreateSaleFee data")
 			postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
 			if err := postFailCreateSaleFee.Save(ctx); err != nil {

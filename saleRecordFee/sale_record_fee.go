@@ -94,24 +94,6 @@ func getContracts(ctx context.Context, storeId int64) (*ResultShopMessage, error
 	return &result, nil
 }
 
-func (PostSaleRecordFee) GetContractFeeRate(ctx context.Context, storeId, brandId int64, transactionCreateDate time.Time) (float64, error) {
-	var contractFeeRate float64
-	// Use the storeId to query contracts
-	resultShopMessage, err := getContracts(ctx, storeId)
-	if err != nil {
-		return 0, err
-	}
-	if len(resultShopMessage.Result.Items) != 0 {
-		for _, contract := range resultShopMessage.Result.Items[0].Contracts {
-			if contract.StartDate.Before(transactionCreateDate) && contract.EndDate.After(transactionCreateDate) && contract.BrandId == brandId {
-				contractFeeRate = contract.BaseRate
-				break
-			}
-		}
-	}
-	return contractFeeRate, nil
-}
-
 func (PostSaleRecordFee) GetPromotionEvent(ctx context.Context, offerNo string) (*promotion.PromotionEvent, error) {
 	promotionEvent, err := promotion.GetByNo(ctx, offerNo)
 	if err != nil {
