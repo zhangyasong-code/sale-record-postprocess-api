@@ -8,8 +8,8 @@ import (
 
 type SaleRecordDtlSalesmanAmount struct {
 	Id                          int64     `json:"id"`
-	TransactionId               int64     `json:"transactionId"`
-	SaleRecordDtlId             int64     `json:"saleRecordDtlId"`
+	TransactionId               int64     `json:"transactionId" xorm:"index"`
+	SaleRecordDtlId             int64     `json:"saleRecordDtlId" xorm:"index"`
 	OrderId                     int64     `json:"orderId"`  //销售单号：退货时销售单号为原销售单号
 	RefundId                    int64     `json:"refundId"` //退货单号：销售时退货单号为0
 	StoreId                     int64     `json:"storeId"`
@@ -31,8 +31,8 @@ type SaleRecordDtlSalesmanAmount struct {
 }
 type SaleRecordDtlOffer struct {
 	Id               int64     `json:"id"`
-	OfferId          int64     `json:"offerId"`
-	SalesmanAmountId int64     `json:"salesmanAmountId"`
+	OfferId          int64     `json:"offerId" xorm:"index"`
+	SalesmanAmountId int64     `json:"salesmanAmountId" xorm:"index"`
 	EventType        string    `json:"eventType"`                            //PromotionEvent.EventTypeCode
 	SaleBaseAmt      float64   `json:"saleBaseAmt" xorm:"decimal(19,2)"`     //PromotionEvent.SaleBaseAmt
 	DiscountBaseAmt  float64   `json:"discountBaseAmt" xorm:"decimal(19,2)"` //PromotionEvent.DiscountBaseAmt
@@ -46,9 +46,37 @@ func (s *SaleRecordDtlSalesmanAmount) Create(ctx context.Context) error {
 	}
 	return nil
 }
+func (s *SaleRecordDtlSalesmanAmount) GetByKey(ctx context.Context, transactionId, saleRecordDtlId int64) (has bool, res *SaleRecordDtlSalesmanAmount, err error) {
+	res = &SaleRecordDtlSalesmanAmount{}
+	has, err = factory.SaleRecordDB(ctx).
+		Where("transaction_id=?", transactionId).
+		And("sale_record_dtl_id=?", saleRecordDtlId).
+		Get(res)
+	return
+}
 func (s *SaleRecordDtlOffer) Create(ctx context.Context) error {
 	if _, err := factory.SaleRecordDB(ctx).Insert(s); err != nil {
 		return err
 	}
 	return nil
+}
+func (s *SaleRecordDtlOffer) GetByKey(ctx context.Context, offerId, salesmanAmountId int64) (has bool, res *SaleRecordDtlOffer, err error) {
+	res = &SaleRecordDtlOffer{}
+	has, err = factory.SaleRecordDB(ctx).
+		Where("offer_id=?", offerId).
+		And("salesman_amount_id=?", salesmanAmountId).
+		Get(res)
+	return
+}
+func (e *SaleRecordDtlSalesmanAmount) Update(ctx context.Context, transactionId, saleRecordDtlId int64) (affectedRow int64, err error) {
+	affectedRow, err = factory.SaleRecordDB(ctx).
+		Where("transaction_id=?", transactionId).
+		And("sale_record_dtl_id=?", saleRecordDtlId).Update(e)
+	return
+}
+func (e *SaleRecordDtlOffer) Update(ctx context.Context, offerId, salesmanAmountId int64) (affectedRow int64, err error) {
+	affectedRow, err = factory.SaleRecordDB(ctx).
+		Where("offer_id=?", offerId).
+		And("salesman_amount_id=?", salesmanAmountId).Update(e)
+	return
 }
