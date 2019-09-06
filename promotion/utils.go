@@ -6,6 +6,13 @@ import (
 	"strconv"
 )
 
+type ConditionType string
+
+const (
+	ConditionTypeStoreId = "store_id"
+	ConditionTypeBrandId = "brand_id"
+)
+
 type Brand struct {
 	Id   int64  `json:"id"`
 	Code string `json:"code"`
@@ -13,9 +20,10 @@ type Brand struct {
 }
 
 type Store struct {
-	Id   int64  `json:"id"`
-	Code string `json:"code"`
-	Name string `json:"name"`
+	Id     int64   `json:"id"`
+	Code   string  `json:"code"`
+	Name   string  `json:"name"`
+	Brands []Brand `json:"brands"`
 }
 
 type Promotion struct {
@@ -26,37 +34,40 @@ type Promotion struct {
 	NormalSaleRecognitionChk bool    `json:"normalSaleRecognitionChk"`
 }
 
-func getBrandAndStore(ctx context.Context, channels []ChannelCondition) (*Brand, *Store, error) {
+func getBrandAndStore(ctx context.Context, channels []ChannelCondition) (*Brand, []Store, error) {
 	var (
-		brandId, storeId int64
-		err              error
+		brandId  int64
+		storeIds []string
+		err      error
+		brand    *Brand
 	)
 	for i := range channels {
-		if channels[i].Type == "brand_id" {
+		if channels[i].Type == ConditionTypeBrandId {
 			brandId, err = strconv.ParseInt(channels[i].Value, 10, 64)
 			if err != nil {
 				return nil, nil, errors.New("brandId invalid")
 			}
 		}
-		if channels[i].Type == "store_id" {
-			storeId, err = strconv.ParseInt(channels[i].Value, 10, 64)
-			if err != nil {
-				return nil, nil, errors.New("storeId invalid")
-			}
+		if channels[i].Type == ConditionTypeStoreId {
+			storeIds = append(storeIds, channels[i].Value)
 		}
 	}
-	brand, err := getBrand(ctx, brandId)
+	if brandId != 0 {
+		brand, err = getBrand(ctx, brandId)
+		if err != nil {
+			return nil, nil, err
+		}
+		return brand, nil, nil
+	}
+
+	if len(storeIds) == 0 {
+		return nil, nil, errors.New("brand and store not exist")
+	}
+	stores, err := getStores(ctx, storeIds)
 	if err != nil {
 		return nil, nil, err
 	}
-	if storeId == 0 {
-		return brand, nil, err
-	}
-	store, err := getStore(ctx, storeId)
-	if err != nil {
-		return nil, nil, err
-	}
-	return brand, store, nil
+	return brand, stores, nil
 }
 
 func ToCSLOfferType(offerType OfferType, templateCode string) (string, error) {
@@ -72,8 +83,13 @@ func ToCSLOfferType(offerType OfferType, templateCode string) (string, error) {
 		} else if offerType == OfferTypeChannel {
 			eventTypeCode = "V"
 		}
+	//TODO:区分优惠券和custEvent模板
 	case "B1", "B2", "C1", "C2", "C6", "D1":
-		eventTypeCode = "02"
+		if offerType == OfferTypeBrand {
+			eventTypeCode = "02"
+		} else if offerType == OfferTypeMember {
+			eventTypeCode = "C"
+		}
 	case "C5":
 		if offerType == OfferTypeBrand {
 			eventTypeCode = "02"

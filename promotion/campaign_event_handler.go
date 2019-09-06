@@ -16,24 +16,25 @@ func (h CampaignEventHandler) HandleCartCampaign(ctx context.Context, c CartCamp
 	}
 
 	//2.转换结构
-	p, err := CartToCSLEvent(ctx, c, ruleGroup)
+	promotions, err := CartToCSLEvent(ctx, c, ruleGroup)
 	if err != nil {
 		return err
 	}
 
 	//3.调用promotion-api(上传数据到CSL，并获取eventNo)
-	eventNo, error := getEventNoByPromotion(ctx, *p)
-	if err != nil {
-		return error
+	for i := range promotions {
+		eventNo, error := getEventNoByPromotion(ctx, promotions[i])
+		if err != nil {
+			return error
+		}
+		if eventNo == "" {
+			return errors.New("eventNo is null")
+		}
+		promotions[i].EventNo = eventNo
 	}
-	if eventNo == "" {
-		return errors.New("eventNo is null")
-	}
-
-	p.EventNo = eventNo
 
 	//4.保存到数据库
-	if err := p.create(ctx); err != nil {
+	if err = (PromotionEvent{}).createInArrary(ctx, promotions); err != nil {
 		return err
 	}
 
@@ -48,24 +49,25 @@ func (h CampaignEventHandler) HandleCatalogCampaign(ctx context.Context, c Catal
 	}
 	//2.转换结构
 
-	p, err := CatalogToCSLEvent(ctx, c, ruleset)
+	promotions, err := CatalogToCSLEvent(ctx, c, ruleset)
 	if err != nil {
 		return err
 	}
 
 	//3.调用promotion-api
-	eventNo, error := getEventNoByPromotion(ctx, *p)
-	if err != nil {
-		return error
+	for i := range promotions {
+		eventNo, error := getEventNoByPromotion(ctx, promotions[i])
+		if err != nil {
+			return error
+		}
+		if eventNo == "" {
+			return errors.New("eventNo is null")
+		}
+		promotions[i].EventNo = eventNo
 	}
-	if eventNo == "" {
-		return errors.New("eventNo is null")
-	}
-
-	p.EventNo = eventNo
 
 	//4.保存到数据库(上传数据到CSL，并获取eventNo)
-	if err := p.create(ctx); err != nil {
+	if err = (PromotionEvent{}).createInArrary(ctx, promotions); err != nil {
 		return err
 	}
 

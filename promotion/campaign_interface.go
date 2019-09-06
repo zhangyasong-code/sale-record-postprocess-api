@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
+	"strings"
 
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
@@ -98,7 +99,7 @@ func getBrand(ctx context.Context, id int64) (*Brand, error) {
 	}
 	return &resp.Result, nil
 }
-func getStore(ctx context.Context, id int64) (*Store, error) {
+func getStores(ctx context.Context, ids []string) ([]Store, error) {
 	var resp struct {
 		Result struct {
 			TotalCount int     `json:"totalCount"`
@@ -111,7 +112,7 @@ func getStore(ctx context.Context, id int64) (*Store, error) {
 			Details interface{} `json:"details"`
 		} `json:"error"`
 	}
-	url := fmt.Sprintf("%s/v1/store/getallinfo?maxResultCount=10&skipCount=0&storeIds=%d", config.Config().Services.StoreApi, id)
+	url := fmt.Sprintf("%s/v1/store/getallinfo?maxResultCount=10&skipCount=0&storeIds=%s&withBrand=true", config.Config().Services.StoreApi, strings.Join(ids, ","))
 	if _, err := httpreq.New(http.MethodGet, url, nil).
 		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
 		Call(&resp); err != nil {
@@ -123,5 +124,5 @@ func getStore(ctx context.Context, id int64) (*Store, error) {
 	if len(resp.Result.Items) == 0 {
 		return nil, errors.New("Store is not exist")
 	}
-	return &resp.Result.Items[0], nil
+	return resp.Result.Items, nil
 }
