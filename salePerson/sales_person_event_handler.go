@@ -6,6 +6,8 @@ import (
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -48,6 +50,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 		//查询使用积分
 		has, e, err := customer.PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId)
 		if err != nil {
+			logrus.WithField("err", err).Info("GetPostMileageDtlError")
 			return err
 		}
 		if has {
@@ -68,6 +71,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			for n := 0; n < len(s.AssortedSaleRecordDtlList[i].ItemOffers); n++ {
 				p, err := promotion.GetByNo(ctx, s.AssortedSaleRecordDtlList[i].ItemOffers[n].OfferNo)
 				if err != nil {
+					logrus.WithField("err", err).Info("GetPromotionError")
 					return err
 				}
 				offer := SaleRecordDtlOffer{
@@ -109,13 +113,42 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 				saleAmountDtl.SalesmanDiscountSaleAmount = saleAmountDtl.SalesmanSaleAmount
 			}
 		}
-		if err := (&saleAmountDtl).Create(ctx); err != nil {
+		hasDtl, _, err := (&saleAmountDtl).GetByKey(ctx, saleAmountDtl.TransactionId, saleAmountDtl.SaleRecordDtlId)
+		if err != nil {
+			logrus.WithField("err", err).Info("CheckSaleAmountDtlExist")
 			return err
 		}
+		if hasDtl {
+			_, err := (&saleAmountDtl).Update(ctx, saleAmountDtl.TransactionId, saleAmountDtl.SaleRecordDtlId)
+			if err != nil {
+				logrus.WithField("err", err).Info("UpdateSaleAmountDtlError")
+				return err
+			}
+		} else {
+			if err := (&saleAmountDtl).Create(ctx); err != nil {
+				logrus.WithField("err", err).Info("CreateSaleAmountDtlError")
+				return err
+			}
+		}
+
 		for e := 0; e < len(offers); e++ {
 			offers[e].SalesmanAmountId = saleAmountDtl.Id
-			if err := (&offers[e]).Create(ctx); err != nil {
+			hasOffer, _, err := (&offers[e]).GetByKey(ctx, offers[e].OfferId, offers[e].SalesmanAmountId)
+			if err != nil {
+				logrus.WithField("err", err).Info("CheckSaleAmountOfferExist")
 				return err
+			}
+			if hasOffer {
+				_, err := (&offers[e]).Update(ctx, offers[e].OfferId, offers[e].SalesmanAmountId)
+				if err != nil {
+					logrus.WithField("err", err).Info("UpdateSaleAmountOfferError")
+					return err
+				}
+			} else {
+				if err := (&offers[e]).Create(ctx); err != nil {
+					logrus.WithField("err", err).Info("CreateSaleAmountOfferError")
+					return err
+				}
 			}
 		}
 	}
