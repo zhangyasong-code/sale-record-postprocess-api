@@ -1,8 +1,10 @@
-package models
+package salePerson
 
 import (
 	"context"
 	"math"
+	"nhub/sale-record-postprocess-api/customer"
+	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
 )
 
@@ -23,7 +25,7 @@ const (
 type SalesPersonEventHandler struct {
 }
 
-func (h SalesPersonEventHandler) Handle(ctx context.Context, s SaleRecordEvent) error {
+func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecordEvent) error {
 
 	for i := 0; i < len(s.AssortedSaleRecordDtlList); i++ {
 		saleAmountDtl := SaleRecordDtlSalesmanAmount{
@@ -44,7 +46,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s SaleRecordEvent) 
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
 		//查询使用积分
-		has, e, err := PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId)
+		has, e, err := customer.PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId)
 		if err != nil {
 			return err
 		}
