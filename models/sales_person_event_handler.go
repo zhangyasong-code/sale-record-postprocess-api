@@ -50,7 +50,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s SaleRecordEvent) 
 		}
 		if has {
 			saleAmountDtl.Mileage = e.Point
-			saleAmountDtl.MileagePrice = e.PointAmount
+			saleAmountDtl.MileagePrice = e.PointPrice
 		} else {
 			saleAmountDtl.Mileage = 0
 			saleAmountDtl.MileagePrice = 0

@@ -21,7 +21,7 @@ type SaleRecordDtlSalesmanAmount struct {
 	TotalPaymentPrice           float64   `json:"totalDistributedPaymentPrice" xorm:"decimal(19,2)"`
 	TransactionChannelType      string    `json:"transactionChannelType"`
 	Mileage                     float64   `json:"mileage" xorm:"decimal(19,2)"`      //mileagePrice.Point
-	MileagePrice                float64   `json:"mileagePrice" xorm:"decimal(19,2)"` //mileagePrice.PointAmount
+	MileagePrice                float64   `json:"mileagePrice" xorm:"decimal(19,2)"` //mileagePrice.PointPrice
 	SalesmanSaleAmount          float64   `json:"salesmanSaleAmount" xorm:"decimal(19,2)"`
 	SalesmanSaleDiscountRate    float64   `json:"salesmanSaleDiscountRate" xorm:"decimal(19,2)"` //实际销售额活动扣率
 	SalesmanNormalSaleAmount    float64   `json:"salesmanNormalSaleAmount" xorm:"decimal(19,2)"`

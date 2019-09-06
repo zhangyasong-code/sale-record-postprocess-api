@@ -63,7 +63,7 @@ type C struct {
 
 	StockSourceTypes []string
 	Services         struct {
-		MembershipApi,
+		BenefitApi,
 		ProductApi,
 		OfferApi,
 		PromotionApi,
