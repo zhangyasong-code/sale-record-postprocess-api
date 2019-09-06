@@ -1,4 +1,4 @@
-package models
+package salePerson
 
 import (
 	"context"

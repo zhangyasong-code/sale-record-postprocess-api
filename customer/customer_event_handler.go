@@ -1,8 +1,10 @@
-package models
+package customer
 
 import (
 	"context"
 	"fmt"
+
+	"nhub/sale-record-postprocess-api/models"
 
 	"github.com/sirupsen/logrus"
 )
@@ -10,7 +12,7 @@ import (
 type CustomerEventHandler struct {
 }
 
-func (h CustomerEventHandler) Handle(ctx context.Context, record SaleRecordEvent) error {
+func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleRecordEvent) error {
 	has, err := PostMileage{}.CheckOrderRefundExist(ctx, record.TransactionId)
 	if err != nil {
 		logrus.WithField("err", err).Info("CheckOrderRefundExist")

@@ -10,11 +10,11 @@ import (
 	"nhub/sale-record-postprocess-api/adapters"
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/controllers"
+	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/promotion"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 
 	"nhub/sale-record-postprocess-api/factory"
-	"nhub/sale-record-postprocess-api/models"
 	"nomni/utils/auth"
 	"nomni/utils/eventconsume"
 
@@ -34,12 +34,9 @@ func main() {
 	defer saleRecordDB.Close()
 	defer orderDB.Close()
 
-	if err := models.InitSaleRecordDb(saleRecordDB); err != nil {
+	if err := customer.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
-	// if err := models.InitOrderDb(orderDB); err != nil {
-	// 	log.Fatal(err)
-	// }
 	if err := promotion.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}

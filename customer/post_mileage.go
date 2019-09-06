@@ -1,8 +1,9 @@
-package models
+package customer
 
 import (
 	"context"
 	"nhub/sale-record-postprocess-api/factory"
+	"nhub/sale-record-postprocess-api/models"
 	"time"
 )
 
@@ -46,7 +47,7 @@ type PostMileageDtl struct {
 	UpdateAt         *time.Time `json:"updateAt" xorm:"updated"`
 }
 
-func (PostMileage) MakePostMileage(ctx context.Context, mileage Mileage, record SaleRecordEvent) (*PostMileage, error) {
+func (PostMileage) MakePostMileage(ctx context.Context, mileage Mileage, record models.SaleRecordEvent) (*PostMileage, error) {
 	mileageMall, err := MileageMall{}.GetMembershipGrade(ctx, mileage.MallId, mileage.MemberId, mileage.TenantCode)
 	if err != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func (PostMileage) CheckOrderRefundExist(ctx context.Context, transactionId int6
 	return has, nil
 }
 
-func (PostMileageDtl) MakePostMileageDtls(postMileage *PostMileage, mileageDtls []MileageDtl, recordDtls []AssortedSaleRecordDtl) []PostMileageDtl {
+func (PostMileageDtl) MakePostMileageDtls(postMileage *PostMileage, mileageDtls []MileageDtl, recordDtls []models.AssortedSaleRecordDtl) []PostMileageDtl {
 	var postMileageDtls []PostMileageDtl
 	for _, mileageDtl := range mileageDtls {
 		postMileageDtl := PostMileageDtl{

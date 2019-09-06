@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 
 	"github.com/pangpanglabs/echoswagger"
@@ -24,11 +26,11 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	if err := (models.CustomerEventHandler{}).Handle(ctx, event); err != nil {
+	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
 	}
 
-	if err := (models.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
+	if err := (salePerson.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
 	}
 
