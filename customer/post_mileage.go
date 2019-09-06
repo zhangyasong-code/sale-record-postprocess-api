@@ -35,20 +35,25 @@ type PostMileage struct {
 }
 
 type PostMileageDtl struct {
-	Id               int64      `json:"id"`
-	PostMileageId    int64      `json:"postMileageId"`
-	TransactionDtlId int64      `json:"transactionDtlId" xorm:"index default 0"`
-	OrderItemId      int64      `json:"orderItemId" xorm:"index default 0"`
-	RefundItemId     int64      `json:"refundItemId" xorm:"index default 0"`
-	UseType          UseType    `json:"useType" xorm:"VARCHAR(25)"`
-	Point            float64    `json:"point" xorm:"decimal(19,2)"`
-	PointPrice       float64    `json:"pointPrice" xorm:"decimal(19,2)"`
-	CreateAt         *time.Time `json:"createAt" xorm:"created"`
-	UpdateAt         *time.Time `json:"updateAt" xorm:"updated"`
+	Id                  int64      `json:"id"`
+	PostMileageId       int64      `json:"postMileageId"`
+	TransactionDtlId    int64      `json:"transactionDtlId" xorm:"index default 0"`
+	OrderItemId         int64      `json:"orderItemId" xorm:"index default 0"`
+	RefundItemId        int64      `json:"refundItemId" xorm:"index default 0"`
+	UseType             UseType    `json:"useType" xorm:"VARCHAR(25)"`
+	Point               float64    `json:"point" xorm:"decimal(19,2)"`
+	PointPrice          float64    `json:"pointPrice" xorm:"decimal(19,2)"`
+	CustMileagePolicyNo int64      `json:"custMileagePolicyNo"`
+	CreateAt            *time.Time `json:"createAt" xorm:"created"`
+	UpdateAt            *time.Time `json:"updateAt" xorm:"updated"`
 }
 
 func (PostMileage) MakePostMileage(ctx context.Context, mileage Mileage, record models.SaleRecordEvent) (*PostMileage, error) {
 	mileageMall, err := MileageMall{}.GetMembershipGrade(ctx, mileage.MallId, mileage.MemberId, mileage.TenantCode)
+	if err != nil {
+		return nil, err
+	}
+	custMileagePolicy, err := CustMileagePolicy{}.GetCustMileagePolicy(ctx, record.AssortedSaleRecordDtlList[0].BrandCode)
 	if err != nil {
 		return nil, err
 	}
@@ -69,17 +74,18 @@ func (PostMileage) MakePostMileage(ctx context.Context, mileage Mileage, record 
 	}
 
 	postMileage := &PostMileage{
-		TenantCode:    mileage.TenantCode,
-		StoreId:       mileage.StoreId,
-		CustomerId:    mileage.MemberId,
-		BrandId:       mileage.MallId,
-		GradeId:       mileageMall.GradeId,
-		TransactionId: record.TransactionId,
-		OrderId:       record.OrderId,
-		RefundId:      record.RefundId,
-		UseType:       useType,
-		Point:         mileage.Point,
-		PointPrice:    mileage.PointPrice,
+		TenantCode:          mileage.TenantCode,
+		StoreId:             mileage.StoreId,
+		CustomerId:          mileage.MemberId,
+		BrandId:             mileage.MallId,
+		GradeId:             mileageMall.GradeId,
+		TransactionId:       record.TransactionId,
+		OrderId:             record.OrderId,
+		RefundId:            record.RefundId,
+		UseType:             useType,
+		Point:               mileage.Point,
+		PointPrice:          mileage.PointPrice,
+		CustMileagePolicyNo: custMileagePolicy.CustMileagePolicyNo,
 	}
 	return postMileage, nil
 }
@@ -105,10 +111,11 @@ func (PostMileageDtl) MakePostMileageDtls(postMileage *PostMileage, mileageDtls 
 	var postMileageDtls []PostMileageDtl
 	for _, mileageDtl := range mileageDtls {
 		postMileageDtl := PostMileageDtl{
-			PostMileageId: postMileage.Id,
-			UseType:       postMileage.UseType,
-			Point:         mileageDtl.Point,
-			PointPrice:    mileageDtl.PointPrice,
+			PostMileageId:       postMileage.Id,
+			UseType:             postMileage.UseType,
+			Point:               mileageDtl.Point,
+			PointPrice:          mileageDtl.PointPrice,
+			CustMileagePolicyNo: postMileage.CustMileagePolicyNo,
 		}
 		for _, recordDtl := range recordDtls {
 			if recordDtl.OrderItemId == mileageDtl.ItemId && recordDtl.RefundItemId == mileageDtl.PreItemId {
