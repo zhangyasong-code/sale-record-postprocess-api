@@ -26,5 +26,6 @@ services:
   storeApi: https://staging.p2shop.com.cn/pangpang-brand/place-management-api
   benefitApi: https://staging.p2shop.com.cn/pangpang-brand/benefit-api
   placeManagementApi: https://staging.p2shop.com.cn/pangpang-brand/place-management-api
+  cslCustomerApi: https://dmz-staging.p2shop.com.cn/mslv2/csl-customer-if
 appenv: dev
 serviceName: sale-record-postprocess-api
