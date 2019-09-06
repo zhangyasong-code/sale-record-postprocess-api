@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nhub/sale-record-postprocess-api/factory"
+	"strconv"
 	"time"
 )
 
@@ -25,6 +26,7 @@ type PromotionEvent struct {
 	DiscountBaseAmt           float64   `json:"discountBaseAmt"`
 	DiscountRate              float64   `json:"discountRate"`
 	StaffSaleChk              bool      `json:"staffSaleChk"`
+	CreatedAt                 time.Time `json:"createdAt" xorm:"created"`
 }
 
 func (p *PromotionEvent) create(ctx context.Context) error {
@@ -41,4 +43,37 @@ func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
 		return nil, errors.New("promotionEvent is not exist")
 	}
 	return &p, nil
+}
+
+func (p PromotionEvent) CreateByStoreOrBrand(brand *Brand, stores []Store, channels []ChannelCondition) []PromotionEvent {
+	var list []PromotionEvent
+	if brand != nil {
+		p.BrandCode = brand.Code
+		list = append(list, p)
+		return list
+	}
+	getFeeRate := func(id int64) float64 {
+		for _, channel := range channels {
+			if strconv.FormatInt(id, 10) == channel.Value && channel.Type == ConditionTypeStoreId {
+				return channel.FeeRate
+			}
+		}
+		return 0
+	}
+	for i := range stores {
+		for j := range stores[i].Brands {
+			p.BrandCode = stores[i].Brands[j].Code
+			p.ShopCode = stores[i].Code
+			p.FeeRate = getFeeRate(stores[i].Id)
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
+func (PromotionEvent) createInArrary(ctx context.Context, promotions []PromotionEvent) error {
+	if _, err := factory.SaleRecordDB(ctx).Insert(&promotions); err != nil {
+		return err
+	}
+	return nil
 }

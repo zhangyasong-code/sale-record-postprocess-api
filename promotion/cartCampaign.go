@@ -2,7 +2,6 @@ package promotion
 
 import (
 	"context"
-	"errors"
 	offer "nomni/offer-api/models"
 	"time"
 )
@@ -69,9 +68,10 @@ type CartCampaign struct {
 }
 
 type ChannelCondition struct {
-	CampaignId int64  `json:"-"`
-	Type       string `json:"type"`
-	Value      string `json:"value"`
+	CampaignId int64   `json:"-"`
+	Type       string  `json:"type"`
+	Value      string  `json:"value"`
+	FeeRate    float64 `json:"feeRate"`
 }
 
 type CartRulesetGroup struct {
@@ -139,25 +139,14 @@ type CartDiscountTarget struct {
 	Value int64  `json:"value"`
 }
 
-func CartToCSLEvent(ctx context.Context, c CartCampaign, ruleGroup *CartRulesetGroup) (*PromotionEvent, error) {
-	var brandCode, storeCode string
+func CartToCSLEvent(ctx context.Context, c CartCampaign, ruleGroup *CartRulesetGroup) ([]PromotionEvent, error) {
 	eventType, err := ToCSLOfferType(ruleGroup.Type, ruleGroup.TemplateCode)
 	if err != nil {
 		return nil, err
 	}
-	brand, store, err := getBrandAndStore(ctx, c.Channels)
+	brand, stores, err := getBrandAndStore(ctx, c.Channels)
 	if err != nil {
 		return nil, err
-	}
-
-	if brand == nil {
-		return nil, errors.New("brand is not exist")
-	}
-	brandCode = brand.Code
-	if store == nil {
-		storeCode = ""
-	} else {
-		storeCode = store.Code
 	}
 
 	promotion := &Promotion{
@@ -167,10 +156,8 @@ func CartToCSLEvent(ctx context.Context, c CartCampaign, ruleGroup *CartRulesetG
 		promotion.ToCSLDisCount(ruleGroup.Actions[0].StandardValue, ruleGroup.Actions[0].DiscountValue)
 	}
 	offerNo := offer.NewOfferNo(offer.CampaignTypeCart, c.Id, ruleGroup.Id)
-	return &PromotionEvent{
+	p := PromotionEvent{
 		OfferNo:                   string(offerNo),
-		BrandCode:                 brandCode,
-		ShopCode:                  storeCode,
 		EventTypeCode:             eventType,
 		EventName:                 c.Name,
 		EventDescription:          c.Desc,
@@ -178,11 +165,14 @@ func CartToCSLEvent(ctx context.Context, c CartCampaign, ruleGroup *CartRulesetG
 		EndDate:                   c.FinalAt,
 		ExtendSalePermitDateCount: 0,
 		NormalSaleRecognitionChk:  promotion.NormalSaleRecognitionChk,
-		FeeRate:                   c.FeeRate,
 		InUserID:                  "mslv2.0",
 		SaleBaseAmt:               promotion.SaleBaseAmt,
 		DiscountBaseAmt:           promotion.DiscountBaseAmt,
 		DiscountRate:              promotion.DiscountRate,
 		StaffSaleChk:              false,
-	}, nil
+	}
+
+	list := p.CreateByStoreOrBrand(brand, stores, c.Channels)
+
+	return list, nil
 }

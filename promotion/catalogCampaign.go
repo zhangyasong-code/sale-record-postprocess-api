@@ -2,7 +2,6 @@ package promotion
 
 import (
 	"context"
-	"errors"
 	offer "nomni/offer-api/models"
 	"time"
 )
@@ -68,24 +67,14 @@ type CatalogTarget struct {
 	Value          string `json:"value"`
 }
 
-func CatalogToCSLEvent(ctx context.Context, c CatalogCampaign, ruleSet *CatalogRuleset) (*PromotionEvent, error) {
-	var brandCode, storeCode string
+func CatalogToCSLEvent(ctx context.Context, c CatalogCampaign, ruleSet *CatalogRuleset) ([]PromotionEvent, error) {
 	eventType, err := ToCSLOfferType(ruleSet.Type, ruleSet.TemplateCode)
 	if err != nil {
 		return nil, err
 	}
-	brand, store, err := getBrandAndStore(ctx, c.Channels)
+	brand, stores, err := getBrandAndStore(ctx, c.Channels)
 	if err != nil {
 		return nil, err
-	}
-	if brand == nil {
-		return nil, errors.New("brand is not exist")
-	}
-	brandCode = brand.Code
-	if store == nil {
-		storeCode = ""
-	} else {
-		storeCode = store.Code
 	}
 
 	promotion := &Promotion{
@@ -95,10 +84,8 @@ func CatalogToCSLEvent(ctx context.Context, c CatalogCampaign, ruleSet *CatalogR
 
 	offerNo := offer.NewOfferNo(offer.CampaignTypeCatalog, c.Id, ruleSet.Id)
 
-	return &PromotionEvent{
+	p := PromotionEvent{
 		OfferNo:                   string(offerNo),
-		BrandCode:                 brandCode,
-		ShopCode:                  storeCode,
 		EventTypeCode:             eventType,
 		EventName:                 c.Name,
 		EventDescription:          c.Desc,
@@ -106,11 +93,14 @@ func CatalogToCSLEvent(ctx context.Context, c CatalogCampaign, ruleSet *CatalogR
 		EndDate:                   c.FinalAt,
 		ExtendSalePermitDateCount: 0,
 		NormalSaleRecognitionChk:  promotion.NormalSaleRecognitionChk,
-		FeeRate:                   c.FeeRate,
 		InUserID:                  "mslv2.0",
 		SaleBaseAmt:               promotion.SaleBaseAmt,
 		DiscountBaseAmt:           promotion.DiscountBaseAmt,
 		DiscountRate:              promotion.DiscountRate,
 		StaffSaleChk:              c.IsStaff,
-	}, nil
+	}
+
+	list := p.CreateByStoreOrBrand(brand, stores, c.Channels)
+
+	return list, nil
 }
