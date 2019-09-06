@@ -11,7 +11,7 @@ import (
 
 func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a models.SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
-	var eventFeeRate, appliedFeeRate, feeAmount float64
+	var eventFeeRate, appliedFeeRate, feeAmount, itemFeeRate float64
 	var eventTypeCode string
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
 		eventFeeRate = 0
@@ -39,7 +39,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			}
 			appliedFeeRate = eventFeeRate
 		}
-		itemFeeRate := 0 //Tode assortedSaleRecordDtl.ItemFeeRate
+		itemFeeRate = 0 //Tode assortedSaleRecordDtl.ItemFeeRate
 		// eventFeeRate 优先级大于 itemFeeRate
 		if appliedFeeRate == 0 && itemFeeRate > 0 {
 			appliedFeeRate = itemFeeRate
