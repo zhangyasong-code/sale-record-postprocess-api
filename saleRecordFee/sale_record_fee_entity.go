@@ -2,6 +2,7 @@ package saleRecordFee
 
 import (
 	"context"
+	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 
 	"github.com/sirupsen/logrus"
@@ -52,9 +53,12 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			}
 			return nil, nil
 		}
-
+		useType := customer.UseTypeUsed
+		if assortedSaleRecordDtl.RefundItemId != 0 {
+			useType = customer.UseTypeUsedCancel
+		}
 		// Use the OrderItemId to query Mileage and MileagePrice
-		mileagePrice, err := PostSaleRecordFee{}.GetPostMileageDtl(ctx, assortedSaleRecordDtl.OrderItemId, assortedSaleRecordDtl.RefundItemId)
+		mileagePrice, err := PostSaleRecordFee{}.GetPostMileageDtl(ctx, assortedSaleRecordDtl.OrderItemId, assortedSaleRecordDtl.RefundItemId, useType)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{"OrderItemId": assortedSaleRecordDtl.OrderItemId, "RefundItemId": assortedSaleRecordDtl.RefundItemId, "Error": err}).Error("GetOrgMileageDtl failed!")
 			return nil, err
