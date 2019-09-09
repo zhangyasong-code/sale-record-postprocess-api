@@ -48,7 +48,14 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
 		//查询使用积分
-		has, e, err := customer.PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId)
+		var has bool
+		var e *customer.PostMileageDtl
+		var err error
+		if s.TransactionChannelType == "PLUS" {
+			has, e, err = customer.PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId, customer.UseTypeUsed)
+		} else {
+			has, e, err = customer.PostMileageDtl{}.GetByKey(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId, customer.UseTypeUsedCancel)
+		}
 		if err != nil {
 			logrus.WithField("err", err).Info("GetPostMileageDtlError")
 			return err
@@ -90,7 +97,11 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 				case SaleEventReduce, SaleEventDiscount: //减 折
 					saleAmountDtl.SalesmanSaleAmount = saleAmountDtl.TotalPaymentPrice - saleAmountDtl.MileagePrice
 				case SaleEventGive: //送
-					saleAmountDtl.SalesmanSaleAmount = math.Floor((saleAmountDtl.TotalPaymentPrice-saleAmountDtl.MileagePrice-saleAmountDtl.TotalPaymentPrice*saleAmountDtl.SalesmanSaleDiscountRate)*100) / 100
+					if s.TransactionChannelType == "PLUS" {
+						saleAmountDtl.SalesmanSaleAmount = math.Floor((saleAmountDtl.TotalPaymentPrice-saleAmountDtl.MileagePrice-saleAmountDtl.TotalPaymentPrice*saleAmountDtl.SalesmanSaleDiscountRate)*100) / 100
+					} else {
+						saleAmountDtl.SalesmanSaleAmount = (math.Floor(math.Abs(saleAmountDtl.TotalPaymentPrice-saleAmountDtl.MileagePrice-saleAmountDtl.TotalPaymentPrice*saleAmountDtl.SalesmanSaleDiscountRate)*100) / 100) * (-1)
+					}
 				}
 			}
 			//拆分业绩金额-正常业绩和折扣业绩
