@@ -13,11 +13,30 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 	var postSaleRecordFees []PostSaleRecordFee
 	var eventFeeRate, appliedFeeRate, feeAmount, itemFeeRate float64
 	var eventTypeCode string
+
+	appliedFeeRate = 0
+	eventTypeCode = ""
+	eventFeeRate = 0
+	for _, cartOffer := range a.CartOffers {
+		promotionEvent, err := PostSaleRecordFee{}.GetPromotionEvent(ctx, cartOffer.OfferNo)
+		if err != nil {
+			logrus.WithField("Error", err).Info("GetPromotionEvent error")
+			return nil, err
+		}
+		eventTypeCode = promotionEvent.EventTypeCode
+		if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
+			eventFeeRate += promotionEvent.FeeRate
+			if eventFeeRate <= 0 {
+				postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
+				if err := postFailCreateSaleFee.Save(ctx); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	appliedFeeRate = eventFeeRate
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
-		eventFeeRate = 0
-		appliedFeeRate = 0
 		feeAmount = 0
-		eventTypeCode = ""
 		// Use the offerNo to query promotionEvent
 		if len(assortedSaleRecordDtl.ItemOffers) != 0 {
 			for _, ItemOffer := range assortedSaleRecordDtl.ItemOffers {
