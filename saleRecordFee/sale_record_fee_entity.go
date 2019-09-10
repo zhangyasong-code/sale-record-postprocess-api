@@ -80,7 +80,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			}
 		}
 		appliedFeeRate = eventFeeRate
-		itemFeeRate = 0 //Tode assortedSaleRecordDtl.ItemFeeRate
+		itemFeeRate = assortedSaleRecordDtl.FeeRate
 		// eventFeeRate 优先级大于 itemFeeRate
 		if appliedFeeRate == 0 && itemFeeRate > 0 {
 			appliedFeeRate = itemFeeRate
