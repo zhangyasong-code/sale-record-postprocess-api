@@ -46,6 +46,8 @@ type AssortedSaleRecordDtl struct {
 	TotalPrice       TotalPrice       `json:"totalPrice"`
 	DistributedPrice DistributedPrice `json:"distributedPrice"`
 	Status           string           `json:"status"`
+	ItemFee          float64          `json:"itemFee"`
+	FeeRate          float64          `json:"feeRate"`
 	ItemOffers       []Offer          `json:"itemOffers"`
 	Committed        Committed        `json:"committed"`
 }
