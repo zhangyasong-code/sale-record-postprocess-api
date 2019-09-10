@@ -4,6 +4,7 @@ import (
 	"context"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/promotion"
 
 	"github.com/sirupsen/logrus"
 
@@ -19,46 +20,66 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 	eventTypeCode = ""
 	eventFeeRate = 0
 	for _, cartOffer := range a.CartOffers {
-		promotionEvent, err := PostSaleRecordFee{}.GetPromotionEvent(ctx, cartOffer.OfferNo)
+		if eventFeeRate != 0 {
+			continue
+		}
+		promotionEvent, err := promotion.GetByNo(ctx, cartOffer.OfferNo)
 		if err != nil {
 			logrus.WithField("Error", err).Info("GetPromotionEvent error")
 			return nil, err
 		}
 		eventTypeCode = promotionEvent.EventTypeCode
 		if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
-			eventFeeRate += promotionEvent.FeeRate
+			eventFeeRate = promotionEvent.FeeRate
 			if eventFeeRate <= 0 {
 				postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-				if err := postFailCreateSaleFee.Save(ctx); err != nil {
+				has, _, err := postFailCreateSaleFee.Get(ctx)
+				if err != nil {
 					return nil, err
 				}
+				if !has {
+					if err := postFailCreateSaleFee.Save(ctx); err != nil {
+						return nil, err
+					}
+				}
+				return nil, nil
 			}
 		}
 	}
-	appliedFeeRate = eventFeeRate
+
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
 		feeAmount = 0
 		// Use the offerNo to query promotionEvent
-		if len(assortedSaleRecordDtl.ItemOffers) != 0 {
+		if eventFeeRate == 0 && len(assortedSaleRecordDtl.ItemOffers) != 0 {
 			for _, ItemOffer := range assortedSaleRecordDtl.ItemOffers {
-				promotionEvent, err := PostSaleRecordFee{}.GetPromotionEvent(ctx, ItemOffer.OfferNo)
+				if eventFeeRate != 0 {
+					continue
+				}
+				promotionEvent, err := promotion.GetByNo(ctx, ItemOffer.OfferNo)
 				if err != nil {
 					logrus.WithField("Error", err).Info("GetPromotionEvent error")
 					return nil, err
 				}
 				eventTypeCode = promotionEvent.EventTypeCode
 				if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
-					eventFeeRate += promotionEvent.FeeRate
+					eventFeeRate = promotionEvent.FeeRate
 					if eventFeeRate <= 0 {
 						postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-						if err := postFailCreateSaleFee.Save(ctx); err != nil {
+						has, _, err := postFailCreateSaleFee.Get(ctx)
+						if err != nil {
 							return nil, err
 						}
+						if !has {
+							if err := postFailCreateSaleFee.Save(ctx); err != nil {
+								return nil, err
+							}
+						}
+						return nil, nil
 					}
 				}
 			}
-			appliedFeeRate = eventFeeRate
 		}
+		appliedFeeRate = eventFeeRate
 		itemFeeRate = 0 //Tode assortedSaleRecordDtl.ItemFeeRate
 		// eventFeeRate 优先级大于 itemFeeRate
 		if appliedFeeRate == 0 && itemFeeRate > 0 {
@@ -67,8 +88,14 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			// Add one Case when eventFeeRate and itemFeeRate is 0
 			logrus.WithField("TransactionId", a.TransactionId).Info("Add FailCreateSaleFee data")
 			postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-			if err := postFailCreateSaleFee.Save(ctx); err != nil {
+			has, _, err := postFailCreateSaleFee.Get(ctx)
+			if err != nil {
 				return nil, err
+			}
+			if !has {
+				if err := postFailCreateSaleFee.Save(ctx); err != nil {
+					return nil, err
+				}
 			}
 			return nil, nil
 		}
@@ -77,7 +104,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			useType = customer.UseTypeUsedCancel
 		}
 		// Use the OrderItemId to query Mileage and MileagePrice
-		mileagePrice, err := PostSaleRecordFee{}.GetPostMileageDtl(ctx, assortedSaleRecordDtl.OrderItemId, assortedSaleRecordDtl.RefundItemId, useType)
+		_, mileagePrice, err := customer.PostMileageDtl{}.GetPostMileageDtl(ctx, 0, assortedSaleRecordDtl.OrderItemId, assortedSaleRecordDtl.RefundItemId, useType)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{"OrderItemId": assortedSaleRecordDtl.OrderItemId, "RefundItemId": assortedSaleRecordDtl.RefundItemId, "Error": err}).Error("GetOrgMileageDtl failed!")
 			return nil, err

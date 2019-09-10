@@ -21,8 +21,16 @@ func setPostSaleRecordFee(ctx context.Context, a models.SaleRecordEvent) error {
 		return err
 	}
 	for _, postSaleRecordFee := range postSaleRecordFees {
-		if err := postSaleRecordFee.Save(ctx); err != nil {
+		has, _, err := postSaleRecordFee.Get(ctx)
+		if err != nil {
 			return err
+		}
+		if has {
+			continue
+		} else {
+			if err := postSaleRecordFee.Save(ctx); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
