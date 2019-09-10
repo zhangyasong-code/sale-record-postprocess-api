@@ -2,18 +2,8 @@ package saleRecordFee
 
 import (
 	"context"
-	"errors"
-	"net/http"
-	"nhub/sale-record-postprocess-api/config"
-	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/factory"
-	"nhub/sale-record-postprocess-api/promotion"
-	"strconv"
 	"time"
-
-	"github.com/pangpanglabs/goutils/behaviorlog"
-	"github.com/pangpanglabs/goutils/httpreq"
-	"github.com/sirupsen/logrus"
 )
 
 type PostSaleRecordFee struct {
@@ -72,6 +62,15 @@ func (p *PostSaleRecordFee) Save(ctx context.Context) error {
 	return nil
 }
 
+func (p *PostSaleRecordFee) Get(ctx context.Context) (bool, PostSaleRecordFee, error) {
+	postSaleRecordFee := PostSaleRecordFee{}
+	has, err := factory.SaleRecordDB(ctx).Where("transaction_dtl_id = ?", p.TransactionDtlId).Get(&postSaleRecordFee)
+	if err != nil {
+		return has, PostSaleRecordFee{}, err
+	}
+	return has, postSaleRecordFee, nil
+}
+
 func (pf *PostFailCreateSaleFee) Save(ctx context.Context) error {
 	if _, err := factory.SaleRecordDB(ctx).Insert(pf); err != nil {
 		return err
@@ -79,38 +78,11 @@ func (pf *PostFailCreateSaleFee) Save(ctx context.Context) error {
 	return nil
 }
 
-func getContracts(ctx context.Context, storeId int64) (*ResultShopMessage, error) {
-	var result ResultShopMessage
-	if _, err := httpreq.New(http.MethodGet, config.Config().
-		Services.PlaceManagementApi+"/v1/store/getallinfo?skipCount=0&maxResultCount=10&withContract=true&propsEnable=true&storeIds="+strconv.FormatInt(storeId, 10), nil).
-		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
-		Call(&result); err != nil {
-		return nil, err
-	}
-	if !result.Success {
-		logrus.WithFields(logrus.Fields{"ServiceName": "PlaceManagementApi", "errorMessage": result.Error, "storeId": storeId}).Error("GetContracts failed!")
-		return nil, errors.New("GetContracts failed!")
-	}
-	return &result, nil
-}
-
-func (PostSaleRecordFee) GetPromotionEvent(ctx context.Context, offerNo string) (*promotion.PromotionEvent, error) {
-	promotionEvent, err := promotion.GetByNo(ctx, offerNo)
+func (pf *PostFailCreateSaleFee) Get(ctx context.Context) (bool, PostFailCreateSaleFee, error) {
+	postFailCreateSaleFee := PostFailCreateSaleFee{}
+	has, err := factory.SaleRecordDB(ctx).Where("transaction_id = ?", pf.TransactionId).And("is_processed = ?", false).Get(&postFailCreateSaleFee)
 	if err != nil {
-		return nil, err
+		return has, PostFailCreateSaleFee{}, err
 	}
-	return promotionEvent, nil
-}
-
-func (PostSaleRecordFee) GetPostMileageDtl(ctx context.Context, orderItemId, refundItemId int64, useType customer.UseType) (*customer.PostMileageDtl, error) {
-	var o customer.PostMileageDtl
-	exist, err := factory.SaleRecordDB(ctx).Where("order_item_id = ?", orderItemId).
-		And("use_type = ?", string(useType)).
-		And("refund_item_id = ?", refundItemId).Get(&o)
-	if err != nil {
-		return nil, err
-	} else if !exist {
-		return nil, errors.New("OrgMileageDtl is not exist")
-	}
-	return &o, nil
+	return has, postFailCreateSaleFee, nil
 }

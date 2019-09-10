@@ -5,11 +5,14 @@ import (
 	"nhub/sale-record-postprocess-api/factory"
 	"nhub/sale-record-postprocess-api/models"
 	"time"
+
+	"github.com/go-xorm/xorm"
 )
 
 type UseType string
 
 const (
+	UseTypeUnKnown    UseType = ""
 	UseTypeEarn       UseType = "Earn"
 	UseTypeEarnCancel UseType = "EarnCancel"
 	UseTypeUsed       UseType = "Used"
@@ -134,13 +137,34 @@ func (PostMileageDtl) CreateBatch(ctx context.Context, v []PostMileageDtl) error
 	}
 	return nil
 }
-func (PostMileageDtl) GetByKey(ctx context.Context, transactionDtlId, orderItemId, refundItemId int64, useType UseType) (has bool, res *PostMileageDtl, err error) {
-	res = &PostMileageDtl{}
-	has, err = factory.SaleRecordDB(ctx).
-		Where("transaction_dtl_id=?", transactionDtlId).
-		And("order_item_id=?", orderItemId).
-		And("refund_item_id=?", refundItemId).
-		And("use_type=?", string(useType)).
-		Get(res)
-	return
+func (PostMileageDtl) GetByKey(ctx context.Context, transactionDtlId, orderItemId, refundItemId int64, useType UseType) (bool, PostMileageDtl, error) {
+	return PostMileageDtl{}.GetPostMileageDtl(ctx, transactionDtlId, orderItemId, refundItemId, useType)
+}
+
+func (PostMileageDtl) GetPostMileageDtl(ctx context.Context, transactionDtlId, orderItemId, refundItemId int64, useType UseType) (bool, PostMileageDtl, error) {
+	res := PostMileageDtl{}
+	query := func() xorm.Interface {
+		q := factory.SaleRecordDB(ctx).Where("1 = 1")
+		if orderItemId != 0 {
+			q.And("order_item_id = ?", orderItemId)
+		}
+		if useType != UseTypeUnKnown {
+			q.And("use_type = ?", string(useType))
+		}
+		if transactionDtlId != 0 {
+			q.And("transaction_dtl_id = ?", transactionDtlId)
+		}
+		if refundItemId != 0 {
+			q.And("refund_item_id = ?", refundItemId)
+		}
+		return q
+	}
+	exist, err := query().Get(&res)
+	if err != nil {
+		return exist, PostMileageDtl{}, err
+	}
+	if !exist {
+		return exist, PostMileageDtl{}, nil
+	}
+	return exist, res, nil
 }
