@@ -12,6 +12,7 @@ import (
 	"nhub/sale-record-postprocess-api/controllers"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/promotion"
+	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 
 	"nhub/sale-record-postprocess-api/factory"
@@ -38,6 +39,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := promotion.InitDB(saleRecordDB); err != nil {
+		log.Fatal(err)
+	}
+	if err := salePerson.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
 
@@ -69,6 +73,7 @@ func main() {
 	controllers.SaleRecordEventController{}.Init(r.Group("SaleRecordEvent", "/v1/saleRecord-events"))
 	controllers.PromotionEventController{}.Init(r.Group("PromotionEvent", "/v1/promotion-event"))
 	controllers.SaleRecordInfoController{}.Init(r.Group("SaleRecordInfo", "/v1/sale-record-info"))
+	salePerson.SalesPersonEventHandler{}.Init(r.Group("SalesPerson", "/v1/sales-person"))
 
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
