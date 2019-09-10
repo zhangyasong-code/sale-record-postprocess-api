@@ -140,7 +140,7 @@ func (PostMileageDtl) GetByKey(ctx context.Context, transactionDtlId, orderItemI
 		Where("transaction_dtl_id=?", transactionDtlId).
 		And("order_item_id=?", orderItemId).
 		And("refund_item_id=?", refundItemId).
-		And("use_type=?", useType).
+		And("use_type=?", string(useType)).
 		Get(res)
 	return
 }
