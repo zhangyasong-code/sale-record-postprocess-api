@@ -2,7 +2,6 @@ package customer
 
 import (
 	"context"
-	"fmt"
 
 	"nhub/sale-record-postprocess-api/models"
 
@@ -19,7 +18,11 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 		return err
 	}
 	if has {
-		return fmt.Errorf("TransactionId(%v) has exist.", record.TransactionId)
+		logrus.WithFields(logrus.Fields{
+			"err":           "TransactionId has exist.",
+			"transactionId": record.TransactionId,
+		})
+		return nil
 	}
 
 	tradeNo := record.OrderId
