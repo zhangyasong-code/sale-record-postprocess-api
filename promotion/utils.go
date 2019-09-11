@@ -24,6 +24,18 @@ type Store struct {
 	Code   string  `json:"code"`
 	Name   string  `json:"name"`
 	Brands []Brand `json:"brands"`
+	Remark Remark  `json:"remark"`
+}
+
+type Remark struct {
+	ElandShopInfos []ElandShopInfo `json:"elandShopInfos"`
+}
+
+type ElandShopInfo struct {
+	BrandCode string `json:"brandCode"`
+	BrandId   int64  `json:"brandId"`
+	IsCheif   bool   `json:"isChief"`
+	ShopCode  string `json:"shopCode"`
 }
 
 type Promotion struct {
@@ -87,8 +99,6 @@ func ToCSLOfferType(offerType OfferType, templateCode string) (string, error) {
 	case "B1", "B2", "C1", "C2", "C6", "D1":
 		if offerType == OfferTypeBrand {
 			eventTypeCode = "02"
-		} else if offerType == OfferTypeMember {
-			eventTypeCode = "C"
 		}
 	case "C5":
 		if offerType == OfferTypeBrand {

@@ -9,7 +9,8 @@ import (
 )
 
 type PromotionEvent struct {
-	OfferNo                   string    `json:"offerNo" xorm:"pk"`
+	Id                        int64     `json:"id" xorm:"pk"`
+	OfferNo                   string    `json:"offerNo" xorm:"index"`
 	BrandCode                 string    `json:"brandCode"`
 	ShopCode                  string    `json:"shopCode"` //是否需要（SaleEvent）
 	EventTypeCode             string    `json:"eventTypeCode"`
@@ -61,12 +62,15 @@ func (p PromotionEvent) CreateByStoreOrBrand(brand *Brand, stores []Store, chann
 		return 0
 	}
 	for i := range stores {
-		for j := range stores[i].Brands {
-			p.BrandCode = stores[i].Brands[j].Code
-			p.ShopCode = stores[i].Code
-			p.FeeRate = getFeeRate(stores[i].Id)
-			list = append(list, p)
+		p.ShopCode = stores[i].Code
+		p.FeeRate = getFeeRate(stores[i].Id)
+		for _, info := range stores[i].Remark.ElandShopInfos {
+			if info.IsCheif {
+				p.BrandCode = info.BrandCode
+
+			}
 		}
+		list = append(list, p)
 	}
 	return list
 }
