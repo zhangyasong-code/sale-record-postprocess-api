@@ -128,6 +128,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 				Mileage:                mileagePrice.Point,
 				MileagePrice:           mileagePrice.PointPrice,
 				ItemFeeRate:            itemFeeRate,
+				ItemFee:                assortedSaleRecordDtl.ItemFee,
 				EventFeeRate:           eventFeeRate,
 				AppliedFeeRate:         appliedFeeRate,
 				FeeAmount:              feeAmount,

@@ -20,6 +20,7 @@ type PostSaleRecordFee struct {
 	Mileage                float64   `json:"mileage" query:"mileage" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
 	MileagePrice           float64   `json:"mileagePrice" query:"mileagePrice" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
 	ItemFeeRate            float64   `json:"itemFeeRate" query:"itemFeeRate" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
+	ItemFee                float64   `json:"itemFee" query:"itemFee" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
 	EventFeeRate           float64   `json:"eventFeeRate" query:"eventFeeRate" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
 	AppliedFeeRate         float64   `json:"appliedFeeRate" query:"appliedFeeRate" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
 	FeeAmount              float64   `json:"feeAmount" query:"feeAmount" xorm:"DECIMAL(18,2) default 0" validate:"gte=0"`
