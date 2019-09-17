@@ -1,0 +1,44 @@
+database:
+  saleRecord:
+    driver: mysql
+    connection: pangpang_app:7#dIQ2qY@tcp(rm-uf65796v5j1t257t1.mysql.rds.aliyuncs.com)/pangpang_brand_nhub?charset=utf8&parseTime=True&loc=UTC
+  order:
+    driver: mysql
+    connection: pangpang_app:7#dIQ2qY@tcp(rm-uf65796v5j1t257t1.mysql.rds.aliyuncs.com)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
+  logger:
+    kafka:
+      brokers:
+        - 10.26.205.20:9092
+        - 10.27.116.104:9092
+        - 10.27.121.103:9092
+      topic: sqllog
+behaviorLog:
+  kafka:
+    brokers:
+      - 10.26.205.20:9092
+      - 10.27.116.104:9092
+      - 10.27.121.103:9092
+    topic: behaviorlog
+eventKafka:
+  saleRecordEvent:
+    brokers:
+      - 10.26.205.20:9092
+      - 10.27.116.104:9092
+      - 10.27.121.103:9092
+    topic: pangpang-brand-sale-record
+  promotionEvent:
+    brokers:
+      - 10.26.205.20:9092
+      - 10.27.116.104:9092
+      - 10.27.121.103:9092
+    topic: pangpang-brand-offer
+appenv: pangpang-brand-production
+services:
+  offerApi: http://offer-api.pangpang-brand:5000
+  promotionApi: https://dmz.p2shop.com.cn/mslv2/promotion-api
+  productApi: http://product-api.pangpang-brand:8000
+  storeApi: http://place-management-api.pangpang-brand:8080
+  benefitApi: http://benefit-api.pangpang-brand:8080
+  placeManagementApi: http://place-management-api.pangpang-brand:8080
+  cslCustomerApi: https://dmz.p2shop.com.cn/mslv2/csl-customer-if
+erviceName: sale-record-postprocess-apis
