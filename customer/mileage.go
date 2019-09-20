@@ -2,6 +2,7 @@ package customer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
@@ -97,16 +98,11 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 	url := fmt.Sprintf("%s/v1/mileage?tradeNo=%v&tenantCode=%s",
 		config.Config().Services.BenefitApi, tradeNo, userClaim.TenantCode)
 	logrus.WithField("url", url).Info("url")
-	if _, err := httpreq.New(http.MethodGet, url, nil).
-		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
-		Call(&resp); err != nil {
-		return nil, err
-	} else if !resp.Success {
-		logrus.WithFields(logrus.Fields{
-			"errorCode":    resp.Error.Code,
-			"errorMessage": resp.Error.Message,
-		}).Error("Fail to get mileages")
+	if err := RetryRestApi(ctx, resp, http.MethodGet, url, nil); err != nil {
 		return nil, fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
+	}
+	if resp.Success && len(resp.Result.Items) == 0 {
+		return nil, errors.New("resp.Result null")
 	}
 
 	return resp.Result.Items, nil
