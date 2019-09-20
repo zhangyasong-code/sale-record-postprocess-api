@@ -45,17 +45,18 @@ type Pay struct {
 	MdiscountAmount float64   `json:"mdiscountAmount"`
 }
 
-func (Pay) GetPayamt(ctx context.Context, orderId int64) (*[]Pay, error) {
+func (Pay) GetPayamt(ctx context.Context, orderId int64) ([]Pay, error) {
 	var resp struct {
-		Result  *[]Pay `json:"result"`
-		Success bool   `json:"success"`
+		Result  []Pay `json:"result"`
+		Success bool  `json:"success"`
 		Error   struct {
 			Code    int    `json:"code"`
 			Message string `json:"message"`
 			Details string `json:"details"`
 		} `json:"error"`
 	}
-	url := fmt.Sprintf("%s/v1/pay/orderId/%v", config.Config().Services.BenefitApi, orderId)
+	url := fmt.Sprintf("%s/v1/query/orderId/%v", config.Config().Services.PayamtApi, orderId)
+	logrus.WithField("url", url).Info("url")
 	if _, err := httpreq.New(http.MethodGet, url, nil).
 		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
 		Call(&resp); err != nil {

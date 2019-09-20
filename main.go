@@ -11,6 +11,7 @@ import (
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/controllers"
 	"nhub/sale-record-postprocess-api/customer"
+	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/promotion"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"

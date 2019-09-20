@@ -3,6 +3,7 @@ package controllers
 import (
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 
@@ -26,6 +27,10 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
+		return err
+	}
+
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
 	}
