@@ -33,4 +33,5 @@ services:
   benefitApi: http://benefit-api.pangpang-brand-staging:8080
   placeManagementApi: http://place-management-api.pangpang-brand-staging:8080
   cslCustomerApi: https://dmz-staging.p2shop.com.cn/mslv2/csl-customer-if
+  payamtApi: http://pay-api.pangpang-brand-staging:8080
 serviceName: sale-record-postprocess-api
