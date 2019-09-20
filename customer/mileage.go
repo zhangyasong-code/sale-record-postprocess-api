@@ -2,7 +2,6 @@ package customer
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
@@ -98,11 +97,9 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 	url := fmt.Sprintf("%s/v1/mileage?tradeNo=%v&tenantCode=%s",
 		config.Config().Services.BenefitApi, tradeNo, userClaim.TenantCode)
 	logrus.WithField("url", url).Info("url")
+	time.Sleep(2 * time.Second)
 	if err := RetryRestApi(ctx, resp, http.MethodGet, url, nil); err != nil {
 		return nil, fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
-	}
-	if resp.Success && len(resp.Result.Items) == 0 {
-		return nil, errors.New("resp.Result null")
 	}
 
 	return resp.Result.Items, nil
