@@ -8,6 +8,7 @@ import (
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 	"nomni/utils/eventconsume"
+	"time"
 
 	"github.com/pangpanglabs/goutils/kafka"
 	"github.com/sirupsen/logrus"
@@ -28,6 +29,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	str, _ := json.Marshal(event)
 	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
 
+	time.Sleep(5 * time.Second)
 	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
 		return err
 	}
