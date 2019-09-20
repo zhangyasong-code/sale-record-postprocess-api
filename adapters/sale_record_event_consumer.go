@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 	"nomni/utils/eventconsume"
@@ -26,6 +27,10 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	ctx := c.Context()
 	str, _ := json.Marshal(event)
 	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
+
+	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
+		return err
+	}
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		return err
 	}

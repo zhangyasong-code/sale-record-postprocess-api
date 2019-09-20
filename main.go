@@ -38,6 +38,9 @@ func main() {
 	if err := customer.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
+	if err := payamt.InitDB(saleRecordDB); err != nil {
+		log.Fatal(err)
+	}
 	if err := promotion.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
