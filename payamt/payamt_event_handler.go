@@ -11,8 +11,8 @@ type PayAmtEventHandler struct {
 func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecordEvent) error {
 	var postPayment []PostPayment
 	pays, err := Pay{}.GetPayamt(ctx, record.OrderId)
-	if len(*pays) > 0 {
-		for _, pay := range *pays {
+	if len(pays) > 0 {
+		for _, pay := range pays {
 			paymentCode := "11"
 			if pay.PayMethod == "CASH" {
 				paymentCode = "11"
