@@ -52,26 +52,33 @@ const (
 )
 
 type CartCampaign struct {
-	Id             int64              `json:"id"`
-	Code           string             `json:"code"`
-	Name           string             `json:"name"`
-	Desc           string             `json:"desc"`
-	FeeRate        float64            `json:"feeRate"`
-	Channels       []ChannelCondition `json:"channels"`
-	StartAt        time.Time          `json:"startAt"`
-	EndAt          time.Time          `json:"endAt"`
-	FinalAt        time.Time          `json:"finalAt"` // 延期后的最终结束时间(== CSL：SaleEventEndDate + ExtendSalePermitDateCount)
-	RulesetGroupId int64              `json:"rulesetGroupId"`
-	Enable         bool               `json:"enable"`
-	CreatedAt      time.Time          `json:"createdAt"`
-	UpdatedAt      time.Time          `json:"updatedAt"`
+	Id             int64                `json:"id"`
+	Code           string               `json:"code"`
+	Name           string               `json:"name"`
+	Desc           string               `json:"desc"`
+	FeeRate        float64              `json:"feeRate"`
+	Channels       []ChannelCondition   `json:"channels"`
+	Simulations    []CampaignSimulation `json:"simulations"`
+	StartAt        time.Time            `json:"startAt"`
+	EndAt          time.Time            `json:"endAt"`
+	FinalAt        time.Time            `json:"finalAt"` // 延期后的最终结束时间(== CSL：SaleEventEndDate + ExtendSalePermitDateCount)
+	RulesetGroupId int64                `json:"rulesetGroupId"`
+	Enable         bool                 `json:"enable"`
+	CreatedAt      time.Time            `json:"createdAt"`
+	UpdatedAt      time.Time            `json:"updatedAt"`
+}
+
+type CampaignSimulation struct {
+	Id               int64   `json:"id"`
+	CampaignId       int64   `json:"campaignId"`
+	BaseFeeRate      float64 `json:"baseFeeRate"`      //基础扣率
+	SaleEventFeeRate float64 `json:"saleEventFeeRate"` //活动扣率
 }
 
 type ChannelCondition struct {
-	CampaignId int64   `json:"-"`
-	Type       string  `json:"type"`
-	Value      string  `json:"value"`
-	FeeRate    float64 `json:"feeRate"`
+	CampaignId int64  `json:"-"`
+	Type       string `json:"type"`
+	Value      string `json:"value"`
 }
 
 type CartRulesetGroup struct {
@@ -164,6 +171,7 @@ func CartToCSLEvent(ctx context.Context, c CartCampaign, ruleGroup *CartRulesetG
 		StartDate:                 c.StartAt,
 		EndDate:                   c.FinalAt,
 		ExtendSalePermitDateCount: 0,
+		FeeRate:                   GetFeeRate(ruleGroup.Type, c.Simulations),
 		NormalSaleRecognitionChk:  promotion.NormalSaleRecognitionChk,
 		InUserID:                  "mslv2.0",
 		SaleBaseAmt:               promotion.SaleBaseAmt,

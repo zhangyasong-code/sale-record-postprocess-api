@@ -163,3 +163,11 @@ func (p *Promotion) ToCSLDisCount(StandardValue, DiscountValue float64) {
 	}
 	return
 }
+
+func GetFeeRate(offerType OfferType, simulations []CampaignSimulation) float64 {
+	if offerType == OfferTypeBrand && len(simulations) > 0 {
+		return simulations[0].SaleEventFeeRate
+	} else {
+		return 0
+	}
+}
