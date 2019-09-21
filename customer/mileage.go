@@ -108,8 +108,12 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 		_, err := httpreq.New(http.MethodGet, url, nil).
 			WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
 			CallWithClient(&resp, client)
+		logrus.WithField("attempt", attempt).Info("attempt")
+		if err != nil {
+			time.Sleep(5 * time.Second)
+		}
 
-		if err != nil || len(resp.Result.Items) == 0 {
+		if len(resp.Result.Items) == 0 {
 			err = errors.New("resp.Result null")
 			time.Sleep(5 * time.Second)
 		}
