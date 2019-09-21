@@ -25,3 +25,11 @@ func (PostPayment) createInArrary(ctx context.Context, postPayment []PostPayment
 	}
 	return nil
 }
+
+func (PostPayment) checkExist(ctx context.Context, transactionId int64) (bool, error) {
+	if has, err := factory.SaleRecordDB(ctx).Exist(&PostPayment{TransactionId: transactionId}); err != nil {
+		return false, err
+	} else {
+		return has, nil
+	}
+}
