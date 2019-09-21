@@ -31,19 +31,39 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 
 	time.Sleep(5 * time.Second)
 	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"TransactionId": event.TransactionId,
+			"OrderId":       event.OrderId,
+		}).WithError(err).Error("Fail to handle PayAmtEventHandler")
 		return err
 	}
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"TransactionId": event.TransactionId,
+			"OrderId":       event.OrderId,
+		}).WithError(err).Error("Fail to handle CustomerEventHandler")
 		return err
 	}
 
 	if err := (salePerson.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"TransactionId": event.TransactionId,
+			"OrderId":       event.OrderId,
+		}).WithError(err).Error("Fail to handle SalesPersonEventHandler")
 		return err
 	}
 
 	if err := (saleRecordFee.SaleRecordFeeEventHandler{}).Handle(ctx, event); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"TransactionId": event.TransactionId,
+			"OrderId":       event.OrderId,
+		}).WithError(err).Error("Fail to handle SaleRecordFeeEventHandler")
 		return err
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"TransactionId": event.TransactionId,
+		"OrderId":       event.OrderId,
+	}).Info("Success to handle event")
 	return nil
 }
