@@ -29,6 +29,10 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 	if record.RefundId != 0 {
 		tradeNo = record.RefundId
 	}
+	if record.CustomerId == 0 {
+		return nil
+	}
+
 	mileages, err := Mileage{}.GetMembershipMileages(ctx, tradeNo)
 	if err != nil {
 		return err
