@@ -110,6 +110,7 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 			CallWithClient(&resp, client)
 
 		if err != nil || len(resp.Result.Items) == 0 {
+			err = errors.New("resp.Result null")
 			time.Sleep(5 * time.Second)
 		}
 
@@ -118,10 +119,6 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 
 	if err != nil {
 		return nil, fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
-	}
-
-	if resp.Success && len(resp.Result.Items) == 0 {
-		return nil, errors.New("resp.Result null")
 	}
 
 	return resp.Result.Items, nil
