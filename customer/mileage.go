@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
-	"nomni/utils/auth"
 	"time"
 
 	try "github.com/matryer/try"
@@ -87,7 +86,6 @@ var client = httpreq.NewClient(httpreq.ClientConfig{
 })
 
 func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mileage, error) {
-	userClaim := auth.UserClaim{}.FromCtx(ctx)
 	var resp struct {
 		Result struct {
 			Items      []Mileage `json:"items"`
@@ -100,15 +98,15 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 			Details string `json:"details"`
 		} `json:"error"`
 	}
-	url := fmt.Sprintf("%s/v1/mileage?tradeNo=%v&tenantCode=%s",
-		config.Config().Services.BenefitApi, tradeNo, userClaim.TenantCode)
+	url := fmt.Sprintf("%s/v1/mileage?tradeNo=%v",
+		config.Config().Services.BenefitApi, tradeNo)
 	logrus.WithField("url", url).Info("url")
 
 	err := try.Do(func(attempt int) (bool, error) {
 		_, err := httpreq.New(http.MethodGet, url, nil).
 			WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
 			CallWithClient(&resp, client)
-		logrus.WithField("attempt", attempt).Info("attempt")
+
 		if err != nil {
 			time.Sleep(5 * time.Second)
 		}
@@ -117,7 +115,6 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 			err = errors.New("resp.Result null")
 			time.Sleep(5 * time.Second)
 		}
-
 		return attempt < 100, err
 	})
 
