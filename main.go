@@ -55,10 +55,10 @@ func main() {
 
 	if err := adapters.NewConsumers(config.ServiceName, config.EventKafka,
 		eventconsume.Recover(),
+		eventconsume.UserClaimMiddleware(),
 		eventconsume.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka),
 		eventconsume.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, config.Database.Logger.Kafka),
 		eventconsume.ContextDBWithName(config.ServiceName, factory.OrderDBContextName, orderDB, config.Database.Logger.Kafka),
-		eventconsume.UserClaimMiddleware(),
 	); err != nil {
 		log.Fatal(err)
 	}
