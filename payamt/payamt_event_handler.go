@@ -21,7 +21,10 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 	pays, err := Pay{}.GetPayamt(ctx, record.OrderId)
 	if len(pays) > 0 {
 		for _, pay := range pays {
-			paymentCode := "12"
+			if pay.PayMethod == "MILEAGE" {
+				continue
+			}
+			paymentCode := "11"
 			creditCardFirmCode := ""
 			if pay.PayMethod == "CASH" {
 				paymentCode = "11"
