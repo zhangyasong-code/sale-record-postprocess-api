@@ -16,20 +16,20 @@ const (
 )
 
 type CatalogCampaign struct {
-	Id        int64              `json:"id"`
-	Code      string             `json:"code"`
-	Name      string             `json:"name"`
-	Desc      string             `json:"desc"`
-	FeeRate   float64            `json:"feeRate"`
-	IsStaff   bool               `json:"isStaff"` // 内购（CSL: SaleEvent -> StaffSaleChk）
-	Channels  []ChannelCondition `json:"channels"`
-	StartAt   time.Time          `json:"startAt"`
-	EndAt     time.Time          `json:"endAt"`
-	FinalAt   time.Time          `json:"finalAt"` // 延期后的最终结束时间(== CSL：SaleEventEndDate + ExtendSalePermitDateCount)
-	RulesetId int64              `json:"rulesetId"`
-	Enable    bool               `json:"enable"`
-	CreatedAt time.Time          `json:"createdAt"`
-	UpdatedAt time.Time          `json:"updatedAt"`
+	Id          int64                `json:"id"`
+	Code        string               `json:"code"`
+	Name        string               `json:"name"`
+	Desc        string               `json:"desc"`
+	IsStaff     bool                 `json:"isStaff"` // 内购（CSL: SaleEvent -> StaffSaleChk）
+	Channels    []ChannelCondition   `json:"channels"`
+	Simulations []CampaignSimulation `json:"simulations"`
+	StartAt     time.Time            `json:"startAt"`
+	EndAt       time.Time            `json:"endAt"`
+	FinalAt     time.Time            `json:"finalAt"` // 延期后的最终结束时间(== CSL：SaleEventEndDate + ExtendSalePermitDateCount)
+	RulesetId   int64                `json:"rulesetId"`
+	Enable      bool                 `json:"enable"`
+	CreatedAt   time.Time            `json:"createdAt"`
+	UpdatedAt   time.Time            `json:"updatedAt"`
 }
 
 type CatalogRuleset struct {
@@ -92,6 +92,7 @@ func CatalogToCSLEvent(ctx context.Context, c CatalogCampaign, ruleSet *CatalogR
 		StartDate:                 c.StartAt,
 		EndDate:                   c.FinalAt,
 		ExtendSalePermitDateCount: 0,
+		FeeRate:                   GetFeeRate(ruleSet.Type, c.Simulations),
 		NormalSaleRecognitionChk:  promotion.NormalSaleRecognitionChk,
 		InUserID:                  "mslv2.0",
 		SaleBaseAmt:               promotion.SaleBaseAmt,

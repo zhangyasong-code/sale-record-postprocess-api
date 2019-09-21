@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"nhub/sale-record-postprocess-api/factory"
-	"strconv"
 	"time"
 )
 
@@ -53,21 +52,11 @@ func (p PromotionEvent) CreateByStoreOrBrand(brand *Brand, stores []Store, chann
 		list = append(list, p)
 		return list
 	}
-	getFeeRate := func(id int64) float64 {
-		for _, channel := range channels {
-			if strconv.FormatInt(id, 10) == channel.Value && channel.Type == ConditionTypeStoreId {
-				return channel.FeeRate
-			}
-		}
-		return 0
-	}
 	for i := range stores {
 		p.ShopCode = stores[i].Code
-		p.FeeRate = getFeeRate(stores[i].Id)
 		for _, info := range stores[i].Remark.ElandShopInfos {
 			if info.IsCheif {
 				p.BrandCode = info.BrandCode
-
 			}
 		}
 		list = append(list, p)
