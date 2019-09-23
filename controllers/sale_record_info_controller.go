@@ -49,9 +49,10 @@ func getSaleRecordInfo(ctx context.Context, transactionId int64) (interface{}, e
 	for _, postMileage := range postMileages {
 		postMileageIds = append(postMileageIds, postMileage.Id)
 	}
+
 	var postMileageDtls []customer.PostMileageDtl
 	if len(postMileageIds) != 0 {
-		if err := factory.SaleRecordDB(ctx).Where("1=1").In("post_mileage_id", postMileageDtls).Find(&postMileageDtls); err != nil {
+		if err := factory.SaleRecordDB(ctx).Where("1=1").In("post_mileage_id", postMileageIds).Find(&postMileageDtls); err != nil {
 			return nil, err
 		}
 	}
