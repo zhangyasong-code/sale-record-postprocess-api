@@ -40,14 +40,18 @@ func (SaleRecordInfoController) GetOne(c echo.Context) error {
 }
 
 func getSaleRecordInfo(ctx context.Context, transactionId int64) (interface{}, error) {
-	postMileage := customer.PostMileage{TransactionId: transactionId}
-	if _, err := factory.SaleRecordDB(ctx).Get(&postMileage); err != nil {
+	var postMileages []customer.PostMileage
+	if err := factory.SaleRecordDB(ctx).Where("transaction_id = ?", transactionId).Find(&postMileages); err != nil {
 		return nil, err
 	}
 
+	postMileageIds := []int64{}
+	for _, postMileage := range postMileages {
+		postMileageIds = append(postMileageIds, postMileage.Id)
+	}
 	var postMileageDtls []customer.PostMileageDtl
-	if postMileage.Id != 0 {
-		if err := factory.SaleRecordDB(ctx).Where("post_mileage_id = ?", postMileage.Id).Find(&postMileageDtls); err != nil {
+	if len(postMileageIds) != 0 {
+		if err := factory.SaleRecordDB(ctx).Where("1=1").In("post_mileage_id", postMileageDtls).Find(&postMileageDtls); err != nil {
 			return nil, err
 		}
 	}
@@ -100,7 +104,7 @@ func getSaleRecordInfo(ctx context.Context, transactionId int64) (interface{}, e
 
 	return map[string]interface{}{
 		"transactionId":                transactionId,
-		"postMileage":                  postMileage,
+		"postMileage":                  postMileages,
 		"postMileageDtls":              postMileageDtls,
 		"saleRecordDtlSalesmanAmounts": saleRecordDtlSalesmanAmounts,
 		"itemOffers":                   itemOffers,
