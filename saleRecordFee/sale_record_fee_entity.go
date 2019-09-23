@@ -96,8 +96,8 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			return nil, err
 		}
 
-		// ((TotalDistributedPaymentPrice - mileagePrice) * appliedFeeRate) / 100
-		feeAmount = number.ToFixed(((assortedSaleRecordDtl.DistributedPrice.TotalDistributedPaymentPrice-mileagePrice.PointPrice)*appliedFeeRate)/100, nil)
+		// (DistributedCashPrice * appliedFeeRate) / 100
+		feeAmount = number.ToFixed((assortedSaleRecordDtl.DistributedPrice.DistributedCashPrice*appliedFeeRate)/100, nil)
 		postSaleRecordFees = append(
 			postSaleRecordFees,
 			PostSaleRecordFee{
