@@ -27,9 +27,6 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
-		return err
-	}
 
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
@@ -41,6 +38,10 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 
 	if err := (saleRecordFee.SaleRecordFeeEventHandler{}).Handle(ctx, event); err != nil {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
+	}
+
+	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
+		return err
 	}
 
 	return ReturnApiSucc(c, http.StatusOK, event)

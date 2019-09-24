@@ -112,7 +112,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 				CustomerId:             a.CustomerId,
 				StoreId:                a.StoreId,
 				TotalSalePrice:         assortedSaleRecordDtl.TotalPrice.SalePrice,
-				TotalPaymentPrice:      assortedSaleRecordDtl.DistributedPrice.TotalDistributedPaymentPrice,
+				TotalPaymentPrice:      assortedSaleRecordDtl.TotalPrice.ListPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedCartOfferPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedItemOfferPrice,
 				Mileage:                mileagePrice.Point,
 				MileagePrice:           mileagePrice.PointPrice,
 				ItemFeeRate:            itemFeeRate,

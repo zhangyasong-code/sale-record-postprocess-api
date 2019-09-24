@@ -6,7 +6,6 @@ import (
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
-	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/pangpanglabs/echoswagger"
@@ -49,28 +48,29 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			TotalListPrice:              s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice,
 			TotalSalePrice:              s.AssortedSaleRecordDtlList[i].TotalPrice.SalePrice,
 			TotalDiscountPrice:          s.AssortedSaleRecordDtlList[i].TotalPrice.DiscountPrice,
+			TotalDiscountItemOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TotalDiscountCartOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice,
-			TotalPaymentPrice:           s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice,
+			TotalPaymentPrice:           s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionType:             s.TransactionType,
 			TransactionChannelType:      s.TransactionChannelType,
 			SalesmanSaleDiscountRate:    0,
-			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice,
+			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
 		//查询使用积分
-		var channelType customer.UseType
-		if strings.ToUpper(s.TransactionType) == "MINUS" {
-			channelType = customer.UseTypeUsed
-		} else {
-			channelType = customer.UseTypeUsedCancel
-		}
-		mileage, mileagePrice, err := GetUsedBonus(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId, channelType)
-		if err != nil {
-			logrus.WithField("err", err).Info("GetPostMileageDtlError")
-			return err
-		}
-		saleAmountDtl.Mileage = mileage
-		saleAmountDtl.MileagePrice = mileagePrice
+		// var channelType customer.UseType
+		// if strings.ToUpper(s.TransactionType) == "MINUS" {
+		// 	channelType = customer.UseTypeUsed
+		// } else {
+		// 	channelType = customer.UseTypeUsedCancel
+		// }
+		// mileage, mileagePrice, err := GetUsedBonus(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId, channelType)
+		// if err != nil {
+		// 	logrus.WithField("err", err).Info("GetPostMileageDtlError")
+		// 	return err
+		// }
+		saleAmountDtl.Mileage = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
+		saleAmountDtl.MileagePrice = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
 		//计算营业员业绩金额-SalesmanSaleAmount
 		offers := []SaleRecordDtlOffer{}
 		if s.TotalPrice.DiscountPrice == 0 {
