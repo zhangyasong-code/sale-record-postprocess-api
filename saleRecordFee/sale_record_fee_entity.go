@@ -2,13 +2,12 @@ package saleRecordFee
 
 import (
 	"context"
+	"math"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
 
 	"github.com/sirupsen/logrus"
-
-	"github.com/pangpanglabs/goutils/number"
 )
 
 func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a models.SaleRecordEvent) ([]PostSaleRecordFee, error) {
@@ -95,9 +94,12 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			logrus.WithFields(logrus.Fields{"OrderItemId": assortedSaleRecordDtl.OrderItemId, "RefundItemId": assortedSaleRecordDtl.RefundItemId, "Error": err}).Error("GetOrgMileageDtl failed!")
 			return nil, err
 		}
-
-		// (DistributedCashPrice * appliedFeeRate) / 100
-		feeAmount = number.ToFixed((assortedSaleRecordDtl.DistributedPrice.DistributedCashPrice*appliedFeeRate)/100, nil)
+		// total_list_price -  total_distributed_cart_offer_price - total_distributed_item_offer_price - (total_distributed_payment_price - distributed_cash_price)
+		sellingAmt := assortedSaleRecordDtl.ListPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedCartOfferPrice -
+			assortedSaleRecordDtl.DistributedPrice.TotalDistributedItemOfferPrice - (assortedSaleRecordDtl.DistributedPrice.TotalDistributedPaymentPrice -
+			assortedSaleRecordDtl.DistributedPrice.DistributedCashPrice)
+		// SellingAmt-(floor(((SellingAmt-SellingAmt*FeeRate/100)*1/0.01))*0.01)
+		feeAmount = sellingAmt - (math.Floor(((sellingAmt - sellingAmt*appliedFeeRate/100) / 0.01)) * 0.01)
 		postSaleRecordFees = append(
 			postSaleRecordFees,
 			PostSaleRecordFee{
