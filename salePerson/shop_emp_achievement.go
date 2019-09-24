@@ -17,6 +17,7 @@ type SaleRecordDtlSalesmanAmount struct {
 	TotalListPrice              float64   `json:"totalListPrice" xorm:"decimal(19,2)"`
 	TotalSalePrice              float64   `json:"totalSalePrice" xorm:"decimal(19,2)"`
 	TotalDiscountPrice          float64   `json:"totalDiscountPrice" xorm:"decimal(19,2)"`
+	TotalDiscountItemOfferPrice float64   `json:"totalDiscountItemOfferPrice" xorm:"decimal(19,2)"`
 	TotalDiscountCartOfferPrice float64   `json:"totalDiscountCartOfferPrice" xorm:"decimal(19,2)"`
 	TotalPaymentPrice           float64   `json:"totalDistributedPaymentPrice" xorm:"decimal(19,2)"`
 	TransactionType             string    `json:"transactionType"`
