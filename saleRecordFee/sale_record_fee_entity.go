@@ -22,26 +22,28 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 		if eventFeeRate != 0 {
 			continue
 		}
-		promotionEvent, err := promotion.GetByNo(ctx, cartOffer.OfferNo)
-		if err != nil {
-			logrus.WithField("Error", err).Info("GetPromotionEvent error")
-			return nil, err
-		}
-		eventTypeCode = promotionEvent.EventTypeCode
-		if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
-			eventFeeRate = promotionEvent.FeeRate
-			if eventFeeRate <= 0 {
-				postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-				has, _, err := postFailCreateSaleFee.Get(ctx)
-				if err != nil {
-					return nil, err
-				}
-				if !has {
-					if err := postFailCreateSaleFee.Save(ctx); err != nil {
+		if cartOffer.CouponNo == "" && cartOffer.OfferNo != "" {
+			promotionEvent, err := promotion.GetByNo(ctx, cartOffer.OfferNo)
+			if err != nil {
+				logrus.WithField("Error", err).Info("GetPromotionEvent error")
+				return nil, err
+			}
+			eventTypeCode = promotionEvent.EventTypeCode
+			if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
+				eventFeeRate = promotionEvent.FeeRate
+				if eventFeeRate <= 0 {
+					postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
+					has, _, err := postFailCreateSaleFee.Get(ctx)
+					if err != nil {
 						return nil, err
 					}
+					if !has {
+						if err := postFailCreateSaleFee.Save(ctx); err != nil {
+							return nil, err
+						}
+					}
+					return nil, nil
 				}
-				return nil, nil
 			}
 		}
 	}
@@ -50,30 +52,32 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 		feeAmount = 0
 		// Use the offerNo to query promotionEvent
 		if eventFeeRate == 0 && len(assortedSaleRecordDtl.ItemOffers) != 0 {
-			for _, ItemOffer := range assortedSaleRecordDtl.ItemOffers {
+			for _, itemOffer := range assortedSaleRecordDtl.ItemOffers {
 				if eventFeeRate != 0 {
 					continue
 				}
-				promotionEvent, err := promotion.GetByNo(ctx, ItemOffer.OfferNo)
-				if err != nil {
-					logrus.WithField("Error", err).Info("GetPromotionEvent error")
-					return nil, err
-				}
-				eventTypeCode = promotionEvent.EventTypeCode
-				if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
-					eventFeeRate = promotionEvent.FeeRate
-					if eventFeeRate <= 0 {
-						postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-						has, _, err := postFailCreateSaleFee.Get(ctx)
-						if err != nil {
-							return nil, err
-						}
-						if !has {
-							if err := postFailCreateSaleFee.Save(ctx); err != nil {
+				if itemOffer.CouponNo == "" && itemOffer.OfferNo != "" {
+					promotionEvent, err := promotion.GetByNo(ctx, itemOffer.OfferNo)
+					if err != nil {
+						logrus.WithField("Error", err).Info("GetPromotionEvent error")
+						return nil, err
+					}
+					eventTypeCode = promotionEvent.EventTypeCode
+					if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
+						eventFeeRate = promotionEvent.FeeRate
+						if eventFeeRate <= 0 {
+							postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
+							has, _, err := postFailCreateSaleFee.Get(ctx)
+							if err != nil {
 								return nil, err
 							}
+							if !has {
+								if err := postFailCreateSaleFee.Save(ctx); err != nil {
+									return nil, err
+								}
+							}
+							return nil, nil
 						}
-						return nil, nil
 					}
 				}
 			}
