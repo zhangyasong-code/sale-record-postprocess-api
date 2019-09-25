@@ -131,13 +131,13 @@ func ToCSLOfferType(offerType OfferType, templateCode string) (string, error) {
 func (p *Promotion) ToCSLDisCount(StandardValue, DiscountValue float64) {
 	switch p.EventType {
 	case "01":
-		p.SaleBaseAmt = StandardValue
-		p.DiscountBaseAmt = DiscountValue
+		p.SaleBaseAmt = getDefaultValue(StandardValue) + 1
+		p.DiscountBaseAmt = getDefaultValue(DiscountValue)
 		p.NormalSaleRecognitionChk = true
 		break
 	case "02":
-		p.SaleBaseAmt = StandardValue
-		p.DiscountBaseAmt = DiscountValue
+		p.SaleBaseAmt = getDefaultValue(StandardValue) + 1
+		p.DiscountBaseAmt = getDefaultValue(DiscountValue)
 		p.NormalSaleRecognitionChk = false
 		break
 	case "03":
@@ -170,4 +170,12 @@ func GetFeeRate(offerType OfferType, simulations []CampaignSimulation) float64 {
 	} else {
 		return 0
 	}
+}
+
+//offer金额小于10，或是类型为数量时，默认传10
+func getDefaultValue(value float64) float64 {
+	if value < 10 {
+		return 10
+	}
+	return value
 }
