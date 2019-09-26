@@ -29,11 +29,11 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 			if pay.PayMethod == "CASH" {
 				paymentCode = "11"
 			} else if pay.PayMethod == "WXPAY" {
-				paymentCode = "01"
+				paymentCode = "O1"
 			} else if pay.PayMethod == "wechat.prepay" {
-				paymentCode = "01"
+				paymentCode = "O1"
 			} else if pay.PayMethod == "ALIPAY" {
-				paymentCode = "02"
+				paymentCode = "O2"
 			} else if pay.PayMethod == "CREDITCARD" {
 				paymentCode = "12"
 				creditCardFirmCode = "01"
