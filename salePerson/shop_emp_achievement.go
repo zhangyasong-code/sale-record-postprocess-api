@@ -14,6 +14,7 @@ type SaleRecordDtlSalesmanAmount struct {
 	RefundId                    int64     `json:"refundId"` //退货单号：销售时退货单号为0
 	StoreId                     int64     `json:"storeId"`
 	SalesmanId                  int64     `json:"salesmanId"`
+	ItemCode                    string    `json:"itemCode"`
 	TotalListPrice              float64   `json:"totalListPrice" xorm:"decimal(19,2)"`
 	TotalSalePrice              float64   `json:"totalSalePrice" xorm:"decimal(19,2)"`
 	TotalDiscountPrice          float64   `json:"totalDiscountPrice" xorm:"decimal(19,2)"`
@@ -33,6 +34,7 @@ type SaleRecordDtlSalesmanAmount struct {
 }
 type SaleRecordDtlOffer struct {
 	Id               int64     `json:"id"`
+	ItemCode         string    `json:"itemCode"`
 	OfferId          int64     `json:"offerId" xorm:"index"`
 	SalesmanAmountId int64     `json:"salesmanAmountId" xorm:"index"`
 	EventType        string    `json:"eventType"`                            //PromotionEvent.EventTypeCode

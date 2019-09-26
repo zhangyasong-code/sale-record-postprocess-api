@@ -6,6 +6,7 @@ import (
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
+	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/pangpanglabs/echoswagger"
@@ -45,6 +46,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			RefundId:                    s.RefundId,
 			StoreId:                     s.StoreId,
 			SalesmanId:                  s.SalesmanId,
+			ItemCode:                    s.AssortedSaleRecordDtlList[i].ItemCode,
 			TotalListPrice:              s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice,
 			TotalSalePrice:              s.AssortedSaleRecordDtlList[i].TotalPrice.SalePrice,
 			TotalDiscountPrice:          s.AssortedSaleRecordDtlList[i].TotalPrice.DiscountPrice,
@@ -57,40 +59,61 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
-		//查询使用积分
-		// var channelType customer.UseType
-		// if strings.ToUpper(s.TransactionType) == "MINUS" {
-		// 	channelType = customer.UseTypeUsed
-		// } else {
-		// 	channelType = customer.UseTypeUsedCancel
-		// }
-		// mileage, mileagePrice, err := GetUsedBonus(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId, channelType)
-		// if err != nil {
-		// 	logrus.WithField("err", err).Info("GetPostMileageDtlError")
-		// 	return err
-		// }
 		saleAmountDtl.Mileage = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
 		saleAmountDtl.MileagePrice = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
 		//计算营业员业绩金额-SalesmanSaleAmount
-		offers := []SaleRecordDtlOffer{}
+		itemOffers := []SaleRecordDtlOffer{}
 		if s.TotalPrice.DiscountPrice == 0 {
 			saleAmountDtl.SalesmanSaleAmount = saleAmountDtl.TotalPaymentPrice
 			saleAmountDtl.SalesmanNormalSaleAmount = saleAmountDtl.TotalPaymentPrice
 			saleAmountDtl.SalesmanDiscountSaleAmount = 0
 		} else {
-			//查询使用优惠的类型
-			offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountType(ctx, s.AssortedSaleRecordDtlList[i].ItemOffers, s.TransactionType, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
-			if err != nil {
-				logrus.WithField("err", err).Info("GetPostMileageDtlError")
-				return err
+			//查询使用优惠的类9
+			itemSalesmanSaleDiscountRate := 0.00
+			itemSalesmanSaleAmount := 0.00
+			//单品的offer的优先级高于购物车的offer 先查单品的offer
+			if len(s.AssortedSaleRecordDtlList[i].ItemOffers) != 0 {
+				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountType(ctx, s.AssortedSaleRecordDtlList[i].ItemOffers, s.TransactionType, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
+				if err != nil {
+					logrus.WithField("err", err).Info("GetPostMileageDtlError")
+					return err
+				}
+				itemOffers = offers
+				itemSalesmanSaleDiscountRate = salesmanSaleDiscountRate
+				itemSalesmanSaleAmount = salesmanSaleAmount
+			} else {
+				//查询购物车的优惠类型
+				itemsOffer := []models.CartOffer{}
+				for i := 0; i < len(s.CartOffers); i++ {
+					itemCodes := strings.Split(s.CartOffers[i].ItemCodes, ",")
+					for n := 0; n < len(itemCodes); n++ {
+						itemOffer := models.CartOffer{
+							OfferId:   s.CartOffers[i].OfferId,
+							OfferNo:   s.CartOffers[i].OfferNo,
+							CouponNo:  s.CartOffers[i].CouponNo,
+							ItemCodes: itemCodes[n],
+							Price:     s.CartOffers[i].Price,
+						}
+						itemsOffer = append(itemsOffer, itemOffer)
+					}
+				}
+				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountTypeCartOffer(ctx, itemsOffer, s.AssortedSaleRecordDtlList[i].ItemCode, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
+				if err != nil {
+					logrus.WithField("err", err).Info("GetDiscountTypeCartOfferByItemCodeError")
+					return err
+				}
+				itemOffers = offers
+				itemSalesmanSaleDiscountRate = salesmanSaleDiscountRate
+				itemSalesmanSaleAmount = salesmanSaleAmount
 			}
-			saleAmountDtl.SalesmanSaleDiscountRate = salesmanSaleDiscountRate
-			if salesmanSaleAmount != 0 {
-				saleAmountDtl.SalesmanSaleAmount = salesmanSaleAmount
+
+			saleAmountDtl.SalesmanSaleDiscountRate = itemSalesmanSaleDiscountRate
+			if itemSalesmanSaleAmount != 0 {
+				saleAmountDtl.SalesmanSaleAmount = itemSalesmanSaleAmount
 			}
 
 			//拆分业绩金额-正常业绩和折扣业绩
-			normalSaleAmount, discountSaleAmount := SeparateNormalAndDiscountAmt(offers, saleAmountDtl.SalesmanSaleAmount, saleAmountDtl.TotalListPrice)
+			normalSaleAmount, discountSaleAmount := SeparateNormalAndDiscountAmt(itemOffers, saleAmountDtl.SalesmanSaleAmount, saleAmountDtl.TotalListPrice)
 			saleAmountDtl.SalesmanNormalSaleAmount = normalSaleAmount
 			saleAmountDtl.SalesmanDiscountSaleAmount = discountSaleAmount
 		}
@@ -102,7 +125,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			return err
 		}
 
-		if err := SaveOffer(ctx, offers, dtl.Id); err != nil {
+		if err := SaveOffer(ctx, itemOffers, dtl.Id); err != nil {
 			logrus.WithField("err", err).Info("SaveSaleAmountOfferFail")
 			return err
 		}
@@ -230,6 +253,39 @@ func SaveOffer(ctx context.Context, offers []SaleRecordDtlOffer, saleAmountDtlId
 	}
 	return nil
 }
+func GetDiscountTypeCartOffer(ctx context.Context, offers []models.CartOffer, itemCode string, totalPaymentPrice, mileagePrice float64) ([]SaleRecordDtlOffer, float64, float64, error) {
+	res := []SaleRecordDtlOffer{}
+	var salesmanSaleDiscountRate, salesmanSaleAmount float64
+	for n := 0; n < len(offers); n++ {
+		if offers[n].ItemCodes == itemCode {
+			p, err := promotion.GetByNo(ctx, offers[n].OfferNo)
+			if err != nil {
+				return res, 0, 0, err
+			}
+			offer := SaleRecordDtlOffer{
+				OfferId:         offers[n].OfferId,
+				EventType:       p.EventTypeCode,
+				ItemCode:        offers[n].ItemCodes,
+				SaleBaseAmt:     p.SaleBaseAmt,
+				DiscountBaseAmt: p.DiscountBaseAmt,
+				DiscountRate:    p.DiscountRate,
+			}
+			res = append(res, offer)
+			//计算实际销售额活动扣率
+			if p.EventTypeCode == SaleEventGive { //送活动
+				salesmanSaleDiscountRate = math.Floor((p.DiscountBaseAmt/(p.SaleBaseAmt*0.1+p.SaleBaseAmt+p.DiscountBaseAmt))*100) / 100
+			}
+			switch p.EventTypeCode {
+			case SaleEventReduce, SaleEventDiscount: //减 折
+				salesmanSaleAmount = totalPaymentPrice - mileagePrice
+			case SaleEventGive: //送
+				salesmanSaleAmount = math.Floor((totalPaymentPrice-mileagePrice-totalPaymentPrice*salesmanSaleDiscountRate)*100) / 100
+			}
+		}
+
+	}
+	return res, salesmanSaleDiscountRate, salesmanSaleAmount, nil
+}
 func (h SalesPersonEventHandler) HandleTest(c echo.Context) error {
 	var s models.SaleRecordEvent
 	if err := c.Bind(&s); err != nil {
@@ -246,49 +302,74 @@ func (h SalesPersonEventHandler) HandleTest(c echo.Context) error {
 			RefundId:                    s.RefundId,
 			StoreId:                     s.StoreId,
 			SalesmanId:                  s.SalesmanId,
+			ItemCode:                    s.AssortedSaleRecordDtlList[i].ItemCode,
 			TotalListPrice:              s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice,
 			TotalSalePrice:              s.AssortedSaleRecordDtlList[i].TotalPrice.SalePrice,
 			TotalDiscountPrice:          s.AssortedSaleRecordDtlList[i].TotalPrice.DiscountPrice,
+			TotalDiscountItemOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TotalDiscountCartOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice,
-			TotalPaymentPrice:           s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice,
+			TotalPaymentPrice:           s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionType:             s.TransactionType,
 			TransactionChannelType:      s.TransactionChannelType,
 			SalesmanSaleDiscountRate:    0,
-			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice,
+			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
-		//查询使用积分
-		var channelType customer.UseType
-		if s.TransactionType == "MINUS" {
-			channelType = customer.UseTypeUsed
-		} else {
-			channelType = customer.UseTypeUsedCancel
-		}
-		mileage, mileagePrice, err := GetUsedBonus(ctx, s.AssortedSaleRecordDtlList[i].Id, s.AssortedSaleRecordDtlList[i].OrderItemId, s.AssortedSaleRecordDtlList[i].RefundItemId, channelType)
-		if err != nil {
-			logrus.WithField("err", err).Info("GetPostMileageDtlError")
-			return err
-		}
-		saleAmountDtl.Mileage = mileage
-		saleAmountDtl.MileagePrice = mileagePrice
+		saleAmountDtl.Mileage = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
+		saleAmountDtl.MileagePrice = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
 		//计算营业员业绩金额-SalesmanSaleAmount
-		offers := []SaleRecordDtlOffer{}
+		itemOffers := []SaleRecordDtlOffer{}
 		if s.TotalPrice.DiscountPrice == 0 {
 			saleAmountDtl.SalesmanSaleAmount = saleAmountDtl.TotalPaymentPrice
 			saleAmountDtl.SalesmanNormalSaleAmount = saleAmountDtl.TotalPaymentPrice
 			saleAmountDtl.SalesmanDiscountSaleAmount = 0
 		} else {
-			//查询使用优惠的类型
-			offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountType(ctx, s.AssortedSaleRecordDtlList[i].ItemOffers, s.TransactionType, saleAmountDtl.TotalPaymentPrice, saleAmountDtl.MileagePrice)
-			if err != nil {
-				logrus.WithField("err", err).Info("GetPostMileageDtlError")
-				return err
+			//查询使用优惠的类9
+			itemSalesmanSaleDiscountRate := 0.00
+			itemSalesmanSaleAmount := 0.00
+			//单品的offer的优先级高于购物车的offer 先查单品的offer
+			if len(s.AssortedSaleRecordDtlList[i].ItemOffers) != 0 {
+				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountType(ctx, s.AssortedSaleRecordDtlList[i].ItemOffers, s.TransactionType, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
+				if err != nil {
+					logrus.WithField("err", err).Info("GetPostMileageDtlError")
+					return err
+				}
+				itemOffers = offers
+				itemSalesmanSaleDiscountRate = salesmanSaleDiscountRate
+				itemSalesmanSaleAmount = salesmanSaleAmount
+			} else {
+				//查询购物车的优惠类型
+				itemsOffer := []models.CartOffer{}
+				for i := 0; i < len(s.CartOffers); i++ {
+					itemCodes := strings.Split(s.CartOffers[i].ItemCodes, ",")
+					for n := 0; n < len(itemCodes); n++ {
+						itemOffer := models.CartOffer{
+							OfferId:   s.CartOffers[i].OfferId,
+							OfferNo:   s.CartOffers[i].OfferNo,
+							CouponNo:  s.CartOffers[i].CouponNo,
+							ItemCodes: itemCodes[n],
+							Price:     s.CartOffers[i].Price,
+						}
+						itemsOffer = append(itemsOffer, itemOffer)
+					}
+				}
+				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountTypeCartOffer(ctx, itemsOffer, s.AssortedSaleRecordDtlList[i].ItemCode, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
+				if err != nil {
+					logrus.WithField("err", err).Info("GetDiscountTypeCartOfferByItemCodeError")
+					return err
+				}
+				itemOffers = offers
+				itemSalesmanSaleDiscountRate = salesmanSaleDiscountRate
+				itemSalesmanSaleAmount = salesmanSaleAmount
 			}
-			saleAmountDtl.SalesmanSaleDiscountRate = salesmanSaleDiscountRate
-			saleAmountDtl.SalesmanSaleAmount = salesmanSaleAmount
+
+			saleAmountDtl.SalesmanSaleDiscountRate = itemSalesmanSaleDiscountRate
+			if itemSalesmanSaleAmount != 0 {
+				saleAmountDtl.SalesmanSaleAmount = itemSalesmanSaleAmount
+			}
 
 			//拆分业绩金额-正常业绩和折扣业绩
-			normalSaleAmount, discountSaleAmount := SeparateNormalAndDiscountAmt(offers, saleAmountDtl.SalesmanSaleAmount, saleAmountDtl.TotalListPrice)
+			normalSaleAmount, discountSaleAmount := SeparateNormalAndDiscountAmt(itemOffers, saleAmountDtl.SalesmanSaleAmount, saleAmountDtl.TotalListPrice)
 			saleAmountDtl.SalesmanNormalSaleAmount = normalSaleAmount
 			saleAmountDtl.SalesmanDiscountSaleAmount = discountSaleAmount
 		}
@@ -300,7 +381,7 @@ func (h SalesPersonEventHandler) HandleTest(c echo.Context) error {
 			return err
 		}
 
-		if err := SaveOffer(ctx, offers, dtl.Id); err != nil {
+		if err := SaveOffer(ctx, itemOffers, dtl.Id); err != nil {
 			logrus.WithField("err", err).Info("SaveSaleAmountOfferFail")
 			return err
 		}
