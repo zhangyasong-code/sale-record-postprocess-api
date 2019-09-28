@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nhub/sale-record-postprocess-api/factory"
+	"strings"
 	"time"
 )
 
@@ -26,7 +27,9 @@ type PromotionEvent struct {
 	DiscountBaseAmt           float64   `json:"discountBaseAmt"`
 	DiscountRate              float64   `json:"discountRate"`
 	StaffSaleChk              bool      `json:"staffSaleChk"`
+	ErrorMsg                  string    `json:"errorMsg"`
 	CreatedAt                 time.Time `json:"createdAt" xorm:"created"`
+	UpdatedAt                 time.Time `json:"updatedAt" xorm:"updated"`
 }
 
 func (p *PromotionEvent) create(ctx context.Context) error {
@@ -69,4 +72,44 @@ func (PromotionEvent) createInArrary(ctx context.Context, promotions []Promotion
 		return err
 	}
 	return nil
+}
+
+func (p PromotionEvent) createOrUpdate(ctx context.Context) error {
+	var promotion PromotionEvent
+	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", p.OfferNo).Get(&promotion)
+	if err != nil {
+		return err
+	}
+	if exist {
+		_, err := factory.SaleRecordDB(ctx).ID(promotion.Id).Cols("event_no,sale_base_amt,discount_base_amount,discount_rate,fee_rate,error_msg").Update(p)
+		if err != nil {
+			return err
+		}
+	} else {
+		if err := p.create(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (PromotionEvent) GetAll(ctx context.Context, v SearchInput) ([]PromotionEvent, int64, error) {
+	var (
+		list       []PromotionEvent
+		totalCount int64
+		err        error
+	)
+	query := factory.SaleRecordDB(ctx)
+	if v.Q != "" {
+		query = query.Where("event_name like ?", "%"+v.Q+"%")
+	}
+	if v.EventTypeCodes != "" {
+		codes := strings.Split(v.EventTypeCodes, ",")
+		query = query.In("event_type_code", codes)
+	}
+	if err = setSortOrder(query, v.Sortby, v.Order, "promotion_event"); err != nil {
+		return nil, 0, nil
+	}
+	totalCount, err = query.Limit(v.MaxResultCount, v.SkipCount).FindAndCount(&list)
+	return list, totalCount, nil
 }

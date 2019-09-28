@@ -2,7 +2,7 @@ package promotion
 
 import (
 	"context"
-	"errors"
+	"fmt"
 )
 
 type CampaignEventHandler struct {
@@ -23,19 +23,17 @@ func (h CampaignEventHandler) HandleCartCampaign(ctx context.Context, c CartCamp
 
 	//3.调用promotion-api(上传数据到CSL，并获取eventNo)
 	for i := range promotions {
-		eventNo, error := getEventNoByPromotion(ctx, promotions[i])
+		eventNo, err := getEventNoByPromotion(ctx, promotions[i])
 		if err != nil {
-			return error
-		}
-		if eventNo == "" {
-			return errors.New("eventNo is null")
+			promotions[i].ErrorMsg = fmt.Sprintf("%s", err)
+		} else if eventNo == "" {
+			promotions[i].ErrorMsg = "eventNo is null"
 		}
 		promotions[i].EventNo = eventNo
-	}
 
-	//4.保存到数据库
-	if err = (PromotionEvent{}).createInArrary(ctx, promotions); err != nil {
-		return err
+		if err := promotions[i].createOrUpdate(ctx); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -56,19 +54,18 @@ func (h CampaignEventHandler) HandleCatalogCampaign(ctx context.Context, c Catal
 
 	//3.调用promotion-api
 	for i := range promotions {
-		eventNo, error := getEventNoByPromotion(ctx, promotions[i])
+		eventNo, err := getEventNoByPromotion(ctx, promotions[i])
 		if err != nil {
-			return error
-		}
-		if eventNo == "" {
-			return errors.New("eventNo is null")
+			promotions[i].ErrorMsg = fmt.Sprintf("%s", err)
+		} else if eventNo == "" {
+			promotions[i].ErrorMsg = "eventNo is null"
 		}
 		promotions[i].EventNo = eventNo
-	}
 
-	//4.保存到数据库(上传数据到CSL，并获取eventNo)
-	if err = (PromotionEvent{}).createInArrary(ctx, promotions); err != nil {
-		return err
+		if err := promotions[i].createOrUpdate(ctx); err != nil {
+			return err
+		}
+
 	}
 
 	return nil

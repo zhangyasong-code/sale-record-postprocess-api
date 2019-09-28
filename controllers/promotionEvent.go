@@ -16,6 +16,8 @@ func (c PromotionEventController) Init(g echoswagger.ApiGroup) {
 
 	g.GET("/:no", c.GetOne).
 		AddParamPath("", "no", "no of Offer")
+	g.GET("", c.GetAll).
+		AddParamBody(promotion.SearchInput{}, "", "", true)
 }
 
 func (PromotionEventController) GetOne(c echo.Context) error {
@@ -33,4 +35,23 @@ func (PromotionEventController) GetOne(c echo.Context) error {
 		return ReturnApiFail(c, http.StatusNotFound, ApiErrorNotFound, nil)
 	}
 	return ReturnApiSucc(c, http.StatusOK, v)
+}
+
+func (PromotionEventController) GetAll(c echo.Context) error {
+	var v promotion.SearchInput
+	if err := c.Bind(&v); err != nil {
+		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
+	}
+
+	if v.MaxResultCount == 0 {
+		v.MaxResultCount = 10
+	}
+	result, totalCount, err := promotion.PromotionEvent{}.GetAll(c.Request().Context(), v)
+	if err != nil {
+		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
+	}
+	return ReturnApiSucc(c, http.StatusOK, ArrayResult{
+		TotalCount: totalCount,
+		Items:      result,
+	})
 }

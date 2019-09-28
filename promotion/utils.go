@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"strconv"
+
+	"github.com/go-xorm/xorm"
 )
 
 type ConditionType string
@@ -12,6 +14,15 @@ const (
 	ConditionTypeStoreId = "store_id"
 	ConditionTypeBrandId = "brand_id"
 )
+
+type SearchInput struct {
+	Q              string   `query:"q"`
+	EventTypeCodes string   `query:"eventTypeCodes"`
+	Sortby         []string `query:"sortby"`
+	Order          []string `query:"order"`
+	SkipCount      int      `query:"skipCount"`
+	MaxResultCount int      `query:"maxResultCount"`
+}
 
 type Brand struct {
 	Id   int64  `json:"id"`
@@ -179,4 +190,48 @@ func getDefaultValue(standardValue, discountValue float64) (float64, float64) {
 		standardValue = discountValue + 1
 	}
 	return standardValue, discountValue
+}
+
+func setSortOrder(q xorm.Interface, sortby, order []string, table ...string) error {
+	connect := func(col string) string {
+		if len(table) > 0 {
+			return table[0] + "." + col
+		}
+		return col
+	}
+
+	if len(sortby) != 0 {
+		if len(sortby) == len(order) {
+			// 1) for each sort field, there is an associated order
+			for i, v := range sortby {
+				v = connect(v)
+				if order[i] == "desc" {
+					q.Desc(v)
+				} else if order[i] == "asc" {
+					q.Asc(v)
+				} else {
+					return errors.New("Invalid order. Must be either [asc|desc]")
+				}
+			}
+		} else if len(sortby) != len(order) && len(order) == 1 {
+			// 2) there is exactly one order, all the sorted fields will be sorted by this order
+			for _, v := range sortby {
+				v = connect(v)
+				if order[0] == "desc" {
+					q.Desc(v)
+				} else if order[0] == "asc" {
+					q.Asc(v)
+				} else {
+					return errors.New("Invalid order. Must be either [asc|desc]")
+				}
+			}
+		} else if len(sortby) != len(order) && len(order) != 1 {
+			return errors.New("'sortby', 'order' sizes mismatch or 'order' size is not 1")
+		}
+	} else {
+		if len(order) != 0 {
+			return errors.New("unused 'order' fields")
+		}
+	}
+	return nil
 }

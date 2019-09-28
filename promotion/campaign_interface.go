@@ -61,9 +61,9 @@ func getEventNoByPromotion(ctx context.Context, p PromotionEvent) (string, error
 		Result  string `json:"result"`
 		Success bool   `json:"success"`
 		Error   struct {
-			Code    int64       `json:"code"`
-			Message string      `json:"message"`
-			Details interface{} `json:"details"`
+			Code    int64  `json:"code"`
+			Message string `json:"message"`
+			Details string `json:"details"`
 		} `json:"error"`
 	}
 	url := fmt.Sprintf("%s/v1/promotions", config.Config().Services.PromotionApi)
@@ -73,7 +73,7 @@ func getEventNoByPromotion(ctx context.Context, p PromotionEvent) (string, error
 		return "", err
 	}
 	if !resp.Success {
-		return "", fmt.Errorf("%d-%s", resp.Error.Code, resp.Error.Message)
+		return "", fmt.Errorf("%d-%s-%s", resp.Error.Code, resp.Error.Message, resp.Error.Details)
 	}
 	return resp.Result, nil
 }
