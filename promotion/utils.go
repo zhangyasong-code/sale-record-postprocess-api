@@ -106,12 +106,11 @@ func ToCSLOfferType(offerType OfferType, templateCode string) (string, error) {
 		} else if offerType == OfferTypeChannel {
 			eventTypeCode = "V"
 		}
-	//TODO:区分优惠券和custEvent模板
-	case "B1", "B2", "C1", "C2", "C6", "D1":
+	case "B1", "B2", "C1", "C6", "D1":
 		if offerType == OfferTypeBrand {
 			eventTypeCode = "02"
 		}
-	case "C5":
+	case "C5", "C2":
 		if offerType == OfferTypeBrand {
 			eventTypeCode = "02"
 		} else if offerType == OfferTypeMember {
