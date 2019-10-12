@@ -256,21 +256,24 @@ func SaveOffer(ctx context.Context, offers []SaleRecordDtlOffer, saleAmountDtlId
 func GetDiscountTypeCartOffer(ctx context.Context, offers []models.CartOffer, itemCode string, totalPaymentPrice, mileagePrice float64) ([]SaleRecordDtlOffer, float64, float64, error) {
 	res := []SaleRecordDtlOffer{}
 	var salesmanSaleDiscountRate, salesmanSaleAmount float64
-	for n := 0; n < len(offers); n++ {
-		if offers[n].ItemCodes == itemCode {
+	for n := range offers {
+		if offers[n].ItemCodes != itemCode {
+			continue
+		}
+		offer := SaleRecordDtlOffer{
+			OfferId:  offers[n].OfferId,
+			ItemCode: offers[n].ItemCodes,
+		}
+		if offers[n].CouponNo == "" {
 			p, err := promotion.GetByNo(ctx, offers[n].OfferNo)
 			if err != nil {
 				return res, 0, 0, err
 			}
-			offer := SaleRecordDtlOffer{
-				OfferId:         offers[n].OfferId,
-				EventType:       p.EventTypeCode,
-				ItemCode:        offers[n].ItemCodes,
-				SaleBaseAmt:     p.SaleBaseAmt,
-				DiscountBaseAmt: p.DiscountBaseAmt,
-				DiscountRate:    p.DiscountRate,
-			}
-			res = append(res, offer)
+			offer.EventType = p.EventTypeCode
+			offer.SaleBaseAmt = p.SaleBaseAmt
+			offer.DiscountBaseAmt = p.DiscountBaseAmt
+			offer.DiscountRate = p.DiscountRate
+
 			//计算实际销售额活动扣率
 			if p.EventTypeCode == SaleEventGive { //送活动
 				salesmanSaleDiscountRate = math.Floor((p.DiscountBaseAmt/(p.SaleBaseAmt*0.1+p.SaleBaseAmt+p.DiscountBaseAmt))*100) / 100
@@ -281,8 +284,11 @@ func GetDiscountTypeCartOffer(ctx context.Context, offers []models.CartOffer, it
 			case SaleEventGive: //送
 				salesmanSaleAmount = math.Floor((totalPaymentPrice-mileagePrice-totalPaymentPrice*salesmanSaleDiscountRate)*100) / 100
 			}
+		} else {
+			offer.EventType = CustEventCoupon
 		}
-
+		res = append(res, offer)
+		return res, salesmanSaleDiscountRate, salesmanSaleAmount, nil
 	}
 	return res, salesmanSaleDiscountRate, salesmanSaleAmount, nil
 }
