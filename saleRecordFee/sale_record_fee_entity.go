@@ -6,6 +6,7 @@ import (
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,11 +14,12 @@ import (
 func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a models.SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
 	var eventFeeRate, appliedFeeRate, feeAmount, itemFeeRate float64
-	var eventTypeCode string
+	var eventTypeCode, itemCodes string
 
 	appliedFeeRate = 0
 	eventTypeCode = ""
 	eventFeeRate = 0
+	var cartOffers []models.CartOffer
 	for _, cartOffer := range a.CartOffers {
 		if eventFeeRate != 0 {
 			continue
@@ -30,6 +32,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			}
 			eventTypeCode = promotionEvent.EventTypeCode
 			if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
+				cartOffers = append(cartOffers, cartOffer)
 				eventFeeRate = promotionEvent.FeeRate
 				if eventFeeRate <= 0 {
 					postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
@@ -50,39 +53,14 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
 		feeAmount = 0
-		// Use the offerNo to query promotionEvent
-		if eventFeeRate == 0 && len(assortedSaleRecordDtl.ItemOffers) != 0 {
-			for _, itemOffer := range assortedSaleRecordDtl.ItemOffers {
-				if eventFeeRate != 0 {
-					continue
-				}
-				if itemOffer.CouponNo == "" && itemOffer.OfferNo != "" {
-					promotionEvent, err := promotion.GetByNo(ctx, itemOffer.OfferNo)
-					if err != nil {
-						logrus.WithField("Error", err).Info("GetPromotionEvent error")
-						return nil, err
-					}
-					eventTypeCode = promotionEvent.EventTypeCode
-					if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
-						eventFeeRate = promotionEvent.FeeRate
-						if eventFeeRate <= 0 {
-							postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-							has, _, err := postFailCreateSaleFee.Get(ctx)
-							if err != nil {
-								return nil, err
-							}
-							if !has {
-								if err := postFailCreateSaleFee.Save(ctx); err != nil {
-									return nil, err
-								}
-							}
-							return nil, nil
-						}
-					}
-				}
+		for _, cartOffer := range cartOffers {
+			itemCodes = cartOffer.ItemCodes
+			result := strings.Index(itemCodes+",", assortedSaleRecordDtl.ItemCode+",")
+			if result != -1 {
+				appliedFeeRate = eventFeeRate
+				break
 			}
 		}
-		appliedFeeRate = eventFeeRate
 		itemFeeRate = assortedSaleRecordDtl.FeeRate
 		// eventFeeRate 优先级大于 itemFeeRate
 		if appliedFeeRate == 0 && itemFeeRate > 0 {
