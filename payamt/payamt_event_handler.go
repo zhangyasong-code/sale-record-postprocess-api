@@ -2,6 +2,7 @@ package payamt
 
 import (
 	"context"
+	"math"
 	"nhub/sale-record-postprocess-api/models"
 )
 
@@ -19,6 +20,11 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 
 	var postPayment []PostPayment
 	pays, err := Pay{}.GetPayamt(ctx, record.OrderId)
+
+	if record.RefundId > 0 {
+		pays = makeRefundPays(pays, record.RefundId)
+	}
+
 	if len(pays) > 0 {
 		for _, pay := range pays {
 			if pay.PayMethod == "MILEAGE" {
@@ -58,4 +64,16 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 	}
 
 	return nil
+}
+
+func makeRefundPays(pays []Pay, refundId int64) []Pay {
+	var refundPays = make([]Pay, 0)
+	for _, pay := range pays {
+		if pay.RefundOrderId != refundId {
+			continue
+		}
+		pay.PayAmt = math.Abs(pay.PayAmt)
+		refundPays = append(refundPays, pay)
+	}
+	return refundPays
 }

@@ -2,14 +2,15 @@ package payamt
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
 	"time"
 
+	"github.com/matryer/try"
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
-	"github.com/sirupsen/logrus"
 )
 
 type Pay struct {
@@ -45,6 +46,10 @@ type Pay struct {
 	MdiscountAmount float64   `json:"mdiscountAmount"`
 }
 
+var client = httpreq.NewClient(httpreq.ClientConfig{
+	Timeout: 10 * time.Second,
+})
+
 func (Pay) GetPayamt(ctx context.Context, orderId int64) ([]Pay, error) {
 	var resp struct {
 		Result  []Pay `json:"result"`
@@ -56,16 +61,24 @@ func (Pay) GetPayamt(ctx context.Context, orderId int64) ([]Pay, error) {
 		} `json:"error"`
 	}
 	url := fmt.Sprintf("%s/v1/query/orderId/%v", config.Config().Services.PayamtApi, orderId)
-	logrus.WithField("url", url).Info("url")
-	if _, err := httpreq.New(http.MethodGet, url, nil).
-		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
-		Call(&resp); err != nil {
-		return nil, err
-	} else if !resp.Success {
-		logrus.WithFields(logrus.Fields{
-			"errorCode":    resp.Error.Code,
-			"errorMessage": resp.Error.Message,
-		}).Error("Fail to get payamt")
+
+	err := try.Do(func(attempt int) (bool, error) {
+		_, err := httpreq.New(http.MethodGet, url, nil).
+			WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
+			CallWithClient(&resp, client)
+
+		if err != nil {
+			time.Sleep(5 * time.Second)
+		}
+
+		if len(resp.Result) == 0 {
+			err = errors.New("resp.Result null")
+			time.Sleep(5 * time.Second)
+		}
+		return attempt < 13, err
+	})
+
+	if err != nil {
 		return nil, fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
 	}
 
