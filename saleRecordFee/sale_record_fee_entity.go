@@ -52,6 +52,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 	}
 
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
+		appliedFeeRate = 0
 		feeAmount = 0
 		for _, cartOffer := range cartOffers {
 			itemCodes = cartOffer.ItemCodes
