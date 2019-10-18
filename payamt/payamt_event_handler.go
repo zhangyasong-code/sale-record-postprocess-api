@@ -21,13 +21,14 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 	var postPayment []PostPayment
 	pays, err := Pay{}.GetPayamt(ctx, record.OrderId)
 
-	if record.RefundId > 0 {
-		pays = makeRefundPays(pays, record.RefundId)
-	}
-
 	if len(pays) > 0 {
 		for _, pay := range pays {
 			if pay.PayMethod == "MILEAGE" {
+				continue
+			}
+			if record.RefundId != 0 && pay.RefundOrderId != record.RefundId {
+				continue
+			} else if record.RefundId == 0 && pay.RefundOrderId != 0 {
 				continue
 			}
 			paymentCode := "11"
@@ -48,7 +49,7 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 				TransactionId:      record.TransactionId,
 				SeqNo:              pay.SeqNo,
 				PaymentCode:        paymentCode,
-				PaymentAmt:         pay.PayAmt,
+				PaymentAmt:         math.Abs(pay.PayAmt),
 				InUserID:           pay.CreatedBy,
 				InDateTime:         pay.CreatedAt,
 				ModiUserID:         pay.CreatedBy,
@@ -64,16 +65,4 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 	}
 
 	return nil
-}
-
-func makeRefundPays(pays []Pay, refundId int64) []Pay {
-	var refundPays = make([]Pay, 0)
-	for _, pay := range pays {
-		if pay.RefundOrderId != refundId {
-			continue
-		}
-		pay.PayAmt = math.Abs(pay.PayAmt)
-		refundPays = append(refundPays, pay)
-	}
-	return refundPays
 }
