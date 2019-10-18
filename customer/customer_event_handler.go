@@ -12,6 +12,9 @@ type CustomerEventHandler struct {
 }
 
 func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleRecordEvent) error {
+	if record.CustomerId == 0 {
+		return nil
+	}
 	has, err := PostMileage{}.CheckOrderRefundExist(ctx, record.TransactionId)
 	if err != nil {
 		logrus.WithField("err", err).Info("CheckOrderRefundExist")
@@ -29,9 +32,6 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 	if record.RefundId != 0 {
 		tradeNo = record.RefundId
 	}
-	if record.CustomerId == 0 {
-		return nil
-	}
 
 	mileages, err := Mileage{}.GetMembershipMileages(ctx, tradeNo)
 	if err != nil {
@@ -46,7 +46,7 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 			if err := postMileage.Create(ctx); err != nil {
 				return err
 			}
-			postMileageDtls := PostMileageDtl{}.MakePostMileageDtls(postMileage, mileage.MileageDtls, record.AssortedSaleRecordDtlList)
+			postMileageDtls := PostMileageDtl{}.MakePostMileageDtls(postMileage, mileage.MileageDtls, record)
 			if err := (PostMileageDtl{}).CreateBatch(ctx, postMileageDtls); err != nil {
 				return err
 			}

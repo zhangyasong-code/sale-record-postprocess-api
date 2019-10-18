@@ -110,7 +110,8 @@ func (PostMileage) CheckOrderRefundExist(ctx context.Context, transactionId int6
 	return has, nil
 }
 
-func (PostMileageDtl) MakePostMileageDtls(postMileage *PostMileage, mileageDtls []MileageDtl, recordDtls []models.AssortedSaleRecordDtl) []PostMileageDtl {
+func (PostMileageDtl) MakePostMileageDtls(postMileage *PostMileage, mileageDtls []MileageDtl, record models.SaleRecordEvent) []PostMileageDtl {
+	recordDtls := record.AssortedSaleRecordDtlList
 	var postMileageDtls []PostMileageDtl
 	for _, mileageDtl := range mileageDtls {
 		postMileageDtl := PostMileageDtl{
@@ -120,12 +121,23 @@ func (PostMileageDtl) MakePostMileageDtls(postMileage *PostMileage, mileageDtls 
 			PointPrice:          mileageDtl.PointPrice,
 			CustMileagePolicyNo: postMileage.CustMileagePolicyNo,
 		}
-		for _, recordDtl := range recordDtls {
-			if recordDtl.OrderItemId == mileageDtl.ItemId && recordDtl.RefundItemId == mileageDtl.PreItemId {
-				postMileageDtl.TransactionDtlId = recordDtl.Id
-				postMileageDtl.OrderItemId = recordDtl.OrderItemId
-				postMileageDtl.RefundItemId = recordDtl.RefundItemId
-				postMileageDtls = append(postMileageDtls, postMileageDtl)
+		if record.RefundId != 0 {
+			for _, recordDtl := range recordDtls {
+				if recordDtl.RefundItemId == mileageDtl.ItemId {
+					postMileageDtl.TransactionDtlId = recordDtl.Id
+					postMileageDtl.OrderItemId = recordDtl.OrderItemId
+					postMileageDtl.RefundItemId = recordDtl.RefundItemId
+					postMileageDtls = append(postMileageDtls, postMileageDtl)
+				}
+			}
+		} else {
+			for _, recordDtl := range recordDtls {
+				if recordDtl.OrderItemId == mileageDtl.ItemId {
+					postMileageDtl.TransactionDtlId = recordDtl.Id
+					postMileageDtl.OrderItemId = recordDtl.OrderItemId
+					postMileageDtl.RefundItemId = recordDtl.RefundItemId
+					postMileageDtls = append(postMileageDtls, postMileageDtl)
+				}
 			}
 		}
 	}
