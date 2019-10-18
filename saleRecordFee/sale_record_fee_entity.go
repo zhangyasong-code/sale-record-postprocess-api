@@ -78,7 +78,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			return nil, err
 		}
 		// total_list_price -  total_distributed_cart_offer_price - total_distributed_item_offer_price - (total_distributed_payment_price - distributed_cash_price)
-		sellingAmt := assortedSaleRecordDtl.ListPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedCartOfferPrice -
+		sellingAmt := assortedSaleRecordDtl.TotalPrice.ListPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedCartOfferPrice -
 			assortedSaleRecordDtl.DistributedPrice.TotalDistributedItemOfferPrice - (assortedSaleRecordDtl.DistributedPrice.TotalDistributedPaymentPrice -
 			assortedSaleRecordDtl.DistributedPrice.DistributedCashPrice)
 		// SellingAmt-(floor(((SellingAmt-SellingAmt*FeeRate/100)*1/0.01))*0.01)
