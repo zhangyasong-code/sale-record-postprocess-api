@@ -10,8 +10,10 @@ type SaleRecordDtlSalesmanAmount struct {
 	Id                          int64     `json:"id"`
 	TransactionId               int64     `json:"transactionId" xorm:"index"`
 	SaleRecordDtlId             int64     `json:"saleRecordDtlId" xorm:"index"`
-	OrderId                     int64     `json:"orderId"`  //销售单号：退货时销售单号为原销售单号
+	OrderId                     int64     `json:"orderId"` //销售单号：退货时销售单号为原销售单号
+	OrderItemId                 int64     `json:"orderItemId"`
 	RefundId                    int64     `json:"refundId"` //退货单号：销售时退货单号为0
+	RefundItemId                int64     `json:"refundItemId"`
 	StoreId                     int64     `json:"storeId"`
 	SalesmanId                  int64     `json:"salesmanId"`
 	ItemCode                    string    `json:"itemCode"`
