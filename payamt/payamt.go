@@ -50,7 +50,7 @@ var client = httpreq.NewClient(httpreq.ClientConfig{
 	Timeout: 10 * time.Second,
 })
 
-func (Pay) GetPayamt(ctx context.Context, orderId int64) ([]Pay, error) {
+func (Pay) GetPayamt(ctx context.Context, orderId, refundId int64) ([]Pay, error) {
 	var resp struct {
 		Result  []Pay `json:"result"`
 		Success bool  `json:"success"`
@@ -60,7 +60,13 @@ func (Pay) GetPayamt(ctx context.Context, orderId int64) ([]Pay, error) {
 			Details string `json:"details"`
 		} `json:"error"`
 	}
-	url := fmt.Sprintf("%s/v1/query/orderId/%v", config.Config().Services.PayamtApi, orderId)
+
+	var url string
+	if refundId > 0 {
+		url = fmt.Sprintf("%s/v1/query/refundId/%v", config.Config().Services.PayamtApi, refundId)
+	} else {
+		url = fmt.Sprintf("%s/v1/query/orderId/%v", config.Config().Services.PayamtApi, orderId)
+	}
 
 	err := try.Do(func(attempt int) (bool, error) {
 		_, err := httpreq.New(http.MethodGet, url, nil).
