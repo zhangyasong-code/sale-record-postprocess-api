@@ -17,18 +17,11 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 	if has {
 		return nil
 	}
-
+	pays, err := Pay{}.GetPayamt(ctx, record.OrderId, record.RefundId)
 	var postPayment []PostPayment
-	pays, err := Pay{}.GetPayamt(ctx, record.OrderId)
-
 	if len(pays) > 0 {
 		for _, pay := range pays {
 			if pay.PayMethod == "MILEAGE" {
-				continue
-			}
-			if record.RefundId != 0 && pay.RefundOrderId != record.RefundId {
-				continue
-			} else if record.RefundId == 0 && pay.RefundOrderId != 0 {
 				continue
 			}
 			paymentCode := "11"
