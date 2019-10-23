@@ -201,13 +201,13 @@ func GetDiscountType(ctx context.Context, offers []models.Offer, channelType str
 		res = append(res, offer)
 		//计算实际销售额活动扣率
 		if p.EventTypeCode == SaleEventGive { //送活动
-			salesmanSaleDiscountRate = math.Floor((p.DiscountBaseAmt/(p.SaleBaseAmt*0.1+p.SaleBaseAmt+p.DiscountBaseAmt))*100) / 100
+			salesmanSaleDiscountRate = (math.Floor((p.DiscountBaseAmt / (p.SaleBaseAmt*0.1 + p.SaleBaseAmt + p.DiscountBaseAmt)) * 100)) / 100
 		}
 		switch p.EventTypeCode {
 		case SaleEventReduce, SaleEventDiscount: //减 折
 			salesmanSaleAmount = totalPaymentPrice - mileagePrice
 		case SaleEventGive: //送
-			salesmanSaleAmount = math.Floor((totalPaymentPrice-mileagePrice-totalPaymentPrice*salesmanSaleDiscountRate)*100) / 100
+			salesmanSaleAmount = (math.Floor((totalPaymentPrice - mileagePrice - totalPaymentPrice*salesmanSaleDiscountRate) * 100)) / 100
 		}
 	}
 	return res, salesmanSaleDiscountRate, salesmanSaleAmount, nil
@@ -278,13 +278,13 @@ func GetDiscountTypeCartOffer(ctx context.Context, offers []models.CartOffer, it
 
 			//计算实际销售额活动扣率
 			if p.EventTypeCode == SaleEventGive { //送活动
-				salesmanSaleDiscountRate = math.Floor((p.DiscountBaseAmt/(p.SaleBaseAmt*0.1+p.SaleBaseAmt+p.DiscountBaseAmt))*100) / 100
+				salesmanSaleDiscountRate = (math.Floor((p.DiscountBaseAmt / (p.SaleBaseAmt*0.1 + p.SaleBaseAmt + p.DiscountBaseAmt)) * 100)) / 100
 			}
 			switch p.EventTypeCode {
 			case SaleEventReduce, SaleEventDiscount: //减 折
 				salesmanSaleAmount = totalPaymentPrice - mileagePrice
 			case SaleEventGive: //送
-				salesmanSaleAmount = math.Floor((totalPaymentPrice-mileagePrice-totalPaymentPrice*salesmanSaleDiscountRate)*100) / 100
+				salesmanSaleAmount = (math.Floor((totalPaymentPrice - mileagePrice - totalPaymentPrice*salesmanSaleDiscountRate) * 100)) / 100
 			}
 		} else {
 			offer.EventType = CustEventCoupon
