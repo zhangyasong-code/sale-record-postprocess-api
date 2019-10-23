@@ -70,7 +70,8 @@ type C struct {
 		PromotionApi,
 		StoreApi,
 		PlaceManagementApi,
-		CslCustomerApi string
+		CslCustomerApi,
+		ClearanceAdapterForSaleRecordApi string
 	}
 	AppEnv, JwtSecret string
 	ServiceName       string

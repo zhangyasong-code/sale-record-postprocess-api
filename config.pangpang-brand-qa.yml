@@ -34,4 +34,5 @@ services:
   placeManagementApi: http://place-management-api.pangpang-brand-qa:8080
   cslCustomerApi: https://dmz-qa.p2shop.com.cn/mslv2/csl-customer-if
   payamtApi: http://pay-api.pangpang-brand-qa:8080
+  clearanceAdapterForSaleRecordApi: http://clearance-adapter-for-sale-record.mslv2-qa:8000
 serviceName: sale-record-postprocess-api
