@@ -7,6 +7,7 @@ import (
 	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
+	"nhub/sale-record-postprocess-api/sendCsl"
 	"nomni/utils/eventconsume"
 
 	"github.com/pangpanglabs/goutils/kafka"
@@ -64,5 +65,14 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		"TransactionId": event.TransactionId,
 		"OrderId":       event.OrderId,
 	}).Info("Success to handle event")
+
+	// Send to Csl
+	if err := (sendCsl.Send{}).SendToCsl(ctx, event); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"TransactionId": event.TransactionId,
+			"OrderId":       event.OrderId,
+		}).WithError(err).Error("Fail to SendToCsl")
+		return err
+	}
 	return nil
 }
