@@ -65,7 +65,7 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 		saleAmountDtl.MileagePrice = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
 		//计算营业员业绩金额-SalesmanSaleAmount
 		itemOffers := []SaleRecordDtlOffer{}
-		if s.TotalPrice.DiscountPrice == 0 {
+		if s.TotalPrice.DiscountPrice == 0 && len(s.CartOffers) == 0 {
 			saleAmountDtl.SalesmanSaleAmount = saleAmountDtl.TotalPaymentPrice
 			saleAmountDtl.SalesmanNormalSaleAmount = saleAmountDtl.TotalPaymentPrice
 			saleAmountDtl.SalesmanDiscountSaleAmount = 0
