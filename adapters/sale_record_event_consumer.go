@@ -5,6 +5,7 @@ import (
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/payamt"
+	"nhub/sale-record-postprocess-api/postprocess"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 	"nhub/sale-record-postprocess-api/sendCsl"
@@ -34,7 +35,32 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			"TransactionId": event.TransactionId,
 			"OrderId":       event.OrderId,
 		}).WithError(err).Error("Fail to handle CustomerEventHandler")
+
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleMileage),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
+
 		return err
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleMileage),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
 	}
 
 	if err := (salePerson.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
@@ -42,7 +68,32 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			"TransactionId": event.TransactionId,
 			"OrderId":       event.OrderId,
 		}).WithError(err).Error("Fail to handle SalesPersonEventHandler")
+
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSalePerson),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
+
 		return err
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSalePerson),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
 	}
 
 	if err := (saleRecordFee.SaleRecordFeeEventHandler{}).Handle(ctx, event); err != nil {
@@ -50,7 +101,32 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			"TransactionId": event.TransactionId,
 			"OrderId":       event.OrderId,
 		}).WithError(err).Error("Fail to handle SaleRecordFeeEventHandler")
+
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSaleFee),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
+
 		return err
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSaleFee),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
 	}
 
 	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
@@ -58,7 +134,32 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			"TransactionId": event.TransactionId,
 			"OrderId":       event.OrderId,
 		}).WithError(err).Error("Fail to handle PayAmtEventHandler")
+
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModulePay),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
+
 		return err
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModulePay),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
 	}
 
 	logrus.WithFields(logrus.Fields{

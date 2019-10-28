@@ -1,9 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
-	"nhub/sale-record-postprocess-api/payamt"
+	"nhub/sale-record-postprocess-api/postprocess"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 
@@ -27,21 +28,87 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+	recordStr, _ := json.Marshal(event)
 
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleMileage),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(recordStr),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
+		}
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleMileage),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(recordStr),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
+		}
 	}
 
 	if err := (salePerson.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSalePerson),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(recordStr),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
+		}
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSalePerson),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(recordStr),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
+		}
 	}
 
 	if err := (saleRecordFee.SaleRecordFeeEventHandler{}).Handle(ctx, event); err != nil {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSaleFee),
+			IsSuccess:    false,
+			Error:        err.Error(),
+			ModuleEntity: string(recordStr),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
+		}
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
-	}
-
-	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
-		return err
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			OrderId:      event.OrderId,
+			RefundId:     event.RefundId,
+			ModuleType:   string(postprocess.ModuleSaleFee),
+			IsSuccess:    true,
+			Error:        "",
+			ModuleEntity: string(recordStr),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
+		}
 	}
 
 	return ReturnApiSucc(c, http.StatusOK, event)

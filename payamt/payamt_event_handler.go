@@ -18,6 +18,9 @@ func (h PayAmtEventHandler) Handle(ctx context.Context, record models.SaleRecord
 		return nil
 	}
 	pays, err := Pay{}.GetPayamt(ctx, record.OrderId, record.RefundId)
+	if err != nil {
+		return err
+	}
 	var postPayment []PostPayment
 	if len(pays) > 0 {
 		for _, pay := range pays {
