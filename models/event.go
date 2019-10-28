@@ -76,11 +76,12 @@ type TotalPrice struct {
 }
 
 type CartOffer struct {
-	OfferId   int64   `json:"offerId"`
-	OfferNo   string  `json:"offerNo"`
-	CouponNo  string  `json:"couponNo"`
-	ItemCodes string  `json:"itemCodes"`
-	Price     float64 `json:"price"`
+	OfferId         int64   `json:"offerId"`
+	OfferNo         string  `json:"offerNo"`
+	CouponNo        string  `json:"couponNo"`
+	ItemCodes       string  `json:"itemCodes"`
+	TargetItemCodes string  `json:"targetItemCodes"`
+	Price           float64 `json:"price"`
 }
 
 type DistributedPrice struct {
