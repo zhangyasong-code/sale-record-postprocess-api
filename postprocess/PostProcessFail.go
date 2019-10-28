@@ -65,39 +65,39 @@ func (post *PostProcessSuccess) Update(ctx context.Context) error {
 	return nil
 }
 
-func (PostProcessSuccess) GetAll(ctx context.Context, postFailParam PostFailParam) (int64, []PostProcessSuccess, error) {
+func (PostProcessSuccess) Get(ctx context.Context, isSuccess bool, orderId, refundId int64, moduleType string) (PostProcessSuccess, error) {
+	var postProcessSuccess PostProcessSuccess
+	exist, err := factory.SaleRecordDB(ctx).Where("1 = 1").And("is_Success = ?", isSuccess).And("order_id = ?", orderId).And("refund_id = ?", refundId).And("module_type = ?", moduleType).Get(&postProcessSuccess)
+	if err != nil {
+		return postProcessSuccess, err
+	} else if !exist {
+		return postProcessSuccess, nil
+	}
+
+	return postProcessSuccess, nil
+}
+
+func (PostProcessSuccess) GetAll(ctx context.Context, isSuccess bool, orderId, refundId int64, moduleType string, skipCount int, maxResultCount int) (int64, []PostProcessSuccess, error) {
 	var postProcessSuccess []PostProcessSuccess
 	query := func() xorm.Interface {
-		query := factory.SaleRecordDB(ctx).Where("1 = 1").And("isSuccess = ?", postFailParam.IsSuccess)
-		if postFailParam.OrderId != 0 {
-			query.And("order_id = ?", postFailParam.OrderId)
+		query := factory.SaleRecordDB(ctx).Where("1 = 1").And("is_Success = ?", isSuccess)
+		if orderId != 0 {
+			query.And("order_id = ?", orderId)
 		}
-		if postFailParam.RefundId != 0 {
-			query.And("refund_id = ?", postFailParam.RefundId)
+		if refundId != 0 {
+			query.And("refund_id = ?", refundId)
 		}
-		if postFailParam.ModuleType != ModuleUnknown {
-			query.And("module_type = ?", string(postFailParam.ModuleType))
+		if moduleType != "" {
+			query.And("module_type = ?", moduleType)
 		}
 		return query
 	}
-	totalCount, err := query().Limit(postFailParam.MaxResultCount, postFailParam.SkipCount).FindAndCount(&postProcessSuccess)
+	if maxResultCount != 0 {
+		query().Limit(maxResultCount, skipCount)
+	}
+	totalCount, err := query().FindAndCount(&postProcessSuccess)
 	if err != nil {
 		return 0, nil, err
 	}
 	return totalCount, postProcessSuccess, nil
-}
-
-func IsSuccessd(ctx context.Context) error {
-	_, postProcessSuccess, err := PostProcessSuccess{}.GetAll(ctx, PostFailParam{IsSuccess: false})
-	if err != nil {
-		return err
-	}
-	for _, postProcess := range postProcessSuccess {
-		postProcess.IsSuccess = true
-		if err := postProcess.Update(ctx); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

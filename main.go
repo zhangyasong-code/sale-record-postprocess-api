@@ -84,6 +84,7 @@ func main() {
 	controllers.PromotionEventController{}.Init(r.Group("PromotionEvent", "/v1/promotion-event"))
 	controllers.SaleRecordInfoController{}.Init(r.Group("SaleRecordInfo", "/v1/sale-record-info"))
 	salePerson.SalesPersonEventHandler{}.Init(r.Group("SalesPerson", "/v1/sales-person"))
+	controllers.ProcessLogController{}.Init(r.Group("ProcessLog", "/v1/process-log"))
 
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")

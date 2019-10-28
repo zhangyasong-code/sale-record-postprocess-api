@@ -49,6 +49,8 @@ var (
 	ApiErrorPassword      = ApiError{Code: 20002, Message: "Password error"}
 )
 
+const defaultMaxResultCount = 20
+
 func ReturnApiFail(c echo.Context, status int, apiError ApiError, err error, v ...interface{}) error {
 	str := ""
 	if err != nil {
