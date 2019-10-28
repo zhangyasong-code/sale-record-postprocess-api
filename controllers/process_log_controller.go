@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 	"nhub/sale-record-postprocess-api/postprocess"
-	"omni/utils/api"
+	"nomni/utils/api"
 	"strconv"
 
 	"github.com/labstack/echo"
