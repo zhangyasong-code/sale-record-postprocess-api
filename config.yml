@@ -13,11 +13,11 @@ behaviorLog:
 eventKafka:
   saleRecordEvent:
     brokers:
-      - 127.0.0.1:9092
+      - localhost:9092
     topic: pangpang-brand-sale-record
   promotionEvent:
     brokers:
-      - 127.0.0.1:9092
+      - localhost:9092
     topic: offer
 services:
   offerApi: https://staging.p2shop.com.cn/pangpang-brand/offer-api

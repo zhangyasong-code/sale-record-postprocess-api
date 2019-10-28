@@ -11,6 +11,7 @@ import (
 	"github.com/matryer/try"
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
+	"github.com/sirupsen/logrus"
 )
 
 type Pay struct {
@@ -67,7 +68,7 @@ func (Pay) GetPayamt(ctx context.Context, orderId, refundId int64) ([]Pay, error
 	} else {
 		url = fmt.Sprintf("%s/v1/query/orderId/%v", config.Config().Services.PayamtApi, orderId)
 	}
-
+	logrus.WithField("url", url).Info("url")
 	err := try.Do(func(attempt int) (bool, error) {
 		_, err := httpreq.New(http.MethodGet, url, nil).
 			WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
@@ -85,7 +86,7 @@ func (Pay) GetPayamt(ctx context.Context, orderId, refundId int64) ([]Pay, error
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
+		return nil, err
 	}
 
 	return resp.Result, nil
