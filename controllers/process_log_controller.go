@@ -38,10 +38,7 @@ func (ProcessLogController) GetPostProcessFail(c echo.Context) error {
 }
 
 func (ProcessLogController) GetPostProcessFails(c echo.Context) error {
-	orderId, err := strconv.ParseInt(c.QueryParam("orderId"), 10, 64)
-	if orderId == 0 {
-		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, api.MissRequiredParamError("orderId"))
-	}
+	orderId, _ := strconv.ParseInt(c.QueryParam("orderId"), 10, 64)
 	refundId, _ := strconv.ParseInt(c.QueryParam("refundId"), 10, 64)
 	moduleType := c.QueryParam("moduleType")
 	skipCount, _ := strconv.ParseInt(c.QueryParam("skipCount"), 10, 64)

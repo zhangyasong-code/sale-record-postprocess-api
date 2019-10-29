@@ -95,7 +95,7 @@ func (PostProcessSuccess) GetAll(ctx context.Context, isSuccess bool, orderId, r
 	if maxResultCount != 0 {
 		query().Limit(maxResultCount, skipCount)
 	}
-	totalCount, err := query().FindAndCount(&postProcessSuccess)
+	totalCount, err := query().Desc("id").FindAndCount(&postProcessSuccess)
 	if err != nil {
 		return 0, nil, err
 	}
