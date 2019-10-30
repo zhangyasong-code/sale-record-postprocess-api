@@ -87,7 +87,12 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 				//查询购物车的优惠类型
 				itemsOffer := []models.CartOffer{}
 				for i := 0; i < len(s.CartOffers); i++ {
-					itemCodes := strings.Split(s.CartOffers[i].ItemCodes, ",")
+					itemCodes := make([]string, 0)
+					if len(s.CartOffers[i].TargetItemCodes) != 0 {
+						itemCodes = strings.Split(s.CartOffers[i].TargetItemCodes, ",")
+					} else {
+						itemCodes = strings.Split(s.CartOffers[i].ItemCodes, ",")
+					}
 					for n := 0; n < len(itemCodes); n++ {
 						itemOffer := models.CartOffer{
 							OfferId:   s.CartOffers[i].OfferId,
