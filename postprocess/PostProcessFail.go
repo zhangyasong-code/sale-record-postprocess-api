@@ -26,7 +26,7 @@ type PostProcessSuccess struct {
 	RefundId     int64     `json:"refund" xorm:"index default 0"`
 	IsSuccess    bool      `json:"isSuccess" xorm:"index notnull default false"`
 	Error        string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
-	ModuleEntity string    `json:"moduleEntity" xorm:"VARCHAR(5000)"`
+	ModuleEntity string    `json:"moduleEntity" xorm:"TEXT"`
 	CreatedAt    time.Time `json:"createdAt" xorm:"index created"`
 	UpdatedAt    time.Time `json:"updatedAt" xorm:"updated"`
 }
