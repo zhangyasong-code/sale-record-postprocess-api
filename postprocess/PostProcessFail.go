@@ -83,7 +83,7 @@ func (PostProcessSuccess) GetAll(ctx context.Context, isSuccess bool, transactio
 	query := func() xorm.Interface {
 		query := factory.SaleRecordDB(ctx).Where("1 = 1").And("is_Success = ?", isSuccess)
 		if transactionId != 0 {
-			query.And("transaction_id = ?", orderId)
+			query.And("transaction_id = ?", transactionId)
 		}
 		if orderId != 0 {
 			query.And("order_id = ?", orderId)
