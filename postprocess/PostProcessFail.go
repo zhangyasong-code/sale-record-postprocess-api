@@ -20,15 +20,16 @@ const (
 )
 
 type PostProcessSuccess struct {
-	Id           int64     `json:"id"`
-	ModuleType   string    `json:"moduleType" xorm:"index VARCHAR(50)"`
-	OrderId      int64     `json:"orderId" xorm:"index default 0" validate:"required"`
-	RefundId     int64     `json:"refund" xorm:"index default 0"`
-	IsSuccess    bool      `json:"isSuccess" xorm:"index notnull default false"`
-	Error        string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
-	ModuleEntity string    `json:"moduleEntity" xorm:"TEXT"`
-	CreatedAt    time.Time `json:"createdAt" xorm:"index created"`
-	UpdatedAt    time.Time `json:"updatedAt" xorm:"updated"`
+	Id            int64     `json:"id"`
+	ModuleType    string    `json:"moduleType" xorm:"index VARCHAR(50)"`
+	TransactionId int64     `json:"transactionId" xorm:"index default 0" validate:"required"`
+	OrderId       int64     `json:"orderId" xorm:"index default 0" validate:"required"`
+	RefundId      int64     `json:"refund" xorm:"index default 0"`
+	IsSuccess     bool      `json:"isSuccess" xorm:"index notnull default false"`
+	Error         string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
+	ModuleEntity  string    `json:"moduleEntity" xorm:"TEXT"`
+	CreatedAt     time.Time `json:"createdAt" xorm:"index created"`
+	UpdatedAt     time.Time `json:"updatedAt" xorm:"updated"`
 }
 
 type PostFailParam struct {
@@ -65,9 +66,9 @@ func (post *PostProcessSuccess) Update(ctx context.Context) error {
 	return nil
 }
 
-func (PostProcessSuccess) Get(ctx context.Context, isSuccess bool, orderId, refundId int64, moduleType string) (PostProcessSuccess, error) {
+func (PostProcessSuccess) Get(ctx context.Context, isSuccess bool, transactionId int64, moduleType string) (PostProcessSuccess, error) {
 	var postProcessSuccess PostProcessSuccess
-	exist, err := factory.SaleRecordDB(ctx).Where("1 = 1").And("is_Success = ?", isSuccess).And("order_id = ?", orderId).And("refund_id = ?", refundId).And("module_type = ?", moduleType).Get(&postProcessSuccess)
+	exist, err := factory.SaleRecordDB(ctx).Where("1 = 1").And("is_Success = ?", isSuccess).And("transaction_id = ?", transactionId).And("module_type = ?", moduleType).Get(&postProcessSuccess)
 	if err != nil {
 		return postProcessSuccess, err
 	} else if !exist {
@@ -77,10 +78,13 @@ func (PostProcessSuccess) Get(ctx context.Context, isSuccess bool, orderId, refu
 	return postProcessSuccess, nil
 }
 
-func (PostProcessSuccess) GetAll(ctx context.Context, isSuccess bool, orderId, refundId int64, moduleType string, skipCount int, maxResultCount int) (int64, []PostProcessSuccess, error) {
+func (PostProcessSuccess) GetAll(ctx context.Context, isSuccess bool, transactionId, orderId, refundId int64, moduleType string, skipCount int, maxResultCount int) (int64, []PostProcessSuccess, error) {
 	var postProcessSuccess []PostProcessSuccess
 	query := func() xorm.Interface {
 		query := factory.SaleRecordDB(ctx).Where("1 = 1").And("is_Success = ?", isSuccess)
+		if transactionId != 0 {
+			query.And("transaction_id = ?", orderId)
+		}
 		if orderId != 0 {
 			query.And("order_id = ?", orderId)
 		}
