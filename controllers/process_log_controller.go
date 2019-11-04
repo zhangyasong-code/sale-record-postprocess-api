@@ -20,17 +20,16 @@ func (c ProcessLogController) Init(g echoswagger.ApiGroup) {
 }
 
 func (ProcessLogController) GetPostProcessFail(c echo.Context) error {
-	orderId, err := strconv.ParseInt(c.QueryParam("orderId"), 10, 64)
-	if orderId == 0 {
-		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, api.MissRequiredParamError("orderId"))
+	transactionId, _ := strconv.ParseInt(c.QueryParam("transactionId"), 10, 64)
+	if transactionId == 0 {
+		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, api.MissRequiredParamError("transactionId"))
 	}
-	refundId, _ := strconv.ParseInt(c.QueryParam("refundId"), 10, 64)
 	moduleType := c.QueryParam("moduleType")
 	if moduleType == "" {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, api.MissRequiredParamError("moduleType"))
 	}
 
-	v, err := postprocess.PostProcessSuccess{}.Get(c.Request().Context(), false, orderId, refundId, moduleType)
+	v, err := postprocess.PostProcessSuccess{}.Get(c.Request().Context(), false, transactionId, moduleType)
 	if err != nil {
 		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
 	}
@@ -38,6 +37,7 @@ func (ProcessLogController) GetPostProcessFail(c echo.Context) error {
 }
 
 func (ProcessLogController) GetPostProcessFails(c echo.Context) error {
+	transactionId, _ := strconv.ParseInt(c.QueryParam("transactionId"), 10, 64)
 	orderId, _ := strconv.ParseInt(c.QueryParam("orderId"), 10, 64)
 	refundId, _ := strconv.ParseInt(c.QueryParam("refundId"), 10, 64)
 	moduleType := c.QueryParam("moduleType")
@@ -48,7 +48,7 @@ func (ProcessLogController) GetPostProcessFails(c echo.Context) error {
 		maxResultCount = defaultMaxResultCount
 	}
 
-	totalCount, result, err := postprocess.PostProcessSuccess{}.GetAll(c.Request().Context(), false, orderId, refundId, moduleType, int(skipCount), int(maxResultCount))
+	totalCount, result, err := postprocess.PostProcessSuccess{}.GetAll(c.Request().Context(), false, transactionId, orderId, refundId, moduleType, int(skipCount), int(maxResultCount))
 	if err != nil {
 		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
 	}

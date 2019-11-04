@@ -8,7 +8,6 @@ import (
 
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/factory"
-	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/promotion"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
@@ -98,11 +97,6 @@ func getSaleRecordInfo(ctx context.Context, transactionId int64) (interface{}, e
 		return nil, err
 	}
 
-	var postPayments []payamt.PostPayment
-	if err := factory.SaleRecordDB(ctx).Where("transaction_id = ?", transactionId).Find(&postPayments); err != nil {
-		return nil, err
-	}
-
 	return map[string]interface{}{
 		"transactionId":                transactionId,
 		"postMileage":                  postMileages,
@@ -112,6 +106,5 @@ func getSaleRecordInfo(ctx context.Context, transactionId int64) (interface{}, e
 		"cartOffers":                   cartOffers,
 		"postSaleRecordFees":           postSaleRecordFees,
 		"postFailCreateSaleFees":       postFailCreateSaleFees,
-		"postPayments":                 postPayments,
 	}, nil
 }
