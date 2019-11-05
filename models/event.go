@@ -27,6 +27,7 @@ type SaleRecordEvent struct {
 	IsOutPaid                 bool                    `json:"isOutPaid"`
 	CartOffers                []CartOffer             `json:"cartOffers"`
 	Committed                 Committed               `json:"committed"`
+	Payments                  []Payment               `json:"payments"`
 }
 
 type AssortedSaleRecordDtl struct {
@@ -82,6 +83,13 @@ type CartOffer struct {
 	ItemCodes       string  `json:"itemCodes"`
 	TargetItemCodes string  `json:"targetItemCodes"`
 	Price           float64 `json:"price"`
+}
+
+type Payment struct {
+	SeqNo     int64     `json:"seqNo"`
+	PayMethod string    `json:"payMethod"`
+	PayAmt    float64   `json:"payAmt"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type DistributedPrice struct {

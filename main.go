@@ -11,6 +11,7 @@ import (
 	"nhub/sale-record-postprocess-api/config"
 	"nhub/sale-record-postprocess-api/controllers"
 	"nhub/sale-record-postprocess-api/customer"
+	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/postprocess"
 	"nhub/sale-record-postprocess-api/promotion"
 	"nhub/sale-record-postprocess-api/salePerson"
@@ -49,6 +50,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := postprocess.InitDB(saleRecordDB); err != nil {
+		log.Fatal(err)
+	}
+	if err := payamt.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
 

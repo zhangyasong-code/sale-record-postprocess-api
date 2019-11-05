@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
+	"nhub/sale-record-postprocess-api/payamt"
 	"nhub/sale-record-postprocess-api/postprocess"
 	"nhub/sale-record-postprocess-api/salePerson"
 	"nhub/sale-record-postprocess-api/saleRecordFee"
@@ -28,6 +29,41 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	ctx := c.Context()
 	str, _ := json.Marshal(event)
 	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
+
+	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"TransactionId": event.TransactionId,
+			"OrderId":       event.OrderId,
+		}).WithError(err).Error("Fail to handle PayAmtEventHandler")
+
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			TransactionId: event.TransactionId,
+			OrderId:       event.OrderId,
+			RefundId:      event.RefundId,
+			ModuleType:    string(postprocess.ModulePay),
+			IsSuccess:     false,
+			Error:         err.Error(),
+			ModuleEntity:  string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
+
+		return err
+	} else {
+		postProcessSuccess := &postprocess.PostProcessSuccess{
+			TransactionId: event.TransactionId,
+			OrderId:       event.OrderId,
+			RefundId:      event.RefundId,
+			ModuleType:    string(postprocess.ModulePay),
+			IsSuccess:     true,
+			Error:         "",
+			ModuleEntity:  string(str),
+		}
+		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+			return saveErr
+		}
+	}
 
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		logrus.WithFields(logrus.Fields{
