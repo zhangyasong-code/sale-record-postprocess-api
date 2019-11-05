@@ -66,7 +66,6 @@ type C struct {
 		BenefitApi,
 		ProductApi,
 		OfferApi,
-		PayamtApi,
 		PromotionApi,
 		StoreApi,
 		PlaceManagementApi,
