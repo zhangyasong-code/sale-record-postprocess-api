@@ -101,7 +101,7 @@ func (PromotionEvent) GetAll(ctx context.Context, v SearchInput) ([]PromotionEve
 	)
 	query := factory.SaleRecordDB(ctx)
 	if v.Q != "" {
-		query = query.Where("event_name like ?", "%"+v.Q+"%")
+		query = query.Where("event_name LIKE ? OR offer_no LIKE ? OR event_no LIKE ?", v.Q+"%", v.Q+"%", v.Q+"%")
 	}
 	if v.EventTypeCodes != "" {
 		codes := strings.Split(v.EventTypeCodes, ",")
