@@ -7,6 +7,5 @@ import (
 func InitDB(db *xorm.Engine) error {
 	return db.Sync(
 		new(PostMileage),
-		new(PostMileageDtl),
 	)
 }
