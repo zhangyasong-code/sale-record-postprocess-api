@@ -17,6 +17,7 @@ const (
 
 type SearchInput struct {
 	Q              string   `query:"q"`
+	BrandCode      string   `query:"brandCode"`
 	EventTypeCodes string   `query:"eventTypeCodes"`
 	Sortby         []string `query:"sortby"`
 	Order          []string `query:"order"`
