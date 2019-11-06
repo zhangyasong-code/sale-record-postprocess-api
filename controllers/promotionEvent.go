@@ -18,6 +18,8 @@ func (c PromotionEventController) Init(g echoswagger.ApiGroup) {
 		AddParamPath("", "no", "no of Offer")
 	g.GET("", c.GetAll).
 		AddParamBody(promotion.SearchInput{}, "", "", true)
+	g.GET("/coupon", c.GetCouponEvent).
+		AddParamBody(promotion.SearchInput{}, "", "", true)
 }
 
 func (PromotionEventController) GetOne(c echo.Context) error {
@@ -47,6 +49,25 @@ func (PromotionEventController) GetAll(c echo.Context) error {
 		v.MaxResultCount = 10
 	}
 	result, totalCount, err := promotion.PromotionEvent{}.GetAll(c.Request().Context(), v)
+	if err != nil {
+		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
+	}
+	return ReturnApiSucc(c, http.StatusOK, ArrayResult{
+		TotalCount: totalCount,
+		Items:      result,
+	})
+}
+
+func (PromotionEventController) GetCouponEvent(c echo.Context) error {
+	var v promotion.SearchInput
+	if err := c.Bind(&v); err != nil {
+		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
+	}
+
+	if v.MaxResultCount == 0 {
+		v.MaxResultCount = 10
+	}
+	result, totalCount, err := promotion.PostCouponEvent{}.GetAll(c.Request().Context(), v)
 	if err != nil {
 		return ReturnApiFail(c, http.StatusInternalServerError, ApiErrorDB, err)
 	}
