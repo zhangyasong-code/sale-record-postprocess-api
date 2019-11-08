@@ -3,7 +3,6 @@ package salePerson
 import (
 	"context"
 	"math"
-	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
 	"strings"
@@ -55,14 +54,14 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 			TotalDiscountItemOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TotalDiscountCartOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice,
 			TotalPaymentPrice:           s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
+			Mileage:                     s.Mileage,
+			MileagePrice:                s.MileagePrice,
 			TransactionType:             s.TransactionType,
 			TransactionChannelType:      s.TransactionChannelType,
 			SalesmanSaleDiscountRate:    0,
 			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
-		saleAmountDtl.Mileage = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
-		saleAmountDtl.MileagePrice = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
 		//计算营业员业绩金额-SalesmanSaleAmount
 		itemOffers := []SaleRecordDtlOffer{}
 		if s.TotalPrice.DiscountPrice == 0 && len(s.CartOffers) == 0 {
@@ -148,22 +147,6 @@ func isNormalAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode
 func isDiscountAmt(primaryEventTypeCode, secondaryEventTypeCode, saleEventTypeCode string, salesmanSaleAmount, totalListPrice float64) bool {
 	return ((saleEventTypeCode == SaleEventGive || saleEventTypeCode == SaleEventReduce) || (secondaryEventTypeCode == CustEventGift || secondaryEventTypeCode == CustEventAmountGift)) ||
 		((saleEventTypeCode == SaleEventDiscount || primaryEventTypeCode == CustEventVip) && (salesmanSaleAmount/totalListPrice) <= DiscountRate)
-}
-func GetUsedBonus(ctx context.Context, dtlId, dtlOrderItemId, dtlRefundItemId int64, useType customer.UseType) (float64, float64, error) {
-	var mileage float64
-	var mileagePrice float64
-	has, e, err := customer.PostMileageDtl{}.GetByKey(ctx, dtlId, dtlOrderItemId, dtlRefundItemId, useType)
-	if err != nil {
-		return 0, 0, err
-	}
-	if has {
-		mileage = e.Point
-		mileagePrice = e.PointPrice
-	} else {
-		mileage = 0
-		mileagePrice = 0
-	}
-	return mileage, mileagePrice, nil
 }
 func SeparateNormalAndDiscountAmt(offers []SaleRecordDtlOffer, salesmanSaleAmount, totalListPrice float64) (float64, float64) {
 	var normalSaleAmount float64
@@ -322,15 +305,14 @@ func (h SalesPersonEventHandler) HandleTest(c echo.Context) error {
 			TotalDiscountItemOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TotalDiscountCartOfferPrice: s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice,
 			TotalPaymentPrice:           s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
+			Mileage:                     s.Mileage,
+			MileagePrice:                s.MileagePrice,
 			TransactionType:             s.TransactionType,
 			TransactionChannelType:      s.TransactionChannelType,
 			SalesmanSaleDiscountRate:    0,
 			SalesmanSaleAmount:          s.AssortedSaleRecordDtlList[i].TotalPrice.ListPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedCartOfferPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedItemOfferPrice,
 			TransactionCreateDate:       s.TransactionCreateDate,
 		}
-		saleAmountDtl.Mileage = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
-		saleAmountDtl.MileagePrice = s.AssortedSaleRecordDtlList[i].DistributedPrice.TotalDistributedPaymentPrice - s.AssortedSaleRecordDtlList[i].DistributedPrice.DistributedCashPrice
-		//计算营业员业绩金额-SalesmanSaleAmount
 		itemOffers := []SaleRecordDtlOffer{}
 		if s.TotalPrice.DiscountPrice == 0 {
 			saleAmountDtl.SalesmanSaleAmount = saleAmountDtl.TotalPaymentPrice
