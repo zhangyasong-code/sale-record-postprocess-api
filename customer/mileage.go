@@ -178,14 +178,14 @@ func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mile
 			CallWithClient(&resp, client)
 
 		if err != nil {
-			time.Sleep(5 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 
 		if len(resp.Result.Items) == 0 {
 			err = errors.New("resp.Result null")
-			time.Sleep(5 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
-		return attempt < 100, err
+		return attempt < 2, err
 	})
 
 	if err != nil {
