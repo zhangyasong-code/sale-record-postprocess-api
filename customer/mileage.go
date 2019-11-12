@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
+	"nhub/sale-record-postprocess-api/models"
 	"time"
 
 	try "github.com/matryer/try"
@@ -79,6 +80,75 @@ type MileageMall struct {
 	UpdatedBy              string     `json:"updatedBy,omitempty"`
 	CreatedAt              *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt              *time.Time `json:"updatedAt,omitempty"`
+}
+
+func (Mileage) MakeMileage(ctx context.Context, record models.SaleRecordEvent) ([]Mileage, error) {
+	/*获取品牌Id*/
+	brandId, err := Store{}.GetBrandIdByStoreId(ctx, record.StoreId)
+	if err != nil {
+		return nil, err
+	}
+	if brandId == 0 {
+		return nil, fmt.Errorf("Fail to get brandId")
+	}
+
+	mileages := []Mileage{}
+	/*使用积分*/
+	if record.Mileage != 0 {
+		mileage := Mileage{
+			TenantCode: record.TenantCode,
+			MallId:     brandId,
+			StoreId:    record.StoreId,
+			MemberId:   record.CustomerId,
+			Type:       CONSUME,
+			Point:      record.Mileage,
+			PointPrice: record.MileagePrice,
+		}
+		mileageDtls := []MileageDtl{}
+		for _, recordDtl := range record.AssortedSaleRecordDtlList {
+			itemId := recordDtl.OrderItemId
+			if recordDtl.RefundItemId != 0 {
+				itemId = recordDtl.RefundItemId
+			}
+			mileageDtl := MileageDtl{
+				ItemId:     itemId,
+				Type:       CONSUME,
+				Point:      recordDtl.Mileage,
+				PointPrice: recordDtl.MileagePrice,
+			}
+			mileageDtls = append(mileageDtls, mileageDtl)
+		}
+		mileage.MileageDtls = mileageDtls
+		mileages = append(mileages, mileage)
+	}
+
+	/*累计积分*/
+	if record.ObtainMileage != 0 {
+		mileage := Mileage{
+			TenantCode: record.TenantCode,
+			MallId:     brandId,
+			StoreId:    record.StoreId,
+			MemberId:   record.CustomerId,
+			Type:       SALE,
+			Point:      record.ObtainMileage,
+		}
+		mileageDtls := []MileageDtl{}
+		for _, recordDtl := range record.AssortedSaleRecordDtlList {
+			itemId := recordDtl.OrderItemId
+			if recordDtl.RefundItemId != 0 {
+				itemId = recordDtl.RefundItemId
+			}
+			mileageDtl := MileageDtl{
+				ItemId: itemId,
+				Type:   SALE,
+				Point:  recordDtl.ObtainMileage,
+			}
+			mileageDtls = append(mileageDtls, mileageDtl)
+		}
+		mileage.MileageDtls = mileageDtls
+		mileages = append(mileages, mileage)
+	}
+	return mileages, nil
 }
 
 var client = httpreq.NewClient(httpreq.ClientConfig{

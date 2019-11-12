@@ -12,7 +12,7 @@ type CustomerEventHandler struct {
 }
 
 func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleRecordEvent) error {
-	if record.CustomerId == 0 {
+	if record.CustomerId == 0 || (record.Mileage == 0 && record.ObtainMileage == 0) {
 		return nil
 	}
 	has, err := PostMileage{}.CheckOrderRefundExist(ctx, record.TransactionId)
@@ -28,6 +28,32 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 		return nil
 	}
 
+	if err := saveMileageFromSaleRecord(ctx, record); err != nil {
+		return err
+	}
+	return nil
+}
+
+func saveMileageFromSaleRecord(ctx context.Context, record models.SaleRecordEvent) error {
+	mileages, err := Mileage{}.MakeMileage(ctx, record)
+	if err != nil {
+		return err
+	}
+	for _, mileage := range mileages {
+		if mileage.Point != 0 {
+			postMileage, err := PostMileage{}.MakePostMileage(ctx, mileage, record)
+			if err != nil {
+				return err
+			}
+			if err := postMileage.Create(ctx); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func saveMileageFromMembership(ctx context.Context, record models.SaleRecordEvent) error {
 	tradeNo := record.OrderId
 	if record.RefundId != 0 {
 		tradeNo = record.RefundId
@@ -44,10 +70,6 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 				return err
 			}
 			if err := postMileage.Create(ctx); err != nil {
-				return err
-			}
-			postMileageDtls := PostMileageDtl{}.MakePostMileageDtls(postMileage, mileage.MileageDtls, record)
-			if err := (PostMileageDtl{}).CreateBatch(ctx, postMileageDtls); err != nil {
 				return err
 			}
 		}
