@@ -55,9 +55,6 @@ type AssortedSaleRecordDtl struct {
 	FeeRate          float64          `json:"feeRate"`
 	ItemOffers       []Offer          `json:"itemOffers"`
 	Committed        Committed        `json:"committed"`
-	Mileage          float64          `json:"mileage"`
-	MileagePrice     float64          `json:"mileagePrice"`
-	ObtainMileage    float64          `json:"obtainMileage"`
 }
 
 type Committed struct {
