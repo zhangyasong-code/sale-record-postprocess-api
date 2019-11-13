@@ -2,67 +2,15 @@ package customer
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
-	"nhub/sale-record-postprocess-api/models"
 	"time"
 
-	try "github.com/matryer/try"
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
 	"github.com/sirupsen/logrus"
 )
-
-const (
-	SALE    string = "E"
-	CONSUME string = "M"
-	ADJUST  string = "A"
-)
-
-type Mileage struct {
-	Id          int64        `json:"id,omitempty"`         /*ID 主键*/
-	TenantCode  string       `json:"tenantCode,omitempty"` /*租户代码*/
-	MallId      int64        `json:"mallId,omitempty"`     /*购物中心代码*/
-	StoreId     int64        `json:"storeId,omitempty"`    /*店铺代码*/
-	MemberId    int64        `json:"memberId"`             /*会员id*/
-	Type        string       `json:"type,omitempty"`       /*类型*/
-	ChannelId   int64        `json:"channelId"`            /*渠道*/
-	TradeDate   time.Time    `json:"tradeDate,omitempty"`  /*交易日期*/
-	TradeNo     string       `json:"tradeNo,omitempty"`    /*交易单号*/
-	PreTradeNo  string       `json:"preTradeNo,omitempty"` /*原交易单号*/
-	SaleAmount  float64      `json:"saleAmount"`           /*整单金额*/
-	PayAmount   float64      `json:"payAmount"`            /*实付金额*/
-	Point       float64      `json:"point"`                /*积分数量*/
-	PointPrice  float64      `json:"pointPrice"`           /*积分抵扣金额*/
-	Remark      string       `json:"remark,omitempty"`     /*备注*/
-	IsSend      string       `json:"isSend,omitempty"`     /*变动是否推送给顾客*/
-	CreatedBy   string       `json:"createdBy,omitempty"`
-	UpdatedBy   string       `json:"updatedBy,omitempty"`
-	CreatedAt   *time.Time   `json:"createdAt,omitempty"`
-	UpdatedAt   *time.Time   `json:"updatedAt,omitempty"`
-	MileageDtls []MileageDtl `json:"mileageDtls,omitempty"`
-}
-
-type MileageDtl struct {
-	Id         int64      `json:"id,omitempty"`        /*ID 主键*/
-	MileageId  int64      `json:"mileageId,omitempty"` /*Mst表主键*/
-	ItemId     int64      `json:"itemId,omitempty"`    /*详情Id*/
-	PreItemId  int64      `json:"preItemId,omitempty"` /*原详情Id*/
-	OfferNo    string     `json:"offerNo,omitempty"`   /*促销号*/
-	Type       string     `json:"type,omitempty"`      /*类型*/
-	SaleAmount float64    `json:"saleAmount"`          /*整单金额*/
-	PayAmount  float64    `json:"payAmount"`           /*实付金额*/
-	Point      float64    `json:"point"`               /*积分数量*/
-	PointPrice float64    `json:"pointPrice"`          /*积分抵扣金额*/
-	Remark     string     `json:"remark,omitempty"`    /*备注*/
-	IsSend     string     `json:"isSend,omitempty"`    /*变动是否推送给顾客*/
-	CreatedBy  string     `json:"createdBy,omitempty"`
-	CreatedAt  *time.Time `json:"createdAt,omitempty"`
-	UpdatedBy  string     `json:"updatedBy,omitempty"`
-	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
-}
 
 type MileageMall struct {
 	TenantCode             string     `json:"tenantCode,omitempty"`   /*租户代码*/
@@ -80,119 +28,6 @@ type MileageMall struct {
 	UpdatedBy              string     `json:"updatedBy,omitempty"`
 	CreatedAt              *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt              *time.Time `json:"updatedAt,omitempty"`
-}
-
-func (Mileage) MakeMileage(ctx context.Context, record models.SaleRecordEvent) ([]Mileage, error) {
-	/*获取品牌Id*/
-	brandId, err := Store{}.GetBrandIdByStoreId(ctx, record.StoreId)
-	if err != nil {
-		return nil, err
-	}
-	if brandId == 0 {
-		return nil, fmt.Errorf("Fail to get brandId")
-	}
-
-	mileages := []Mileage{}
-	/*使用积分*/
-	if record.Mileage != 0 {
-		mileage := Mileage{
-			TenantCode: record.TenantCode,
-			MallId:     brandId,
-			StoreId:    record.StoreId,
-			MemberId:   record.CustomerId,
-			Type:       CONSUME,
-			Point:      record.Mileage,
-			PointPrice: record.MileagePrice,
-		}
-		mileageDtls := []MileageDtl{}
-		for _, recordDtl := range record.AssortedSaleRecordDtlList {
-			itemId := recordDtl.OrderItemId
-			if recordDtl.RefundItemId != 0 {
-				itemId = recordDtl.RefundItemId
-			}
-			mileageDtl := MileageDtl{
-				ItemId:     itemId,
-				Type:       CONSUME,
-				Point:      recordDtl.Mileage,
-				PointPrice: recordDtl.MileagePrice,
-			}
-			mileageDtls = append(mileageDtls, mileageDtl)
-		}
-		mileage.MileageDtls = mileageDtls
-		mileages = append(mileages, mileage)
-	}
-
-	/*累计积分*/
-	if record.ObtainMileage != 0 {
-		mileage := Mileage{
-			TenantCode: record.TenantCode,
-			MallId:     brandId,
-			StoreId:    record.StoreId,
-			MemberId:   record.CustomerId,
-			Type:       SALE,
-			Point:      record.ObtainMileage,
-		}
-		mileageDtls := []MileageDtl{}
-		for _, recordDtl := range record.AssortedSaleRecordDtlList {
-			itemId := recordDtl.OrderItemId
-			if recordDtl.RefundItemId != 0 {
-				itemId = recordDtl.RefundItemId
-			}
-			mileageDtl := MileageDtl{
-				ItemId: itemId,
-				Type:   SALE,
-				Point:  recordDtl.ObtainMileage,
-			}
-			mileageDtls = append(mileageDtls, mileageDtl)
-		}
-		mileage.MileageDtls = mileageDtls
-		mileages = append(mileages, mileage)
-	}
-	return mileages, nil
-}
-
-var client = httpreq.NewClient(httpreq.ClientConfig{
-	Timeout: 10 * time.Second,
-})
-
-func (Mileage) GetMembershipMileages(ctx context.Context, tradeNo int64) ([]Mileage, error) {
-	var resp struct {
-		Result struct {
-			Items      []Mileage `json:"items"`
-			TotalCount int64     `json:"totalCount"`
-		} `json:"result"`
-		Success bool `json:"success"`
-		Error   struct {
-			Code    int    `json:"code"`
-			Message string `json:"message"`
-			Details string `json:"details"`
-		} `json:"error"`
-	}
-	url := fmt.Sprintf("%s/v1/mileage?tradeNo=%v",
-		config.Config().Services.BenefitApi, tradeNo)
-	logrus.WithField("url", url).Info("url")
-
-	err := try.Do(func(attempt int) (bool, error) {
-		_, err := httpreq.New(http.MethodGet, url, nil).
-			WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
-			CallWithClient(&resp, client)
-
-		if err != nil {
-			time.Sleep(1 * time.Second)
-		}
-
-		if len(resp.Result.Items) == 0 {
-			err = errors.New("resp.Result null")
-			time.Sleep(1 * time.Second)
-		}
-		return attempt < 2, err
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
-	}
-
-	return resp.Result.Items, nil
 }
 
 func (MileageMall) GetMembershipGrade(ctx context.Context, brandId, memberId int64, tenantCode string) (*MileageMall, error) {
