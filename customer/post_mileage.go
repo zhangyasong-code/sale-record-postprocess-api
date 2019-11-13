@@ -2,6 +2,7 @@ package customer
 
 import (
 	"context"
+	"fmt"
 	"nhub/sale-record-postprocess-api/factory"
 	"nhub/sale-record-postprocess-api/models"
 	"time"
@@ -32,22 +33,31 @@ type PostMileage struct {
 	UpdateAt      *time.Time `json:"updateAt" xorm:"updated"`
 }
 
-func (PostMileage) MakePostMileage(ctx context.Context, mileage Mileage, record models.SaleRecordEvent) (*PostMileage, error) {
-	mileageMall, err := MileageMall{}.GetMembershipGrade(ctx, mileage.MallId, mileage.MemberId, mileage.TenantCode)
+func (PostMileage) MakePostMileage(ctx context.Context, record models.SaleRecordEvent) (*PostMileage, error) {
+	/*获取品牌Id*/
+	brandId, err := Store{}.GetBrandIdByStoreId(ctx, record.StoreId)
+	if err != nil {
+		return nil, err
+	}
+	if brandId == 0 {
+		return nil, fmt.Errorf("Fail to get brandId")
+	}
+
+	mileageMall, err := MileageMall{}.GetMembershipGrade(ctx, brandId, record.CustomerId, record.TenantCode)
 	if err != nil {
 		return nil, err
 	}
 
-	brandCode, err := BrandInfo{}.GetBrandInfo(ctx, mileage.MallId)
+	brandCode, err := BrandInfo{}.GetBrandInfo(ctx, brandId)
 	if err != nil {
 		return nil, err
 	}
 
 	postMileage := &PostMileage{
-		TenantCode:    mileage.TenantCode,
-		StoreId:       mileage.StoreId,
-		CustomerId:    mileage.MemberId,
-		BrandId:       mileage.MallId,
+		TenantCode:    record.TenantCode,
+		StoreId:       record.StoreId,
+		CustomerId:    record.CustomerId,
+		BrandId:       brandId,
 		BrandCode:     brandCode,
 		GradeId:       mileageMall.GradeId,
 		TransactionId: record.TransactionId,

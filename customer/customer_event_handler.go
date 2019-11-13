@@ -35,44 +35,13 @@ func (h CustomerEventHandler) Handle(ctx context.Context, record models.SaleReco
 }
 
 func saveMileageFromSaleRecord(ctx context.Context, record models.SaleRecordEvent) error {
-	mileages, err := Mileage{}.MakeMileage(ctx, record)
+	postMileage, err := PostMileage{}.MakePostMileage(ctx, record)
 	if err != nil {
 		return err
 	}
-	for _, mileage := range mileages {
-		if mileage.Point != 0 {
-			postMileage, err := PostMileage{}.MakePostMileage(ctx, mileage, record)
-			if err != nil {
-				return err
-			}
-			if err := postMileage.Create(ctx); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func saveMileageFromMembership(ctx context.Context, record models.SaleRecordEvent) error {
-	tradeNo := record.OrderId
-	if record.RefundId != 0 {
-		tradeNo = record.RefundId
-	}
-
-	mileages, err := Mileage{}.GetMembershipMileages(ctx, tradeNo)
-	if err != nil {
+	if err := postMileage.Create(ctx); err != nil {
 		return err
 	}
-	for _, mileage := range mileages {
-		if mileage.Point != 0 {
-			postMileage, err := PostMileage{}.MakePostMileage(ctx, mileage, record)
-			if err != nil {
-				return err
-			}
-			if err := postMileage.Create(ctx); err != nil {
-				return err
-			}
-		}
-	}
+
 	return nil
 }
