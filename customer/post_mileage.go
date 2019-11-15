@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nhub/sale-record-postprocess-api/factory"
 	"nhub/sale-record-postprocess-api/models"
+	"strconv"
 	"time"
 )
 
@@ -35,7 +36,11 @@ type PostMileage struct {
 
 func (PostMileage) MakePostMileage(ctx context.Context, record models.SaleRecordEvent) (*PostMileage, error) {
 	/*获取品牌Id*/
-	brandId, err := Store{}.GetBrandIdByStoreId(ctx, record.StoreId)
+	brandIds := ""
+	for _, item := range record.AssortedSaleRecordDtlList {
+		brandIds = brandIds + strconv.FormatInt(item.BrandId, 10) + ","
+	}
+	brandId, err := BrandInfo{}.GetCustBrandId(ctx, brandIds)
 	if err != nil {
 		return nil, err
 	}
