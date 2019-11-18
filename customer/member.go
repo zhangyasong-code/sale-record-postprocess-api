@@ -3,8 +3,8 @@ package customer
 import (
 	"context"
 	"fmt"
-	"membership/benefit-api/config"
 	"net/http"
+	"nhub/sale-record-postprocess-api/config"
 
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
