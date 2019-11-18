@@ -35,8 +35,9 @@ type SaleRecordDtlSalesmanAmount struct {
 	CreatedAt                   time.Time `json:"createdAt" xorm:"created"`
 }
 type SaleRecordDtlOffer struct {
-	Id               int64     `json:"id"`
-	ItemCode         string    `json:"itemCode"`
+	Id          int64 `json:"id"`
+	OrderItemId int64 `json:"orderItemId"`
+	//ItemCode         string    `json:"itemCode"`
 	OfferId          int64     `json:"offerId" xorm:"index"`
 	SalesmanAmountId int64     `json:"salesmanAmountId" xorm:"index"`
 	EventType        string    `json:"eventType"`                            //PromotionEvent.EventTypeCode

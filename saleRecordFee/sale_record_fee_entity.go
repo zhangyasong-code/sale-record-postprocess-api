@@ -5,6 +5,7 @@ import (
 	"math"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
+	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -13,7 +14,7 @@ import (
 func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a models.SaleRecordEvent) ([]PostSaleRecordFee, error) {
 	var postSaleRecordFees []PostSaleRecordFee
 	var eventFeeRate, appliedFeeRate, feeAmount, itemFeeRate float64
-	var eventTypeCode, itemCodes string
+	var eventTypeCode, itemIds string
 
 	appliedFeeRate = 0
 	eventTypeCode = ""
@@ -54,8 +55,8 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 		appliedFeeRate = 0
 		feeAmount = 0
 		for _, cartOffer := range cartOffers {
-			itemCodes = cartOffer.ItemCodes
-			result := strings.Index(itemCodes+",", assortedSaleRecordDtl.ItemCode+",")
+			itemIds = cartOffer.ItemIds
+			result := strings.Index(itemIds+",", strconv.FormatInt(assortedSaleRecordDtl.Id, 10)+",")
 			if result != -1 {
 				appliedFeeRate = eventFeeRate
 				break
