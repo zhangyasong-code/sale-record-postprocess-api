@@ -5,6 +5,7 @@ import (
 	"math"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo"
@@ -86,24 +87,24 @@ func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecord
 				//查询购物车的优惠类型
 				itemsOffer := []models.CartOffer{}
 				for i := 0; i < len(s.CartOffers); i++ {
-					itemCodes := make([]string, 0)
-					if len(s.CartOffers[i].TargetItemCodes) != 0 {
-						itemCodes = strings.Split(s.CartOffers[i].TargetItemCodes, ",")
+					itemIds := make([]string, 0)
+					if len(s.CartOffers[i].TargetItemIds) != 0 {
+						itemIds = strings.Split(s.CartOffers[i].TargetItemIds, ",")
 					} else {
-						itemCodes = strings.Split(s.CartOffers[i].ItemCodes, ",")
+						itemIds = strings.Split(s.CartOffers[i].ItemIds, ",")
 					}
-					for n := 0; n < len(itemCodes); n++ {
+					for n := 0; n < len(itemIds); n++ {
 						itemOffer := models.CartOffer{
-							OfferId:   s.CartOffers[i].OfferId,
-							OfferNo:   s.CartOffers[i].OfferNo,
-							CouponNo:  s.CartOffers[i].CouponNo,
-							ItemCodes: itemCodes[n],
-							Price:     s.CartOffers[i].Price,
+							OfferId:  s.CartOffers[i].OfferId,
+							OfferNo:  s.CartOffers[i].OfferNo,
+							CouponNo: s.CartOffers[i].CouponNo,
+							ItemIds:  itemIds[n],
+							Price:    s.CartOffers[i].Price,
 						}
 						itemsOffer = append(itemsOffer, itemOffer)
 					}
 				}
-				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountTypeCartOffer(ctx, itemsOffer, s.AssortedSaleRecordDtlList[i].ItemCode, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
+				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountTypeCartOffer(ctx, itemsOffer, s.AssortedSaleRecordDtlList[i].OrderItemId, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
 				if err != nil {
 					logrus.WithField("err", err).Info("GetDiscountTypeCartOfferByItemCodeError")
 					return err
@@ -243,16 +244,17 @@ func SaveOffer(ctx context.Context, offers []SaleRecordDtlOffer, saleAmountDtlId
 	}
 	return nil
 }
-func GetDiscountTypeCartOffer(ctx context.Context, offers []models.CartOffer, itemCode string, totalPaymentPrice, mileagePrice float64) ([]SaleRecordDtlOffer, float64, float64, error) {
+func GetDiscountTypeCartOffer(ctx context.Context, offers []models.CartOffer, itemId int64, totalPaymentPrice, mileagePrice float64) ([]SaleRecordDtlOffer, float64, float64, error) {
 	res := []SaleRecordDtlOffer{}
 	var salesmanSaleDiscountRate, salesmanSaleAmount float64
 	for n := range offers {
-		if offers[n].ItemCodes != itemCode {
+		if offers[n].ItemIds != strconv.FormatInt(itemId, 10) {
 			continue
 		}
 		offer := SaleRecordDtlOffer{
-			OfferId:  offers[n].OfferId,
-			ItemCode: offers[n].ItemCodes,
+			OfferId:     offers[n].OfferId,
+			OrderItemId: itemId,
+			// ItemCode:    offers[n].ItemCodes,
 		}
 		if offers[n].CouponNo == "" {
 			p, err := promotion.GetByNo(ctx, offers[n].OfferNo)
@@ -336,19 +338,19 @@ func (h SalesPersonEventHandler) HandleTest(c echo.Context) error {
 				//查询购物车的优惠类型
 				itemsOffer := []models.CartOffer{}
 				for i := 0; i < len(s.CartOffers); i++ {
-					itemCodes := strings.Split(s.CartOffers[i].ItemCodes, ",")
-					for n := 0; n < len(itemCodes); n++ {
+					itemIds := strings.Split(s.CartOffers[i].ItemIds, ",")
+					for n := 0; n < len(itemIds); n++ {
 						itemOffer := models.CartOffer{
-							OfferId:   s.CartOffers[i].OfferId,
-							OfferNo:   s.CartOffers[i].OfferNo,
-							CouponNo:  s.CartOffers[i].CouponNo,
-							ItemCodes: itemCodes[n],
-							Price:     s.CartOffers[i].Price,
+							OfferId:  s.CartOffers[i].OfferId,
+							OfferNo:  s.CartOffers[i].OfferNo,
+							CouponNo: s.CartOffers[i].CouponNo,
+							ItemIds:  itemIds[n],
+							Price:    s.CartOffers[i].Price,
 						}
 						itemsOffer = append(itemsOffer, itemOffer)
 					}
 				}
-				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountTypeCartOffer(ctx, itemsOffer, s.AssortedSaleRecordDtlList[i].ItemCode, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
+				offers, salesmanSaleDiscountRate, salesmanSaleAmount, err := GetDiscountTypeCartOffer(ctx, itemsOffer, s.AssortedSaleRecordDtlList[i].OrderItemId, saleAmountDtl.TotalPaymentPrice, math.Abs(saleAmountDtl.MileagePrice))
 				if err != nil {
 					logrus.WithField("err", err).Info("GetDiscountTypeCartOfferByItemCodeError")
 					return err

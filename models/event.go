@@ -65,12 +65,12 @@ type Committed struct {
 }
 
 type Offer struct {
-	OfferId   int64   `json:"offerId"`
-	OfferNo   string  `json:"offerNo"`
-	CouponNo  string  `json:"couponNo"`
-	ItemCodes string  `json:"itemCodes"`
-	ItemCode  string  `json:"itemCode"`
-	Price     float64 `json:"price"`
+	OfferId       int64   `json:"offerId"`
+	OfferNo       string  `json:"offerNo"`
+	CouponNo      string  `json:"couponNo"`
+	ItemIds       string  `json:"itemIds"`
+	TargetItemIds string  `json:"targetItemIds"`
+	Price         float64 `json:"price"`
 }
 
 type TotalPrice struct {
@@ -81,12 +81,12 @@ type TotalPrice struct {
 }
 
 type CartOffer struct {
-	OfferId         int64   `json:"offerId"`
-	OfferNo         string  `json:"offerNo"`
-	CouponNo        string  `json:"couponNo"`
-	ItemCodes       string  `json:"itemCodes"`
-	TargetItemCodes string  `json:"targetItemCodes"`
-	Price           float64 `json:"price"`
+	OfferId       int64   `json:"offerId"`
+	OfferNo       string  `json:"offerNo"`
+	CouponNo      string  `json:"couponNo"`
+	ItemIds       string  `json:"itemIds"`
+	TargetItemIds string  `json:"targetItemIds"`
+	Price         float64 `json:"price"`
 }
 
 type Payment struct {

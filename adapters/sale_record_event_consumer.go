@@ -172,12 +172,21 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			return saveErr
 		}
 	}
-
 	logrus.WithFields(logrus.Fields{
 		"TransactionId": event.TransactionId,
 		"OrderId":       event.OrderId,
 		"RefundId":      event.RefundId,
 	}).Info("Success to handle event")
+
+	// if event.RefundId > 0 {
+	// 	isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !isAllowTransCSL {
+	// 		return nil
+	// 	}
+	// }
 
 	// Send to Csl
 	if err := (sendCsl.Send{}).SendToCsl(ctx, event); err != nil {
