@@ -40,7 +40,7 @@ func (PostMileage) MakePostMileage(ctx context.Context, record models.SaleRecord
 	for _, item := range record.AssortedSaleRecordDtlList {
 		brandIds = brandIds + strconv.FormatInt(item.BrandId, 10) + ","
 	}
-	brandId, err := BrandInfo{}.GetCustBrandId(ctx, brandIds)
+	brandId, err := BrandMember{}.GetBrandId(ctx, brandIds)
 	if err != nil {
 		return nil, err
 	}

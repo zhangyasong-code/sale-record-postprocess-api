@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"nhub/sale-record-postprocess-api/config"
 	"strconv"
-	"strings"
 
 	"github.com/pangpanglabs/goutils/behaviorlog"
 	"github.com/pangpanglabs/goutils/httpreq"
@@ -56,28 +55,6 @@ func (BrandInfo) GetBrandInfo(ctx context.Context, brandId int64) (string, error
 		return "", fmt.Errorf("[%d]%s", resp.Error.Code, resp.Error.Details)
 	}
 	return resp.Result.Code, nil
-}
-
-func (BrandInfo) GetCustBrandId(ctx context.Context, brandIds string) (int64, error) {
-	/*获取品牌Id*/
-
-	brandMembers, err := BrandMember{}.GetBrandMembers(ctx, brandIds)
-	if err != nil {
-		return 0, err
-	}
-	memberBrandIdsStr := ""
-	for _, brandMember := range brandMembers {
-		tempStr := "," + strconv.FormatInt(brandMember.MemberBrandId, 10)
-		if !strings.Contains(memberBrandIdsStr, tempStr) {
-			memberBrandIdsStr = memberBrandIdsStr + tempStr
-		}
-	}
-	memberBrandIds := strings.Split(memberBrandIdsStr, ",")
-	if len(memberBrandIds) != 2 {
-		return 0, fmt.Errorf("Members of multiple brands are not supported")
-	}
-	memberBrandId, _ := strconv.ParseInt(memberBrandIds[1], 10, 64)
-	return memberBrandId, nil
 }
 
 func (Product) GetBrandIdsByProductIds(ctx context.Context, productIds string) (string, error) {
