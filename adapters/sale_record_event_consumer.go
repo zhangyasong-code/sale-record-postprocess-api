@@ -2,6 +2,7 @@ package adapters
 
 import (
 	"encoding/json"
+	"fmt"
 	"nhub/sale-record-postprocess-api/customer"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/payamt"
@@ -30,6 +31,38 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	ctx := c.Context()
 	str, _ := json.Marshal(event)
 	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
+
+	if event.RefundId > 0 {
+		isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
+		if err != nil || !isAllowTransCSL {
+			postProcessSuccess := &postprocess.PostProcessSuccess{
+				TransactionId: event.TransactionId,
+				OrderId:       event.OrderId,
+				RefundId:      event.RefundId,
+				ModuleType:    string(postprocess.ModuleRefundApproval),
+				IsSuccess:     false,
+				Error:         "Refund Approval Error",
+				ModuleEntity:  string(str),
+			}
+			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+				return saveErr
+			}
+			return fmt.Errorf("Refund Approval Error")
+		} else {
+			postProcessSuccess := &postprocess.PostProcessSuccess{
+				TransactionId: event.TransactionId,
+				OrderId:       event.OrderId,
+				RefundId:      event.RefundId,
+				ModuleType:    string(postprocess.ModuleRefundApproval),
+				IsSuccess:     true,
+				Error:         "",
+				ModuleEntity:  string(str),
+			}
+			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+				return saveErr
+			}
+		}
+	}
 
 	if err := (payamt.PayAmtEventHandler{}).Handle(ctx, event); err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -178,16 +211,6 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		"OrderId":       event.OrderId,
 		"RefundId":      event.RefundId,
 	}).Info("Success to handle event")
-
-	if event.RefundId > 0 {
-		isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
-		if err != nil {
-			return err
-		}
-		if !isAllowTransCSL {
-			return nil
-		}
-	}
 
 	// Send to Csl
 	if err := (sendCsl.Send{}).SendToCsl(ctx, event); err != nil {

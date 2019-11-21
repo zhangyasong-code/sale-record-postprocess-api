@@ -11,12 +11,13 @@ import (
 type ModuleType string
 
 const (
-	ModuleUnknown    ModuleType = ""
-	ModulePromotion  ModuleType = "Promotion"
-	ModuleMileage    ModuleType = "Mileage"
-	ModulePay        ModuleType = "Pay"
-	ModuleSalePerson ModuleType = "SalePerson"
-	ModuleSaleFee    ModuleType = "SaleFee"
+	ModuleUnknown        ModuleType = ""
+	ModulePromotion      ModuleType = "Promotion"
+	ModuleMileage        ModuleType = "Mileage"
+	ModulePay            ModuleType = "Pay"
+	ModuleSalePerson     ModuleType = "SalePerson"
+	ModuleSaleFee        ModuleType = "SaleFee"
+	ModuleRefundApproval ModuleType = "RefundApproval"
 )
 
 type PostProcessSuccess struct {
