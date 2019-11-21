@@ -36,4 +36,5 @@ services:
   clearanceAdapterForSaleRecordApi: https://dmz-staging.p2shop.com.cn/mslv2/clearance-adapter-for-sale-record
   memberApi: http://member-api.pangpang-brand-staging:8080
   refundApprovalApi: http://refund-approval-api/pangpang-brand-staging:8080
+  membershipApi: http://membership-api.pangpang-brand-staging:8080
 serviceName: sale-record-postprocess-api

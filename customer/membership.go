@@ -16,6 +16,19 @@ type BrandMember struct {
 	MemberBrandId int64 `json:"memberBrandId,omitempty"` /*会员品牌Id*/
 }
 
+func (BrandMember) GetBrandId(ctx context.Context, brandIds string) (int64, error) {
+	/*获取品牌Id*/
+	brandMembers, err := BrandMember{}.GetBrandMembers(ctx, brandIds)
+	if err != nil {
+		return 0, err
+	}
+	if len(brandMembers) == 0 {
+		return 0, fmt.Errorf("cant't find member brand")
+	}
+	memberBrandId := brandMembers[0].MemberBrandId
+	return memberBrandId, nil
+}
+
 func (BrandMember) GetBrandMembers(ctx context.Context, brandIds string) ([]BrandMember, error) {
 	var resp struct {
 		Result  []BrandMember `json:"result"`
@@ -26,7 +39,7 @@ func (BrandMember) GetBrandMembers(ctx context.Context, brandIds string) ([]Bran
 			Details string `json:"details"`
 		} `json:"error"`
 	}
-	url := fmt.Sprintf("%s/v1/brand/member?brandIds=%s", config.Config().Services.MemberApi, brandIds)
+	url := fmt.Sprintf("%s/v1/member/brand?mallIds=%s", config.Config().Services.MembershipApi, brandIds)
 	logrus.WithField("url", url).Info("url")
 	if _, err := httpreq.New(http.MethodGet, url, nil).
 		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).

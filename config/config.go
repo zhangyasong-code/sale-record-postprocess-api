@@ -72,7 +72,8 @@ type C struct {
 		CslCustomerApi,
 		ClearanceAdapterForSaleRecordApi,
 		MemberApi,
-		RefundApprovalApi string
+		RefundApprovalApi,
+		MembershipApi string
 	}
 	AppEnv, JwtSecret string
 	ServiceName       string
