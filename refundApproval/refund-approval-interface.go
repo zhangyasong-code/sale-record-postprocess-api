@@ -38,8 +38,9 @@ func Check(ctx context.Context, tenantCode string, storeId, orderId, refundId in
 		RefundId:   refundId,
 		RefundTime: refundTime,
 	}
-
+	fmt.Println("parameter = %+v", refundApprovalInput)
 	url := fmt.Sprintf("%s/v1/check", config.Config().Services.RefundApprovalApi)
+
 	if _, err := httpreq.New(http.MethodPost, url, refundApprovalInput).
 		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
 		Call(&resp); err != nil {
