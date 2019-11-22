@@ -43,6 +43,6 @@ services:
   cslCustomerApi: https://dmz.p2shop.com.cn/mslv2/csl-customer-if
   clearanceAdapterForSaleRecordApi: https://dmz.p2shop.com.cn/mslv2/clearance-adapter-for-sale-record
   memberApi: http://member-api.pangpang-brand:8080
-  refundApprovalApi: http://refund-approval-api/pangpang-brand:8080
+  refundApprovalApi: http://refund-approval-api.pangpang-brand:8080
   membershipApi: http://membership-api.pangpang-brand:8080
 erviceName: sale-record-postprocess-apis
