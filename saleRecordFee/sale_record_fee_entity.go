@@ -56,7 +56,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 		feeAmount = 0
 		for _, cartOffer := range cartOffers {
 			itemIds = cartOffer.ItemIds
-			result := strings.Index(itemIds+",", strconv.FormatInt(assortedSaleRecordDtl.Id, 10)+",")
+			result := strings.Index(itemIds+",", strconv.FormatInt(assortedSaleRecordDtl.OrderItemId, 10)+",")
 			if result != -1 {
 				appliedFeeRate = eventFeeRate
 				break
