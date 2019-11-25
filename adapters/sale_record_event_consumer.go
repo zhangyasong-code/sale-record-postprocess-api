@@ -34,7 +34,21 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 
 	if event.RefundId > 0 {
 		isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
-		if err != nil || !isAllowTransCSL {
+		if err != nil {
+			postProcessSuccess := &postprocess.PostProcessSuccess{
+				TransactionId: event.TransactionId,
+				OrderId:       event.OrderId,
+				RefundId:      event.RefundId,
+				ModuleType:    string(postprocess.ModuleRefundApproval),
+				IsSuccess:     false,
+				Error:         err.Error(),
+				ModuleEntity:  string(str),
+			}
+			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
+				return saveErr
+			}
+			return fmt.Errorf("Refund Approval Error")
+		} else if !isAllowTransCSL {
 			postProcessSuccess := &postprocess.PostProcessSuccess{
 				TransactionId: event.TransactionId,
 				OrderId:       event.OrderId,
