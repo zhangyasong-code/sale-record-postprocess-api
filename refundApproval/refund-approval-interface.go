@@ -22,7 +22,7 @@ type RefundApprovalInput struct {
 func Check(ctx context.Context, tenantCode string, storeId, orderId, refundId int64, refundTime time.Time) (bool, error) {
 	var resp struct {
 		Result struct {
-			Status int `json:"status"`
+			Status string `json:"status"`
 		} `json:"result"`
 		Success bool `json:"success"`
 		Error   struct {
