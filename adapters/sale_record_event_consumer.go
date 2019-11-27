@@ -227,13 +227,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	}).Info("Success to handle event")
 
 	// Send to Csl
-	if err := (sendCsl.Send{}).SendToCsl(ctx, event); err != nil {
-		logrus.WithFields(logrus.Fields{
-			"TransactionId": event.TransactionId,
-			"OrderId":       event.OrderId,
-			"RefundId":      event.RefundId,
-		}).WithError(err).Error("Fail to SendToCsl")
-		return err
+	if event.TransactionStatus == "SaleOrderFinished" || event.TransactionStatus == "RefundOrderSuccess" {
+		if err := (sendCsl.Send{}).SendToCsl(ctx, event); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"TransactionId": event.TransactionId,
+				"OrderId":       event.OrderId,
+				"RefundId":      event.RefundId,
+			}).WithError(err).Error("Fail to SendToCsl")
+			return err
+		}
 	}
+
 	return nil
 }
