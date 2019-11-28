@@ -227,7 +227,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	}).Info("Success to handle event")
 
 	// Send to Csl
-	if event.TransactionStatus == "SaleOrderFinished" || event.TransactionStatus == "RefundOrderSuccess" {
+	if event.TransactionStatus == "BuyerReceivedConfirmed" || event.TransactionStatus == "RefundOrderSuccess" {
 		if err := (sendCsl.Send{}).SendToCsl(ctx, event); err != nil {
 			logrus.WithFields(logrus.Fields{
 				"TransactionId": event.TransactionId,
