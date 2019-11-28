@@ -18,6 +18,7 @@ const (
 	ModuleSalePerson     ModuleType = "SalePerson"
 	ModuleSaleFee        ModuleType = "SaleFee"
 	ModuleRefundApproval ModuleType = "RefundApproval"
+	SendToClearance      ModuleType = "SendToClearance"
 )
 
 type PostProcessSuccess struct {
