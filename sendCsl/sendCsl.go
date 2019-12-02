@@ -15,10 +15,10 @@ import (
 type Send struct{}
 
 type Payload struct {
-	BrandCode   string `json:"brandCode"`
-	ChannelType string `json:"channelType"`
-	OrderId     int64  `json:"orderId"`
-	RefundId    int64  `json:"refundId"`
+	ChannelType   string `json:"channelType"`
+	OrderId       int64  `json:"orderId"`
+	RefundId      int64  `json:"refundId"`
+	TransactionId int64  `json:"transactionId"`
 }
 
 func (Send) SendToCsl(ctx context.Context, event models.SaleRecordEvent) error {
@@ -50,13 +50,9 @@ func (Send) SendToCsl(ctx context.Context, event models.SaleRecordEvent) error {
 
 func getPayload(event models.SaleRecordEvent) (Payload, error) {
 	var payload Payload
-	for i, dtl := range event.AssortedSaleRecordDtlList {
-		if i == 0 {
-			payload.BrandCode = dtl.BrandCode
-		}
-	}
 	payload.ChannelType = event.TransactionChannelType
 	payload.OrderId = event.OrderId
 	payload.RefundId = event.RefundId
+	payload.TransactionId = event.TransactionId
 	return payload, nil
 }
