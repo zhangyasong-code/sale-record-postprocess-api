@@ -107,3 +107,11 @@ func (PostProcessSuccess) GetAll(ctx context.Context, isSuccess bool, transactio
 	}
 	return totalCount, postProcessSuccess, nil
 }
+
+func (PostProcessSuccess) GetById(ctx context.Context, id int64) (PostProcessSuccess, error) {
+	var postProcessSuccess PostProcessSuccess
+	if _, err := factory.SaleRecordDB(ctx).ID(id).Get(&postProcessSuccess); err != nil {
+		return postProcessSuccess, err
+	}
+	return postProcessSuccess, nil
+}
