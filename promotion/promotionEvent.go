@@ -43,7 +43,7 @@ func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
 	if err != nil {
 		return nil, err
 	} else if !exist {
-		return nil, errors.New("promotionEvent is not exist")
+		return nil, errors.New("promotionEvent offer_no = '" + no + "' is not exist")
 	}
 	return &p, nil
 }

@@ -37,7 +37,9 @@ func (h SalesPersonEventHandler) Init(g echoswagger.ApiGroup) {
 }
 
 func (h SalesPersonEventHandler) Handle(ctx context.Context, s models.SaleRecordEvent) error {
-
+	if s.SalesmanId == 0 {
+		return nil
+	}
 	for i := 0; i < len(s.AssortedSaleRecordDtlList); i++ {
 		saleAmountDtl := SaleRecordDtlSalesmanAmount{
 			TransactionId:               s.TransactionId,
