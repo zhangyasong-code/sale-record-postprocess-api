@@ -20,10 +20,9 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 	eventTypeCode = ""
 	eventFeeRate = 0
 	var cartOffers []models.CartOffer
+	var promotionEvents []*promotion.PromotionEvent
+
 	for _, cartOffer := range a.CartOffers {
-		if eventFeeRate != 0 {
-			continue
-		}
 		if cartOffer.CouponNo == "" && cartOffer.OfferNo != "" {
 			promotionEvent, err := promotion.GetByNo(ctx, cartOffer.OfferNo)
 			if err != nil {
@@ -32,9 +31,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			}
 			eventTypeCode = promotionEvent.EventTypeCode
 			if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
-				cartOffers = append(cartOffers, cartOffer)
-				eventFeeRate = promotionEvent.FeeRate
-				if eventFeeRate <= 0 {
+				if promotionEvent.FeeRate <= 0 {
 					postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
 					has, _, err := postFailCreateSaleFee.Get(ctx)
 					if err != nil {
@@ -47,19 +44,26 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 					}
 					return nil, nil
 				}
+				cartOffers = append(cartOffers, cartOffer)
+				promotionEvents = append(promotionEvents, promotionEvent)
 			}
 		}
 	}
-
 	for _, assortedSaleRecordDtl := range a.AssortedSaleRecordDtlList {
+		eventFeeRate = 0
 		appliedFeeRate = 0
 		feeAmount = 0
 		for _, cartOffer := range cartOffers {
-			itemIds = cartOffer.ItemIds
-			result := strings.Index(itemIds+",", strconv.FormatInt(assortedSaleRecordDtl.OrderItemId, 10)+",")
-			if result != -1 {
-				appliedFeeRate = eventFeeRate
-				break
+			for _, promotionEvent := range promotionEvents {
+				if promotionEvent.OfferNo == cartOffer.OfferNo {
+					itemIds = cartOffer.ItemIds
+					result := strings.Index(itemIds+",", strconv.FormatInt(assortedSaleRecordDtl.OrderItemId, 10)+",")
+					if result != -1 {
+						eventFeeRate = promotionEvent.FeeRate
+						appliedFeeRate = promotionEvent.FeeRate
+						break
+					}
+				}
 			}
 		}
 		itemFeeRate = assortedSaleRecordDtl.FeeRate
