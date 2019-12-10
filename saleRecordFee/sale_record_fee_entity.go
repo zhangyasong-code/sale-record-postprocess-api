@@ -2,7 +2,6 @@ package saleRecordFee
 
 import (
 	"context"
-	"math"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
 	"strconv"
@@ -77,7 +76,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 		sellingAmt := assortedSaleRecordDtl.TotalPrice.ListPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedCartOfferPrice -
 			assortedSaleRecordDtl.DistributedPrice.TotalDistributedItemOfferPrice - assortedSaleRecordDtl.MileagePrice
 		// SellingAmt-(floor(((SellingAmt-SellingAmt*FeeRate/100)*1/0.01))*0.01)
-		feeAmount = number.ToFixed(sellingAmt-(math.Floor(((sellingAmt-sellingAmt*appliedFeeRate/100)/0.01))*0.01), nil)
+		feeAmount = number.ToFixed(sellingAmt-(sellingAmt-sellingAmt*appliedFeeRate/100), nil)
 		postSaleRecordFees = append(
 			postSaleRecordFees,
 			PostSaleRecordFee{
