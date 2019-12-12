@@ -70,10 +70,9 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 		if appliedFeeRate == 0 && itemFeeRate > 0 {
 			appliedFeeRate = itemFeeRate
 		}
-		// total_list_price -  total_distributed_cart_offer_price - total_distributed_item_offer_price - (total_distributed_payment_price - distributed_cash_price)
 		sellingAmt := assortedSaleRecordDtl.TotalPrice.ListPrice - assortedSaleRecordDtl.DistributedPrice.TotalDistributedCartOfferPrice -
 			assortedSaleRecordDtl.DistributedPrice.TotalDistributedItemOfferPrice - assortedSaleRecordDtl.MileagePrice
-		// SellingAmt-(floor(((SellingAmt-SellingAmt*FeeRate/100)*1/0.01))*0.01)
+
 		feeAmount = GetToFixedPrice(sellingAmt*appliedFeeRate/100, "feeAmount")
 		postSaleRecordFees = append(
 			postSaleRecordFees,
