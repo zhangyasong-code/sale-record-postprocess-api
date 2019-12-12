@@ -50,5 +50,6 @@ func GetToFixedPrice(price float64, BaseTrimCode string) float64 {
 			RoundDigit:    2,
 		}
 	}
+
 	return number.ToFixed(price, setting)
 }
