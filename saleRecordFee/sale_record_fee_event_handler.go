@@ -3,6 +3,8 @@ package saleRecordFee
 import (
 	"context"
 	"nhub/sale-record-postprocess-api/models"
+
+	"github.com/sirupsen/logrus"
 )
 
 type SaleRecordFeeEventHandler struct {
@@ -23,6 +25,7 @@ func setPostSaleRecordFee(ctx context.Context, a models.SaleRecordEvent) error {
 	for _, postSaleRecordFee := range postSaleRecordFees {
 		has, _, err := postSaleRecordFee.Get(ctx)
 		if err != nil {
+			logrus.WithField("Error", err).Info("GetpostSaleRecordFee error")
 			return err
 		}
 		if has {
