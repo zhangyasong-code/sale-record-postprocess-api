@@ -3,6 +3,7 @@ package saleRecordFee
 import (
 	"context"
 	"nhub/sale-record-postprocess-api/models"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -11,6 +12,9 @@ type SaleRecordFeeEventHandler struct {
 }
 
 func (h SaleRecordFeeEventHandler) Handle(ctx context.Context, a models.SaleRecordEvent) error {
+	if strings.ToUpper(a.TransactionChannelType) == "EMALL" {
+		return nil
+	}
 	if err := setPostSaleRecordFee(ctx, a); err != nil {
 		return err
 	}
