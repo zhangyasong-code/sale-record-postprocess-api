@@ -15,10 +15,11 @@ import (
 type Send struct{}
 
 type Payload struct {
-	ChannelType   string `json:"channelType"`
-	OrderId       int64  `json:"orderId"`
-	RefundId      int64  `json:"refundId"`
-	TransactionId int64  `json:"transactionId"`
+	ChannelType            string `json:"channelType"`
+	OrderId                int64  `json:"orderId"`
+	RefundId               int64  `json:"refundId"`
+	TransactionId          int64  `json:"transactionId"`
+	TransactionChannelType string `json:"transactionChannelType"`
 }
 
 func (Send) SendToCsl(ctx context.Context, event models.SaleRecordEvent) error {
@@ -54,5 +55,6 @@ func getPayload(event models.SaleRecordEvent) (Payload, error) {
 	payload.OrderId = event.OrderId
 	payload.RefundId = event.RefundId
 	payload.TransactionId = event.TransactionId
+	payload.TransactionChannelType = event.TransactionChannelType
 	return payload, nil
 }

@@ -12,6 +12,7 @@ import (
 	"nhub/sale-record-postprocess-api/saleRecordFee"
 	"nhub/sale-record-postprocess-api/sendCsl"
 	"nomni/utils/eventconsume"
+	"strings"
 
 	"github.com/pangpanglabs/goutils/kafka"
 	"github.com/sirupsen/logrus"
@@ -32,7 +33,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	str, _ := json.Marshal(event)
 	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
 
-	if event.RefundId > 0 {
+	if event.RefundId > 0 && strings.ToUpper(event.TransactionChannelType) != "EMALL" {
 		isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
 		if err != nil {
 			postProcessSuccess := &postprocess.PostProcessSuccess{
