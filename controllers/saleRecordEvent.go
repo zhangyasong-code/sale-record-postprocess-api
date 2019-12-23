@@ -34,6 +34,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
 			OrderId:      event.OrderId,
 			RefundId:     event.RefundId,
+			StoreId:      event.StoreId,
 			ModuleType:   string(postprocess.ModuleMileage),
 			IsSuccess:    false,
 			Error:        err.Error(),
@@ -47,6 +48,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
 			OrderId:      event.OrderId,
 			RefundId:     event.RefundId,
+			StoreId:      event.StoreId,
 			ModuleType:   string(postprocess.ModuleMileage),
 			IsSuccess:    true,
 			Error:        "",
@@ -61,6 +63,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
 			OrderId:      event.OrderId,
 			RefundId:     event.RefundId,
+			StoreId:      event.StoreId,
 			ModuleType:   string(postprocess.ModuleSalePerson),
 			IsSuccess:    false,
 			Error:        err.Error(),
@@ -74,6 +77,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
 			OrderId:      event.OrderId,
 			RefundId:     event.RefundId,
+			StoreId:      event.StoreId,
 			ModuleType:   string(postprocess.ModuleSalePerson),
 			IsSuccess:    true,
 			Error:        "",
@@ -88,6 +92,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
 			OrderId:      event.OrderId,
 			RefundId:     event.RefundId,
+			StoreId:      event.StoreId,
 			ModuleType:   string(postprocess.ModuleSaleFee),
 			IsSuccess:    false,
 			Error:        err.Error(),
@@ -101,6 +106,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
 			OrderId:      event.OrderId,
 			RefundId:     event.RefundId,
+			StoreId:      event.StoreId,
 			ModuleType:   string(postprocess.ModuleSaleFee),
 			IsSuccess:    true,
 			Error:        "",
