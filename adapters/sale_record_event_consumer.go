@@ -262,6 +262,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			}
 			return err
 		}
+		postProcessSuccess, err := postprocess.PostProcessSuccess{}.Get(ctx, false, event.TransactionId, string(postprocess.SendToClearance))
+		if err != nil {
+			return err
+		}
+		if postProcessSuccess.Id != 0 {
+			postProcessSuccess.IsSuccess = true
+			if err := postProcessSuccess.Update(ctx); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
