@@ -33,7 +33,8 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 	str, _ := json.Marshal(event)
 	logrus.WithField("Body", string(str)).Info("Event Body>>>>>>")
 
-	if event.RefundId > 0 && strings.ToUpper(event.TransactionChannelType) != "EMALL" {
+	// TransactionChannelType > EMALL AND  TransactionType > EXCHANGE not to refundApproval
+	if event.RefundId > 0 && strings.ToUpper(event.TransactionChannelType) != "EMALL" && strings.ToUpper(event.TransactionType) != "EXCHANGE" {
 		isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
 		if err != nil {
 			postProcessSuccess := &postprocess.PostProcessSuccess{
