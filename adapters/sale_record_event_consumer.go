@@ -59,7 +59,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 				StoreId:       event.StoreId,
 				ModuleType:    string(postprocess.ModuleRefundApproval),
 				IsSuccess:     false,
-				Error:         "Refund Approval Error",
+				Error:         "审批中...",
 				ModuleEntity:  string(str),
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
