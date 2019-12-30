@@ -45,6 +45,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 				ModuleType:    string(postprocess.ModuleRefundApproval),
 				IsSuccess:     false,
 				Error:         err.Error(),
+				Details:       postprocess.GetErrorDetails(string(postprocess.ModuleRefundApproval)),
 				ModuleEntity:  string(str),
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -59,7 +60,8 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 				StoreId:       event.StoreId,
 				ModuleType:    string(postprocess.ModuleRefundApproval),
 				IsSuccess:     false,
-				Error:         "审批中...",
+				Error:         "Refund Approval Error",
+				Details:       "退货审批中！",
 				ModuleEntity:  string(str),
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -97,6 +99,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			ModuleType:    string(postprocess.ModulePay),
 			IsSuccess:     false,
 			Error:         err.Error(),
+			Details:       postprocess.GetErrorDetails(string(postprocess.ModulePay)),
 			ModuleEntity:  string(str),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -135,6 +138,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			ModuleType:    string(postprocess.ModuleMileage),
 			IsSuccess:     false,
 			Error:         err.Error(),
+			Details:       postprocess.GetErrorDetails(string(postprocess.ModuleMileage)),
 			ModuleEntity:  string(str),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -173,6 +177,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			ModuleType:    string(postprocess.ModuleSalePerson),
 			IsSuccess:     false,
 			Error:         err.Error(),
+			Details:       postprocess.GetErrorDetails(string(postprocess.ModuleSalePerson)),
 			ModuleEntity:  string(str),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -211,6 +216,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			ModuleType:    string(postprocess.ModuleSaleFee),
 			IsSuccess:     false,
 			Error:         err.Error(),
+			Details:       postprocess.GetErrorDetails(string(postprocess.ModuleSaleFee)),
 			ModuleEntity:  string(str),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -256,6 +262,7 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 				ModuleType:    string(postprocess.SendToClearance),
 				IsSuccess:     false,
 				Error:         err.Error(),
+				Details:       postprocess.GetErrorDetails(string(postprocess.SendToClearance)),
 				ModuleEntity:  string(str),
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {

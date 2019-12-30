@@ -38,6 +38,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 			ModuleType:   string(postprocess.ModuleMileage),
 			IsSuccess:    false,
 			Error:        err.Error(),
+			Details:      postprocess.GetErrorDetails(string(postprocess.ModuleMileage)),
 			ModuleEntity: string(recordStr),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -67,6 +68,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 			ModuleType:   string(postprocess.ModuleSalePerson),
 			IsSuccess:    false,
 			Error:        err.Error(),
+			Details:      postprocess.GetErrorDetails(string(postprocess.ModuleSalePerson)),
 			ModuleEntity: string(recordStr),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
@@ -96,6 +98,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 			ModuleType:   string(postprocess.ModuleSaleFee),
 			IsSuccess:    false,
 			Error:        err.Error(),
+			Details:      postprocess.GetErrorDetails(string(postprocess.ModuleSaleFee)),
 			ModuleEntity: string(recordStr),
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
