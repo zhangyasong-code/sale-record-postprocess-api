@@ -43,7 +43,14 @@ func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
 	if err != nil {
 		return nil, err
 	} else if !exist {
+		uploadErr := reUploadOffer(ctx, no)
+		if uploadErr != nil {
+			return nil, errors.New("promotionEvent offer_no = '" + no + "' is not exist")
+		}
 		return nil, errors.New("promotionEvent offer_no = '" + no + "' is not exist")
+	}
+	if p.ErrorMsg != "" {
+		_ = reUploadOffer(ctx, no)
 	}
 	return &p, nil
 }
