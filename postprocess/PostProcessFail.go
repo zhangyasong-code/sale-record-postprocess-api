@@ -30,6 +30,7 @@ type PostProcessSuccess struct {
 	StoreId       int64     `json:"storeId " xorm:"index default 0"`
 	IsSuccess     bool      `json:"isSuccess" xorm:"index notnull default false"`
 	Error         string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
+	Details       string    `json:"details" xorm:"VARCHAR(100)"`
 	ModuleEntity  string    `json:"moduleEntity" xorm:"TEXT"`
 	CreatedAt     time.Time `json:"createdAt" xorm:"index created"`
 	UpdatedAt     time.Time `json:"updatedAt" xorm:"updated"`
