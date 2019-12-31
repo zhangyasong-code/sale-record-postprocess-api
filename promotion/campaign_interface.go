@@ -126,3 +126,30 @@ func getStores(ctx context.Context, ids []string) ([]Store, error) {
 	}
 	return resp.Result.Items, nil
 }
+func reUploadOffer(ctx context.Context, no string) error {
+	var resp struct {
+		Result interface{} `json:"result"`
+		Error  struct {
+			Code    int64       `json:"code"`
+			Message string      `json:"message"`
+			Details interface{} `json:"details"`
+		} `json:"error"`
+		Success bool `json:"success"`
+	}
+	strArr := strings.Split(no, "-")
+	var url string
+	if strArr[0] == "1" {
+		url = fmt.Sprintf("%s/v1/catalog/campaigns/%s/upload", config.Config().Services.OfferApi, strArr[1])
+	} else {
+		url = fmt.Sprintf("%s/v1/cart/campaigns/%s/upload", config.Config().Services.OfferApi, strArr[1])
+	}
+	if _, err := httpreq.New(http.MethodPost, url, nil).
+		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
+		Call(&resp); err != nil {
+		return err
+	}
+	if !resp.Success {
+		return fmt.Errorf("%d-%s", resp.Error.Code, resp.Error.Message)
+	}
+	return nil
+}
