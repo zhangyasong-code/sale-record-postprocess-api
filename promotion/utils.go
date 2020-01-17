@@ -100,6 +100,7 @@ func ToCSLOfferType(offerType OfferType, templateCode string) (string, error) {
 	case "A1", "A5", "A7":
 		eventTypeCode = "03"
 	case "A2":
+	case "A2-O":
 		if offerType == OfferTypeBrand {
 			eventTypeCode = "03"
 		} else if offerType == OfferTypeMember {
