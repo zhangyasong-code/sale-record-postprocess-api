@@ -8,7 +8,7 @@ import (
 
 type PostPayment struct {
 	Id                 int64     `json:"id" xorm:"pk notnull autoincr"`
-	TransactionId      int64     `json:"transactionId"`
+	TransactionId      int64     `json:"transactionId" xorm:"index notnull"`
 	SeqNo              int64     `json:"seqNo"`
 	PaymentCode        string    `json:"paymentCode"`
 	PaymentAmt         float64   `json:"paymentAmt"`
