@@ -27,7 +27,7 @@ type PostProcessSuccess struct {
 	TransactionId int64     `json:"transactionId" xorm:"index default 0" validate:"required"`
 	OrderId       int64     `json:"orderId" xorm:"index default 0" validate:"required"`
 	RefundId      int64     `json:"refund" xorm:"index default 0"`
-	StoreId       int64     `json:"storeId " xorm:"index default 0"`
+	StoreId       int64     `json:"storeId" xorm:"index default 0"`
 	IsSuccess     bool      `json:"isSuccess" xorm:"index notnull default false"`
 	Error         string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
 	Details       string    `json:"details" xorm:"VARCHAR(100)"`
