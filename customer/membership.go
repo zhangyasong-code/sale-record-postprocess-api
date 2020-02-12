@@ -39,7 +39,7 @@ func (BrandMember) GetBrandMembers(ctx context.Context, brandIds string) ([]Bran
 			Details string `json:"details"`
 		} `json:"error"`
 	}
-	url := fmt.Sprintf("%s/v1/member/brand?mallIds=%s", config.Config().Services.MembershipApi, brandIds)
+	url := fmt.Sprintf("%s/v1/member/brand?mallIds=%s", config.Config().Services.MemberApi, brandIds)
 	logrus.WithField("url", url).Info("url")
 	if _, err := httpreq.New(http.MethodGet, url, nil).
 		WithBehaviorLogContext(behaviorlog.FromCtx(ctx)).
