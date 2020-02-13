@@ -88,7 +88,7 @@ func (p PromotionEvent) createOrUpdate(ctx context.Context) error {
 		return err
 	}
 	if exist {
-		_, err := factory.SaleRecordDB(ctx).ID(promotion.Id).Cols("event_no,sale_base_amt,discount_base_amount,discount_rate,fee_rate,error_msg").Update(p)
+		_, err := factory.SaleRecordDB(ctx).ID(promotion.Id).Cols("event_no,event_type_code,sale_base_amt,discount_base_amount,discount_rate,fee_rate,error_msg").Update(p)
 		if err != nil {
 			return err
 		}
