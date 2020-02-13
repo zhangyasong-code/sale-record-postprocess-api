@@ -21,15 +21,15 @@ func NewPromotionEventConsumer(serviceName string, kafkaConfig kafka.Config, fil
 func handlePromotionEvent(c eventconsume.ConsumeContext) error {
 	ctx := c.Context()
 
-	str, _ := json.Marshal(event)
-	logrus.WithField("Body", string(str)).Info("Offer Event Body>>>>>>")
-
 	if c.Status() == EventCartCampaignApproved {
 		var event promotion.CartCampaign
 
 		if err := c.Bind(&event); err != nil {
 			return err
 		}
+
+		str, _ := json.Marshal(event)
+		logrus.WithField("Body", string(str)).Info("Offer Event Body>>>>>>")
 
 		if err := (promotion.CampaignEventHandler{}).HandleCartCampaign(ctx, event); err != nil {
 			logrus.WithFields(logrus.Fields{
@@ -52,6 +52,9 @@ func handlePromotionEvent(c eventconsume.ConsumeContext) error {
 		if err := c.Bind(&event); err != nil {
 			return err
 		}
+
+		str, _ := json.Marshal(event)
+		logrus.WithField("Body", string(str)).Info("Offer Event Body>>>>>>")
 
 		if err := (promotion.CampaignEventHandler{}).HandleCatalogCampaign(ctx, event); err != nil {
 			logrus.WithFields(logrus.Fields{
