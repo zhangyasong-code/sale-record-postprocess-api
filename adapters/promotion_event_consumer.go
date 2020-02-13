@@ -1,10 +1,12 @@
 package adapters
 
 import (
+	"encoding/json"
 	"nhub/sale-record-postprocess-api/promotion"
 	"nomni/utils/eventconsume"
 
 	"github.com/pangpanglabs/goutils/kafka"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -19,6 +21,9 @@ func NewPromotionEventConsumer(serviceName string, kafkaConfig kafka.Config, fil
 func handlePromotionEvent(c eventconsume.ConsumeContext) error {
 	ctx := c.Context()
 
+	str, _ := json.Marshal(event)
+	logrus.WithField("Body", string(str)).Info("Offer Event Body>>>>>>")
+
 	if c.Status() == EventCartCampaignApproved {
 		var event promotion.CartCampaign
 
@@ -27,8 +32,18 @@ func handlePromotionEvent(c eventconsume.ConsumeContext) error {
 		}
 
 		if err := (promotion.CampaignEventHandler{}).HandleCartCampaign(ctx, event); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"Id":              event.Id,
+				"RulesetGroupId ": event.RulesetGroupId,
+				"Error":           err,
+			}).Info("Fail to handle event")
 			return err
 		}
+
+		logrus.WithFields(logrus.Fields{
+			"Id":              event.Id,
+			"RulesetGroupId ": event.RulesetGroupId,
+		}).Info("Success to handle event")
 	}
 
 	if c.Status() == EventCatalogCampaignApproved {
@@ -39,8 +54,18 @@ func handlePromotionEvent(c eventconsume.ConsumeContext) error {
 		}
 
 		if err := (promotion.CampaignEventHandler{}).HandleCatalogCampaign(ctx, event); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"Id":              event.Id,
+				"RulesetGroupId ": event.RulesetId,
+				"Error":           err,
+			}).Info("Success to handle event")
 			return err
 		}
+
+		logrus.WithFields(logrus.Fields{
+			"Id":              event.Id,
+			"RulesetGroupId ": event.RulesetId,
+		}).Info("Success to handle event")
 	}
 
 	return nil
