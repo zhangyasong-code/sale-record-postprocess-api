@@ -82,6 +82,9 @@ func (PromotionEvent) createInArrary(ctx context.Context, promotions []Promotion
 }
 
 func (p PromotionEvent) createOrUpdate(ctx context.Context) error {
+	if p.FeeRate <= 0 && (p.EventTypeCode == "01" || p.EventTypeCode == "02" || p.EventTypeCode == "03") {
+		return errors.New("PromotionEvent feeRate lower then equal 0")
+	}
 	var promotion PromotionEvent
 	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", p.OfferNo).Get(&promotion)
 	if err != nil {
