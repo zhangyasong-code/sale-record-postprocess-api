@@ -2,6 +2,7 @@ package saleRecordFee
 
 import (
 	"context"
+	"errors"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
 	"strconv"
@@ -31,17 +32,7 @@ func (PostSaleRecordFee) MakePostSaleRecordFeesEntity(ctx context.Context, a mod
 			eventTypeCode = promotionEvent.EventTypeCode
 			if eventTypeCode == "01" || eventTypeCode == "02" || eventTypeCode == "03" {
 				if promotionEvent.FeeRate <= 0 {
-					postFailCreateSaleFee := &PostFailCreateSaleFee{TransactionId: a.TransactionId, IsProcessed: false}
-					has, _, err := postFailCreateSaleFee.Get(ctx)
-					if err != nil {
-						return nil, err
-					}
-					if !has {
-						if err := postFailCreateSaleFee.Save(ctx); err != nil {
-							return nil, err
-						}
-					}
-					return nil, nil
+					return nil, errors.New("活动扣率不能为0！")
 				}
 				cartOffers = append(cartOffers, cartOffer)
 				promotionEvents = append(promotionEvents, promotionEvent)
