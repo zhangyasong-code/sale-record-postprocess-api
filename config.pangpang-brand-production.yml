@@ -5,6 +5,9 @@ database:
   order:
     driver: mysql
     connection: pangpang_app:7#dIQ2qY@tcp(rm-uf65796v5j1t257t1.mysql.rds.aliyuncs.com)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
+  mslv2Readonly:
+    driver: mysql
+    connection: mslv2_readonly:o0V^c3gB@tcp(rm-uf65796v5j1t257t19o.mysql.rds.aliyuncs.com:3306)/pangpang_brand_nhub?charset=utf8&parseTime=True&loc=Local
   logger:
     kafka:
       brokers:

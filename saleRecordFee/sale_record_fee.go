@@ -3,6 +3,7 @@ package saleRecordFee
 import (
 	"context"
 	"nhub/sale-record-postprocess-api/factory"
+	"strconv"
 	"time"
 )
 
@@ -34,6 +35,22 @@ type PostFailCreateSaleFee struct {
 	IsProcessed   bool      `json:"isProcessed" query:"isProcessed" xorm:"index notnull default false" validate:"required"`
 	CreatedAt     time.Time `json:"createdAt" xorm:"created"`
 	UpdatedAt     time.Time `json:"updatedAt" xorm:"updated"`
+}
+
+type CheckSaleNo struct {
+	Id                int64     `json:"id"`
+	TransactionId     int64     `json:"transactionId" xorm:"index default 0"`
+	SaleTransactionId int64     `json:"saleTransactionId" xorm:"index default 0"`
+	OrderId           int64     `json:"orderId" xorm:"index default 0"`
+	RefundId          int64     `json:"refundId" xorm:"index default 0"`
+	ShopCode          string    `json:"shopCode" xorm:"index VARCHAR(30) notnull"`
+	Dates             string    `json:"dates" xorm:"index VARCHAR(30) notnull"`
+	SaleNo            string    `json:"saleNo" xorm:"index VARCHAR(30) notnull"`
+	PosNo             string    `json:"posNo" xorm:"index VARCHAR(30) notnull"`
+	Processing        bool      `json:"processing" xorm:"index"`
+	Whthersend        bool      `json:"whthersend" xorm:"index"`
+	CreatedAt         time.Time `json:"createdAt" xorm:"index created"`
+	UpdateAt          time.Time `json:"updateAt" xorm:"updated"`
 }
 
 type ResultShopMessage struct {
@@ -86,4 +103,25 @@ func (pf *PostFailCreateSaleFee) Get(ctx context.Context) (bool, PostFailCreateS
 		return has, PostFailCreateSaleFee{}, err
 	}
 	return has, postFailCreateSaleFee, nil
+}
+
+func (psrf *PostSaleRecordFee) Update(ctx context.Context, transactionDtlId int64) error {
+	if _, err := factory.SaleRecordDB(ctx).Where("transaction_dtl_id = ?", transactionDtlId).
+		AllCols().Update(psrf); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CheckWhetherUpload(ctx context.Context, transactionId int64) (bool, error) {
+	var checkSaleNos []CheckSaleNo
+	sql := "SELECT a.id , a.transaction_id , a.refund_id , a.order_id FROM mslv2_clearance.check_sale_no a where a.whthersend = true and a.processing = false" +
+		" and a.transaction_id = '" + strconv.FormatInt(transactionId, 10) + "'"
+	if err := factory.Mslv2ReadonlyDB(ctx).SQL(sql).Find(&checkSaleNos); err != nil {
+		return false, err
+	}
+	if len(checkSaleNos) != 0 {
+		return true, nil
+	}
+	return false, nil
 }

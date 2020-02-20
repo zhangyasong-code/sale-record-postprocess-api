@@ -5,6 +5,9 @@ database:
   order:
     driver: mysql
     connection: pangpang_app:Eland^123@tcp(10.173.208.142:3307)/pangpang_brand_order?charset=utf8&parseTime=True&loc=UTC
+  mslv2Readonly:
+    driver: mysql
+    connection: staging_readonly:Eland^123@tcp(10.173.208.142:3307)/pangpang_brand_nhub?charset=utf8&parseTime=True&loc=Local
   logger:
     kafka:
       brokers:
