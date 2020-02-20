@@ -82,6 +82,9 @@ func (PromotionEvent) createInArrary(ctx context.Context, promotions []Promotion
 }
 
 func (p PromotionEvent) createOrUpdate(ctx context.Context) error {
+	if p.EventTypeCode == "" {
+		return errors.New("PromotionEvent eventTypeCode is null")
+	}
 	if p.FeeRate <= 0 && (p.EventTypeCode == "01" || p.EventTypeCode == "02" || p.EventTypeCode == "03") {
 		return errors.New("PromotionEvent feeRate lower then equal 0")
 	}
