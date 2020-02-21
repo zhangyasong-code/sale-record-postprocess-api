@@ -210,11 +210,21 @@ func SaveAchievement(ctx context.Context, dtl SaleRecordDtlSalesmanAmount) (Sale
 		return dtl, err
 	}
 	if has {
-		_, err := (&dtl).Update(ctx, dtl.TransactionId, dtl.SaleRecordDtlId)
+		isUpload, err := CheckWhetherUpload(ctx, postSaleRecordFee.TransactionId)
 		if err != nil {
-			logrus.WithField("err", err).Info("UpdateSaleAmountDtlError")
+			logrus.WithField("err", err).Info("CheckWhetherUploadError")
 			return dtl, err
 		}
+		if !isUpload {
+			_, err := (&dtl).Update(ctx, dtl.TransactionId, dtl.SaleRecordDtlId)
+			if err != nil {
+				logrus.WithField("err", err).Info("UpdateSaleAmountDtlError")
+				return dtl, err
+			}
+		} else {
+			return dtl, nil
+		}
+
 	} else {
 		if err := (&dtl).Create(ctx); err != nil {
 			logrus.WithField("err", err).Info("CreateSaleAmountDtlError")
