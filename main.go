@@ -34,9 +34,10 @@ func main() {
 	fmt.Println(config)
 	saleRecordDB := initDB(config.Database.SaleRecord.Driver, config.Database.SaleRecord.Connection)
 	orderDB := initDB(config.Database.Order.Driver, config.Database.Order.Connection)
+	mslv2ReadonlyDB := initDB(config.Database.Mslv2Readonly.Driver, config.Database.Mslv2Readonly.Connection)
 	defer saleRecordDB.Close()
 	defer orderDB.Close()
-
+	defer mslv2ReadonlyDB.Close()
 	if err := customer.InitDB(saleRecordDB); err != nil {
 		log.Fatal(err)
 	}
@@ -61,6 +62,7 @@ func main() {
 		eventconsume.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka),
 		eventconsume.ContextDBWithName(config.ServiceName, factory.SaleRecordDBContextName, saleRecordDB, config.Database.Logger.Kafka),
 		eventconsume.ContextDBWithName(config.ServiceName, factory.OrderDBContextName, orderDB, config.Database.Logger.Kafka),
+		eventconsume.ContextDBWithName(config.ServiceName, factory.Mslv2ReadonlyDBContextName, mslv2ReadonlyDB, config.Database.Logger.Kafka),
 		// eventconsume.UserClaimMiddleware(),
 	); err != nil {
 		log.Fatal(err)
@@ -94,6 +96,7 @@ func main() {
 	e.Use(middleware.CORS())
 	e.Use(echomiddleware.ContextLogger())
 	e.Use(echomiddleware.ContextDBWithName(config.ServiceName, echomiddleware.ContextDBType(factory.SaleRecordDBContextName), saleRecordDB, echomiddleware.KafkaConfig(config.Database.Logger.Kafka)))
+	e.Use(echomiddleware.ContextDBWithName(config.ServiceName, echomiddleware.ContextDBType(factory.Mslv2ReadonlyDBContextName), mslv2ReadonlyDB, echomiddleware.KafkaConfig(config.Database.Logger.Kafka)))
 	e.Use(echomiddleware.BehaviorLogger(config.ServiceName, config.BehaviorLog.Kafka))
 	e.Use(auth.UserClaimMiddleware("/ping", "/docs"))
 
