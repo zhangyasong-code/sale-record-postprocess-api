@@ -5,6 +5,7 @@ import (
 	"math"
 	"nhub/sale-record-postprocess-api/models"
 	"nhub/sale-record-postprocess-api/promotion"
+	"nhub/sale-record-postprocess-api/saleRecordFee"
 	"strconv"
 	"strings"
 
@@ -210,7 +211,7 @@ func SaveAchievement(ctx context.Context, dtl SaleRecordDtlSalesmanAmount) (Sale
 		return dtl, err
 	}
 	if has {
-		isUpload, err := CheckWhetherUpload(ctx, postSaleRecordFee.TransactionId)
+		isUpload, err := saleRecordFee.CheckWhetherUpload(ctx, dtl.TransactionId)
 		if err != nil {
 			logrus.WithField("err", err).Info("CheckWhetherUploadError")
 			return dtl, err
