@@ -38,6 +38,8 @@ func (p *PromotionEvent) create(ctx context.Context) error {
 }
 
 func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
+	//将新结构的offerNo转换成旧结构
+	no = convertOfferNo(no)
 	var p PromotionEvent
 	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", no).Get(&p)
 	if err != nil {
