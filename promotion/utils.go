@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/go-xorm/xorm"
 )
@@ -234,4 +235,12 @@ func setSortOrder(q xorm.Interface, sortby, order []string, table ...string) err
 		}
 	}
 	return nil
+}
+
+func convertOfferNo(no string) string {
+	strArr := strings.Split(no, "-")
+	if len(strArr) > 3 {
+		no = strings.Join(strArr[:3], "-")
+	}
+	return no
 }
