@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nhub/sale-record-postprocess-api/factory"
+	offer "nomni/offer-api/models"
 	"strings"
 	"time"
 )
@@ -39,9 +40,9 @@ func (p *PromotionEvent) create(ctx context.Context) error {
 
 func GetByNo(ctx context.Context, no string) (*PromotionEvent, error) {
 	//将新结构的offerNo转换成旧结构
-	no = convertOfferNo(no)
+	nos := convertOfferNo(offer.OfferNo(no))
 	var p PromotionEvent
-	exist, err := factory.SaleRecordDB(ctx).Where("offer_no = ?", no).Get(&p)
+	exist, err := factory.SaleRecordDB(ctx).In("offer_no", nos).Desc("created_at").Get(&p)
 	if err != nil {
 		return nil, err
 	} else if !exist {

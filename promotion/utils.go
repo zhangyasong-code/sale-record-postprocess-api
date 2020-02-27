@@ -3,8 +3,10 @@ package promotion
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
-	"strings"
+
+	offer "nomni/offer-api/models"
 
 	"github.com/go-xorm/xorm"
 )
@@ -237,10 +239,13 @@ func setSortOrder(q xorm.Interface, sortby, order []string, table ...string) err
 	return nil
 }
 
-func convertOfferNo(no string) string {
-	strArr := strings.Split(no, "-")
-	if len(strArr) > 3 {
-		no = strings.Join(strArr[:3], "-")
+func convertOfferNo(no offer.OfferNo) []offer.OfferNo {
+	if no.Version() == 0 {
+		return []offer.OfferNo{no}
+	} else {
+		return []offer.OfferNo{
+			offer.OfferNo(fmt.Sprintf("%d-%d-%d", no.CampaignType(), no.CampaignId(), no.RulesetOrGroupId())),
+			offer.NewOfferNo(no.CampaignType(), no.CampaignId(), no.RulesetOrGroupId()),
+		}
 	}
-	return no
 }
