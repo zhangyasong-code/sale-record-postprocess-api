@@ -32,14 +32,15 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 
 	if err := (customer.CustomerEventHandler{}).Handle(ctx, event); err != nil {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			OrderId:      event.OrderId,
-			RefundId:     event.RefundId,
-			StoreId:      event.StoreId,
-			ModuleType:   string(postprocess.ModuleMileage),
-			IsSuccess:    false,
-			Error:        err.Error(),
-			Details:      postprocess.GetErrorDetails(string(postprocess.ModuleMileage)),
-			ModuleEntity: string(recordStr),
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleMileage),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModuleMileage)),
+			ModuleEntity:          string(recordStr),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
@@ -47,13 +48,14 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
 	} else {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			OrderId:      event.OrderId,
-			RefundId:     event.RefundId,
-			StoreId:      event.StoreId,
-			ModuleType:   string(postprocess.ModuleMileage),
-			IsSuccess:    true,
-			Error:        "",
-			ModuleEntity: string(recordStr),
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleMileage),
+			IsSuccess:             true,
+			Error:                 "",
+			ModuleEntity:          string(recordStr),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
@@ -62,14 +64,15 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 
 	if err := (salePerson.SalesPersonEventHandler{}).Handle(ctx, event); err != nil {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			OrderId:      event.OrderId,
-			RefundId:     event.RefundId,
-			StoreId:      event.StoreId,
-			ModuleType:   string(postprocess.ModuleSalePerson),
-			IsSuccess:    false,
-			Error:        err.Error(),
-			Details:      postprocess.GetErrorDetails(string(postprocess.ModuleSalePerson)),
-			ModuleEntity: string(recordStr),
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSalePerson),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModuleSalePerson)),
+			ModuleEntity:          string(recordStr),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
@@ -77,13 +80,14 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 		return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, err)
 	} else {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			OrderId:      event.OrderId,
-			RefundId:     event.RefundId,
-			StoreId:      event.StoreId,
-			ModuleType:   string(postprocess.ModuleSalePerson),
-			IsSuccess:    true,
-			Error:        "",
-			ModuleEntity: string(recordStr),
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSalePerson),
+			IsSuccess:             true,
+			Error:                 "",
+			ModuleEntity:          string(recordStr),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
@@ -92,14 +96,15 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 
 	if err := (saleRecordFee.SaleRecordFeeEventHandler{}).Handle(ctx, event); err != nil {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			OrderId:      event.OrderId,
-			RefundId:     event.RefundId,
-			StoreId:      event.StoreId,
-			ModuleType:   string(postprocess.ModuleSaleFee),
-			IsSuccess:    false,
-			Error:        err.Error(),
-			Details:      postprocess.GetErrorDetails(string(postprocess.ModuleSaleFee)),
-			ModuleEntity: string(recordStr),
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSaleFee),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModuleSaleFee)),
+			ModuleEntity:          string(recordStr),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)
@@ -114,6 +119,7 @@ func (SaleRecordEventController) HandleEvent(c echo.Context) error {
 			IsSuccess:    true,
 			Error:        "",
 			ModuleEntity: string(recordStr),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return ReturnApiFail(c, http.StatusBadRequest, ApiErrorParameter, saveErr)

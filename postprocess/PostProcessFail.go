@@ -22,18 +22,19 @@ const (
 )
 
 type PostProcessSuccess struct {
-	Id            int64     `json:"id"`
-	ModuleType    string    `json:"moduleType" xorm:"index VARCHAR(50)"`
-	TransactionId int64     `json:"transactionId" xorm:"index default 0" validate:"required"`
-	OrderId       int64     `json:"orderId" xorm:"index default 0" validate:"required"`
-	RefundId      int64     `json:"refund" xorm:"index default 0"`
-	StoreId       int64     `json:"storeId" xorm:"index default 0"`
-	IsSuccess     bool      `json:"isSuccess" xorm:"index notnull default false"`
-	Error         string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
-	Details       string    `json:"details" xorm:"VARCHAR(100)"`
-	ModuleEntity  string    `json:"moduleEntity" xorm:"TEXT"`
-	CreatedAt     time.Time `json:"createdAt" xorm:"index created"`
-	UpdatedAt     time.Time `json:"updatedAt" xorm:"updated"`
+	Id                    int64     `json:"id"`
+	ModuleType            string    `json:"moduleType" xorm:"index VARCHAR(50)"`
+	TransactionId         int64     `json:"transactionId" xorm:"index default 0" validate:"required"`
+	OrderId               int64     `json:"orderId" xorm:"index default 0" validate:"required"`
+	RefundId              int64     `json:"refund" xorm:"index default 0"`
+	StoreId               int64     `json:"storeId" xorm:"index default 0"`
+	IsSuccess             bool      `json:"isSuccess" xorm:"index notnull default false"`
+	Error                 string    `json:"error" xorm:"VARCHAR(1000)" validate:"required"`
+	Details               string    `json:"details" xorm:"VARCHAR(100)"`
+	ModuleEntity          string    `json:"moduleEntity" xorm:"TEXT"`
+	TransactionCreateDate time.Time `json:"transactionCreateDate"`
+	CreatedAt             time.Time `json:"createdAt" xorm:"index created"`
+	UpdatedAt             time.Time `json:"updatedAt" xorm:"updated"`
 }
 
 type PostFailParam struct {
