@@ -38,15 +38,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		isAllowTransCSL, err := refundApproval.Check(ctx, event.TenantCode, event.StoreId, event.OrderId, event.RefundId, event.Committed.Created)
 		if err != nil {
 			postProcessSuccess := &postprocess.PostProcessSuccess{
-				TransactionId: event.TransactionId,
-				OrderId:       event.OrderId,
-				RefundId:      event.RefundId,
-				StoreId:       event.StoreId,
-				ModuleType:    string(postprocess.ModuleRefundApproval),
-				IsSuccess:     false,
-				Error:         err.Error(),
-				Details:       postprocess.GetErrorDetails(string(postprocess.ModuleRefundApproval)),
-				ModuleEntity:  string(str),
+				TransactionId:         event.TransactionId,
+				OrderId:               event.OrderId,
+				RefundId:              event.RefundId,
+				StoreId:               event.StoreId,
+				ModuleType:            string(postprocess.ModuleRefundApproval),
+				IsSuccess:             false,
+				Error:                 err.Error(),
+				Details:               postprocess.GetErrorDetails(string(postprocess.ModuleRefundApproval)),
+				ModuleEntity:          string(str),
+				TransactionCreateDate: event.TransactionCreateDate,
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 				return saveErr
@@ -54,15 +55,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			return fmt.Errorf("Refund Approval Error")
 		} else if !isAllowTransCSL {
 			postProcessSuccess := &postprocess.PostProcessSuccess{
-				TransactionId: event.TransactionId,
-				OrderId:       event.OrderId,
-				RefundId:      event.RefundId,
-				StoreId:       event.StoreId,
-				ModuleType:    string(postprocess.ModuleRefundApproval),
-				IsSuccess:     false,
-				Error:         "Refund Approval Error",
-				Details:       "退货审批中！",
-				ModuleEntity:  string(str),
+				TransactionId:         event.TransactionId,
+				OrderId:               event.OrderId,
+				RefundId:              event.RefundId,
+				StoreId:               event.StoreId,
+				ModuleType:            string(postprocess.ModuleRefundApproval),
+				IsSuccess:             false,
+				Error:                 "Refund Approval Error",
+				Details:               "退货审批中！",
+				ModuleEntity:          string(str),
+				TransactionCreateDate: event.TransactionCreateDate,
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 				return saveErr
@@ -70,14 +72,15 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			return fmt.Errorf("Refund Approval Error")
 		} else {
 			postProcessSuccess := &postprocess.PostProcessSuccess{
-				TransactionId: event.TransactionId,
-				OrderId:       event.OrderId,
-				RefundId:      event.RefundId,
-				StoreId:       event.StoreId,
-				ModuleType:    string(postprocess.ModuleRefundApproval),
-				IsSuccess:     true,
-				Error:         "",
-				ModuleEntity:  string(str),
+				TransactionId:         event.TransactionId,
+				OrderId:               event.OrderId,
+				RefundId:              event.RefundId,
+				StoreId:               event.StoreId,
+				ModuleType:            string(postprocess.ModuleRefundApproval),
+				IsSuccess:             true,
+				Error:                 "",
+				ModuleEntity:          string(str),
+				TransactionCreateDate: event.TransactionCreateDate,
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 				return saveErr
@@ -92,15 +95,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		}).WithError(err).Error("Fail to handle PayAmtEventHandler")
 
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModulePay),
-			IsSuccess:     false,
-			Error:         err.Error(),
-			Details:       postprocess.GetErrorDetails(string(postprocess.ModulePay)),
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModulePay),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModulePay)),
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -109,14 +113,15 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		return err
 	} else {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModulePay),
-			IsSuccess:     true,
-			Error:         "",
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModulePay),
+			IsSuccess:             true,
+			Error:                 "",
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -131,15 +136,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		}).WithError(err).Error("Fail to handle CustomerEventHandler")
 
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModuleMileage),
-			IsSuccess:     false,
-			Error:         err.Error(),
-			Details:       postprocess.GetErrorDetails(string(postprocess.ModuleMileage)),
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleMileage),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModuleMileage)),
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -148,14 +154,15 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		return err
 	} else {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModuleMileage),
-			IsSuccess:     true,
-			Error:         "",
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleMileage),
+			IsSuccess:             true,
+			Error:                 "",
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -170,15 +177,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		}).WithError(err).Error("Fail to handle SalesPersonEventHandler")
 
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModuleSalePerson),
-			IsSuccess:     false,
-			Error:         err.Error(),
-			Details:       postprocess.GetErrorDetails(string(postprocess.ModuleSalePerson)),
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSalePerson),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModuleSalePerson)),
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -187,14 +195,15 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		return err
 	} else {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModuleSalePerson),
-			IsSuccess:     true,
-			Error:         "",
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSalePerson),
+			IsSuccess:             true,
+			Error:                 "",
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -209,15 +218,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		}).WithError(err).Error("Fail to handle SaleRecordFeeEventHandler")
 
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModuleSaleFee),
-			IsSuccess:     false,
-			Error:         err.Error(),
-			Details:       postprocess.GetErrorDetails(string(postprocess.ModuleSaleFee)),
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSaleFee),
+			IsSuccess:             false,
+			Error:                 err.Error(),
+			Details:               postprocess.GetErrorDetails(string(postprocess.ModuleSaleFee)),
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -226,14 +236,15 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 		return err
 	} else {
 		postProcessSuccess := &postprocess.PostProcessSuccess{
-			TransactionId: event.TransactionId,
-			OrderId:       event.OrderId,
-			RefundId:      event.RefundId,
-			StoreId:       event.StoreId,
-			ModuleType:    string(postprocess.ModuleSaleFee),
-			IsSuccess:     true,
-			Error:         "",
-			ModuleEntity:  string(str),
+			TransactionId:         event.TransactionId,
+			OrderId:               event.OrderId,
+			RefundId:              event.RefundId,
+			StoreId:               event.StoreId,
+			ModuleType:            string(postprocess.ModuleSaleFee),
+			IsSuccess:             true,
+			Error:                 "",
+			ModuleEntity:          string(str),
+			TransactionCreateDate: event.TransactionCreateDate,
 		}
 		if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 			return saveErr
@@ -255,15 +266,16 @@ func handleEvent(c eventconsume.ConsumeContext) error {
 			}).WithError(err).Error("Fail to SendToCsl")
 
 			postProcessSuccess := &postprocess.PostProcessSuccess{
-				TransactionId: event.TransactionId,
-				OrderId:       event.OrderId,
-				RefundId:      event.RefundId,
-				StoreId:       event.StoreId,
-				ModuleType:    string(postprocess.SendToClearance),
-				IsSuccess:     false,
-				Error:         err.Error(),
-				Details:       postprocess.GetErrorDetails(string(postprocess.SendToClearance)),
-				ModuleEntity:  string(str),
+				TransactionId:         event.TransactionId,
+				OrderId:               event.OrderId,
+				RefundId:              event.RefundId,
+				StoreId:               event.StoreId,
+				ModuleType:            string(postprocess.SendToClearance),
+				IsSuccess:             false,
+				Error:                 err.Error(),
+				Details:               postprocess.GetErrorDetails(string(postprocess.SendToClearance)),
+				ModuleEntity:          string(str),
+				TransactionCreateDate: event.TransactionCreateDate,
 			}
 			if saveErr := postProcessSuccess.Save(ctx); saveErr != nil {
 				return saveErr
